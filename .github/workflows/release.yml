@@ -76,7 +76,7 @@ jobs:
           - os: ubuntu-latest
             artifact: testsmith-linux-amd64
             binary: dist/testsmith
-          - os: macos-13
+          - os: macos-12
             artifact: testsmith-macos-amd64
             binary: dist/testsmith
           - os: macos-latest
