@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "testsmith"
+version = "0.1.0"
+description = "A project-agnostic Python CLI tool that reads any source file, analyzes its dependency graph via AST parsing, and generates everything you need to start testing"
+authors = ["TestSmith Team"]
+readme = "README.md"
+packages = [{include = "testsmith", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pytest = "^8.0"
+pytest-mock = "^3.12"
+black = "^24.0"
+ruff = "^0.2"
+pytest-cov = "^4.1"
+tomli = "^2.0"
+anthropic = "^0.42.0"
+watchdog = "^3.0"
+
+[tool.poetry.group.build.dependencies]
+pyinstaller = "^6.0"
+
+[tool.poetry.scripts]
+testsmith = "testsmith.cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+addopts = "--cov=src/testsmith --cov-report=term-missing"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
