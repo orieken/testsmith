@@ -136,7 +136,8 @@ def test_cli_end_to_end(sample_project, capsys):
     assert conftest_path.exists()
     c_content = conftest_path.read_text()
     assert "paths_to_add" in c_content
-    assert "tests/fixtures" in c_content
+    # Normalize for cross-platform - check for either forward or backslash
+    assert "tests/fixtures" in c_content or "tests\\fixtures" in c_content
     assert "src" in c_content
 
 
