@@ -139,19 +139,21 @@ def test_watch_project_handles_keyboard_interrupt(mock_observer_class):
 def test_debounce_handler_custom_debounce_time():
     """Test that custom debounce time is respected."""
     callback = Mock()
-    handler = DebounceHandler(callback, debounce_seconds=0.1)
+    # Use a longer debounce time to make the test more reliable
+    handler = DebounceHandler(callback, debounce_seconds=0.2)
 
     event = FileModifiedEvent("/some/file.py")
 
+    # First event - should trigger callback
     handler.on_modified(event)
     assert callback.call_count == 1
 
-    # Within debounce window
-    time.sleep(0.05)
+    # Second event within debounce window - should be ignored
+    time.sleep(0.1)  # Half the debounce time
     handler.on_modified(event)
-    assert callback.call_count == 1
+    assert callback.call_count == 1, "Event within debounce window should be ignored"
 
-    # After debounce window - use longer sleep to avoid timing issues
-    time.sleep(0.15)
+    # Third event after debounce window - should trigger callback
+    time.sleep(0.25)  # More than debounce time from first event
     handler.on_modified(event)
-    assert callback.call_count == 2
+    assert callback.call_count == 2, "Event after debounce window should trigger callback"
