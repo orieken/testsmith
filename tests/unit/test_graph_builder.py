@@ -56,17 +56,17 @@ def helper():
 """,
         encoding="utf-8",
     )
-    
+
     # Construct a real or mock context
     # Usually we scan valid packages.
     # Package map for src/myapp
     package_map = {"myapp": src}
-    
+
     return ProjectContext(
         root=project_root,
         package_map=package_map,
         conftest_path=None,
-        existing_paths=[]
+        existing_paths=[],
     )
 
 
@@ -76,14 +76,14 @@ def test_build_dependency_graph(sample_project_context):
     graph = build_dependency_graph(sample_project_context, config)
 
     assert isinstance(graph, DependencyGraph)
-    
+
     # Now that we fixed the signature, we expect successful analysis
     assert len(graph.nodes) > 0, "Graph should have nodes"
-    
+
     # Check for expected nodes
     node_names = [n.name for n in graph.nodes]
     assert "myapp.api" in node_names or "api" in node_names
-    
+
     assert isinstance(graph.edges, list)
 
 
@@ -111,12 +111,9 @@ def test_build_dependency_graph_empty_project(tmp_path):
 
     config = Config()
     context = ProjectContext(
-        root=project_root,
-        package_map={},
-        conftest_path=None,
-        existing_paths=[]
+        root=project_root, package_map={}, conftest_path=None, existing_paths=[]
     )
-    
+
     graph = build_dependency_graph(context, config)
 
     assert len(graph.nodes) == 0
