@@ -117,3 +117,34 @@ def test_generate_test_bodies(mock_call):
     assert bodies["foo"] == ["def test_x(): pass"]
     assert "Bar" in bodies  # It generates for Bar too
     assert mock_call.call_count == 2
+
+
+@patch("testsmith.generation.llm_generator.os.environ.get")
+def test_call_llm_openai(mock_env):
+    """Test successful OpenAI API call."""
+    mock_env.return_value = "fake-key"
+    
+    # Create mock OpenAI client
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_choice = MagicMock()
+    mock_message = MagicMock()
+    
+    mock_message.content = "openai response"
+    mock_choice.message = mock_message
+    mock_response.choices = [mock_choice]
+    mock_client.chat.completions.create.return_value = mock_response
+
+    # Mock OpenAI import
+    with patch("testsmith.generation.llm_generator._call_openai_compatible") as mock_call:
+        mock_call.return_value = "openai response"
+        
+        config = LLMConfig(enabled=True, provider="openai", api_key_env_var="KEY")
+        result = call_llm("prompt", config)
+        
+        assert result == "openai response"
+        mock_call.assert_called_once()
+        args, _ = mock_call.call_args
+        assert args[0] == "prompt"
+        assert args[1] == config
+        assert args[2] == "fake-key"

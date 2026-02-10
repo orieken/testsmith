@@ -47,17 +47,27 @@ Please write the Python code for the test function(s) or method(s) to test `{mem
 
 def call_llm(prompt: str, config: LLMConfig) -> str:
     """
-    Call Anthropic API to generate text.
+    Call LLM API (Anthropic or OpenAI-compatible).
     """
-    if anthropic is None:
-        raise TestSmithError(
-            "Anthropic library not installed. Run 'pip install anthropic'."
-        )
-
     api_key = os.environ.get(config.api_key_env_var)
     if not api_key:
         raise TestSmithError(
             f"API key not found in environment variable {config.api_key_env_var}."
+        )
+
+    if config.provider == "anthropic":
+        return _call_anthropic(prompt, config, api_key)
+    elif config.provider in ["openai", "custom"]:
+        return _call_openai_compatible(prompt, config, api_key)
+    else:
+        raise TestSmithError(f"Unsupported LLM provider: {config.provider}")
+
+
+def _call_anthropic(prompt: str, config: LLMConfig, api_key: str) -> str:
+    """Call Anthropic API."""
+    if anthropic is None:
+        raise TestSmithError(
+            "Anthropic library not installed. Run 'pip install anthropic'."
         )
 
     client = anthropic.Anthropic(api_key=api_key)
@@ -66,13 +76,47 @@ def call_llm(prompt: str, config: LLMConfig) -> str:
         message = client.messages.create(
             model=config.model,
             max_tokens=config.max_tokens_per_function,
-            temperature=0.0,
+            temperature=config.temperature,
             system="You are a strict code generation assistant. You only output valid Python code in code blocks.",
             messages=[{"role": "user", "content": prompt}],
         )
         return message.content[0].text
     except Exception as e:
         raise TestSmithError(f"Anthropic API call failed: {e}")
+
+
+def _call_openai_compatible(prompt: str, config: LLMConfig, api_key: str) -> str:
+    """Call OpenAI-compatible API (including custom endpoints like Open-UI)."""
+    try:
+        from openai import OpenAI
+    except ImportError:
+        raise TestSmithError(
+            "OpenAI library not installed. Run 'pip install openai'."
+        )
+
+    # Create client with optional base_url for custom endpoints
+    client_kwargs = {"api_key": api_key}
+    if config.base_url:
+        client_kwargs["base_url"] = config.base_url
+
+    client = OpenAI(**client_kwargs)
+
+    try:
+        response = client.chat.completions.create(
+            model=config.model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a strict code generation assistant. You only output valid Python code in code blocks.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=config.max_tokens_per_function,
+            temperature=config.temperature,
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        raise TestSmithError(f"OpenAI API call failed: {e}")
 
 
 def parse_llm_response(response: str) -> list[str]:

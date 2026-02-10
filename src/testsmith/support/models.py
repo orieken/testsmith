@@ -63,9 +63,12 @@ class LLMConfig:
     """Configuration for LLM-based generation."""
 
     enabled: bool = False
+    provider: str = "anthropic"  # "anthropic", "openai", or "custom"
     model: str = "claude-3-sonnet-20240229"
     max_tokens_per_function: int = 1500
     api_key_env_var: str = "ANTHROPIC_API_KEY"
+    base_url: str | None = None  # For custom OpenAI-compatible endpoints
+    temperature: float = 0.0
 
 
 @dataclass
