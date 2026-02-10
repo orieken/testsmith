@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "testsmith"
-version = "0.1.0"
+version = "1.0.0"
 description = "A project-agnostic Python CLI tool that reads any source file, analyzes its dependency graph via AST parsing, and generates everything you need to start testing"
 authors = ["TestSmith Team"]
 readme = "README.md"
