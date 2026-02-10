@@ -28,3 +28,19 @@ exclude_dirs = ["foo"]
     cfg = load_config(tmp_path)
     assert cfg.test_root == "mytests/"
     assert cfg.exclude_dirs == ["foo"]
+
+
+def test_load_config_cwd(monkeypatch, tmp_path):
+    """Test loading config from current working directory."""
+    monkeypatch.chdir(tmp_path)
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[tool.testsmith]
+test_root = "cwd/"
+""",
+        encoding="utf-8",
+    )
+
+    cfg = load_config(None)
+    assert cfg.test_root == "cwd/"

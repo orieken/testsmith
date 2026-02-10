@@ -47,14 +47,16 @@ def load_config(path: Path | None = None) -> TestSmithConfig:
               If None, returns default config.
     """
     if path is None:
-        return TestSmithConfig()
-
+        # Default to current working directory
+        path = Path.cwd()
+    
     if path.is_dir():
         config_path = path / "pyproject.toml"
     else:
         config_path = path
 
     if not config_path.exists():
+        # If no config file found, return defaults
         return TestSmithConfig()
 
     try:
