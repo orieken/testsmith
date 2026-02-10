@@ -76,7 +76,7 @@ jobs:
           - os: ubuntu-latest
             artifact: testsmith-linux-amd64
             binary: dist/testsmith
-          - os: macos-13
+          - os: macos-12
             artifact: testsmith-macos-amd64
             binary: dist/testsmith
           - os: macos-latest
@@ -96,7 +96,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install Poetry
-        uses: snok/install-poetry@v1
+        run: pipx install poetry
 
       - name: Install dependencies
         run: poetry install --with build
@@ -165,7 +165,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Poetry
-        uses: snok/install-poetry@v1
+        run: pipx install poetry
 
       - name: Build package
         run: poetry build
