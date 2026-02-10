@@ -13,23 +13,53 @@ This document describes how to create and publish a new release of TestSmith.
 
 ## Release Process
 
-### 1. Update Version
+### Automated Releases (Recommended)
 
-Edit `src/testsmith/__init__.py` and update the version:
+TestSmith uses [python-semantic-release](https://python-semantic-release.readthedocs.io/) to automatically version and release based on conventional commits.
+
+**How it works:**
+1. Merge a PR to `main` with conventional commit messages
+2. GitHub Actions automatically:
+   - Analyzes commit messages
+   - Determines version bump (major/minor/patch)
+   - Updates `__version__` in `__init__.py` and `pyproject.toml`
+   - Creates and pushes a git tag
+   - Builds binaries for all platforms
+   - Creates GitHub Release with binaries and checksums
+   - Publishes to PyPI (for stable releases)
+
+**Commit message format:**
+```bash
+feat: add new feature        # Minor version bump (0.1.0 -> 0.2.0)
+fix: fix bug                 # Patch version bump (0.1.0 -> 0.1.1)
+feat!: breaking change       # Major version bump (0.1.0 -> 1.0.0)
+docs: update docs            # No version bump
+chore: update deps           # No version bump
+```
+
+**That's it!** Just merge to main with proper commit messages and the release happens automatically.
+
+### Manual Releases (Alternative)
+
+If you need to manually trigger a release:
+
+#### 1. Update Version
+
+Edit `src/testsmith/__init__.py` and `pyproject.toml`:
 
 ```python
 __version__ = "1.2.3"  # Update to new version
 ```
 
-### 2. Commit and Push
+#### 2. Commit and Push
 
 ```bash
-git add src/testsmith/__init__.py
+git add src/testsmith/__init__.py pyproject.toml
 git commit -m "Bump version to 1.2.3"
 git push origin main
 ```
 
-### 3. Create and Push Tag
+#### 3. Create and Push Tag
 
 ```bash
 git tag v1.2.3

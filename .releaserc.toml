@@ -1,0 +1,33 @@
+# Python Semantic Release Configuration
+#
+# This file configures how semantic-release analyzes commits and generates releases.
+# See: https://python-semantic-release.readthedocs.io/
+
+# Version source files
+version_toml = ["pyproject.toml:tool.poetry.version"]
+version_variables = ["src/testsmith/__init__.py:__version__"]
+
+# Branch configuration
+branch = "main"
+
+# Build and upload settings
+upload_to_pypi = false
+upload_to_release = true
+build_command = "pip install poetry && poetry build"
+
+# Commit parsing
+commit_parser = "angular"
+major_on_zero = true
+
+# Tag format
+tag_format = "v{version}"
+
+# Changelog settings
+[changelog]
+template_dir = "templates"
+exclude_commit_patterns = []
+
+# Branch-specific settings
+[branches.main]
+match = "main"
+prerelease = false

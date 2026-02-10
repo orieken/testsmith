@@ -2,14 +2,50 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
+    branches: [main]
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
+  # ── Semantic Release: Auto-version and tag ────────────────
+  release:
+    runs-on: ubuntu-latest
+    concurrency: release
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install python-semantic-release
+        run: pip install python-semantic-release
+
+      - name: Semantic Release
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          semantic-release version
+          echo "released=$(semantic-release version --print)" >> $GITHUB_OUTPUT
+          echo "version=$(semantic-release version --print)" >> $GITHUB_OUTPUT
+          echo "tag=v$(semantic-release version --print)" >> $GITHUB_OUTPUT
+
   # ── Build binaries for each platform ──────────────────────
   build:
+    needs: release
+    if: needs.release.outputs.released == 'true'
     strategy:
       matrix:
         include:
@@ -28,6 +64,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag }}
 
       - uses: actions/setup-python@v5
         with:
@@ -57,11 +95,13 @@ jobs:
           path: ${{ matrix.artifact }}
 
   # ── Create GitHub Release ─────────────────────────────────
-  release:
-    needs: build
+  publish:
+    needs: [release, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -81,17 +121,20 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.release.outputs.tag }}
           generate_release_notes: true
           files: |
             release/*
 
   # ── Publish to PyPI ───────────────────────────────────────
-  publish:
-    needs: build
+  pypi:
+    needs: [release, build]
     runs-on: ubuntu-latest
-    if: "!contains(github.ref, '-')"  # Skip pre-release tags like v1.0.0-beta.1
+    if: "!contains(needs.release.outputs.version, '-')"  # Skip pre-releases
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag }}
 
       - uses: actions/setup-python@v5
         with:

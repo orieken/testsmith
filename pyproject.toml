@@ -19,6 +19,7 @@ watchdog = "^3.0"
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = "^0.24.0"
+python-semantic-release = "^9.0.0"
 
 [tool.poetry.group.build.dependencies]
 pyinstaller = "^6.0"
@@ -67,3 +68,24 @@ clean = { shell = "rm -rf build/ dist/ .pytest_cache/ .coverage htmlcov/ .ruff_c
 # Development
 install = "poetry install --with dev,build"
 version = { shell = "python -c 'from testsmith import __version__; print(__version__)'" }
+release = "semantic-release version --print"  # Preview next version
+release-publish = "semantic-release version"  # Bump version and create tag
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:tool.poetry.version"]
+version_variables = ["src/testsmith/__init__.py:__version__"]
+branch = "main"
+upload_to_pypi = false
+upload_to_release = true
+build_command = "pip install poetry && poetry build"
+commit_parser = "angular"
+major_on_zero = true
+tag_format = "v{version}"
+
+[tool.semantic_release.changelog]
+template_dir = "templates"
+exclude_commit_patterns = []
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
