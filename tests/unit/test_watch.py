@@ -151,7 +151,7 @@ def test_debounce_handler_custom_debounce_time():
     handler.on_modified(event)
     assert callback.call_count == 1
 
-    # After debounce window
-    time.sleep(0.1)
+    # After debounce window - use longer sleep to avoid timing issues
+    time.sleep(0.15)
     handler.on_modified(event)
     assert callback.call_count == 2
