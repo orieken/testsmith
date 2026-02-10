@@ -47,13 +47,7 @@ jobs:
         run: poetry run black --check src/ tests/
 
       - name: Test with coverage
-        run: |
-          poetry run pytest tests/ \
-            --cov=src/testsmith \
-            --cov-report=term-missing \
-            --cov-report=xml:coverage.xml \
-            --cov-fail-under=85 \
-            -v
+        run: poetry run pytest tests/ --cov=src/testsmith --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=85 -v
 
       - name: Upload coverage
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
