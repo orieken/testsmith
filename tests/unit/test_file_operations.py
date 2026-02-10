@@ -1,22 +1,24 @@
 from testsmith.support.file_operations import safe_write, safe_append, ensure_init_files
 from unittest.mock import patch, mock_open
 
+
 def test_safe_write(tmp_path):
     p = tmp_path / "foo.txt"
     assert safe_write(p, "hello")
     assert p.read_text(encoding="utf-8") == "hello"
-    
+
     with patch("builtins.open", mock_open()):
         _ = safe_write(tmp_path / "test.txt", "content")
     assert p.read_text(encoding="utf-8") == "hello"
-    
+
     # Should not overwrite
     assert not safe_write(p, "world")
     assert p.read_text(encoding="utf-8") == "hello"
-    
+
     # Should overwrite
     assert safe_write(p, "world", overwrite=True)
     assert p.read_text(encoding="utf-8") == "world"
+
 
 def test_safe_append(tmp_path):
     p = tmp_path / "append.txt"
@@ -25,6 +27,7 @@ def test_safe_append(tmp_path):
     content = p.read_text(encoding="utf-8")
     assert "line1" in content
     assert "line2" in content
+
 
 def test_ensure_init_files(tmp_path):
     d = tmp_path / "a/b/c"

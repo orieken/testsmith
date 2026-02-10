@@ -1,6 +1,7 @@
 """
 Generates and updates shared pytest fixture files.
 """
+
 import ast
 import re
 from pathlib import Path
@@ -27,7 +28,7 @@ def derive_fixture_filename(dependency_name: str, config: TestSmithConfig) -> Pa
     safe_name = dependency_name.replace("-", "_").replace(".", "_")
     # Prompt example was 'stripe.fixture.py', but dots are bad for imports.
     # We use '_fixture.py' pattern for safety if suffix allows, or just verify valid identifier.
-    
+
     # If suffix starts with '.', we might create invalid module name if we prepend name.
     # e.g. stripe.fixture.py
     # We will enforce underscore separator if suffix doesn't have one, or sanitize.
@@ -42,34 +43,40 @@ def parse_existing_fixture(fixture_path: Path) -> dict:
     Returns {"sub_modules": set[str], "mock_assignments": set[str]}
     """
     result = {"sub_modules": set(), "mock_assignments": set()}
-    
+
     if not fixture_path.exists():
         return result
-        
+
     try:
         source = fixture_path.read_text(encoding="utf-8")
         tree = ast.parse(source)
     except Exception:
         return result
-        
+
     for node in ast.walk(tree):
         # Look for mocker.patch.dict("sys.modules", {...})
         if isinstance(node, ast.Call):
             if isinstance(node.func, ast.Attribute) and node.func.attr == "dict":
-                if node.args and isinstance(node.args[0], ast.Constant) and node.args[0].value == "sys.modules":
+                if (
+                    node.args
+                    and isinstance(node.args[0], ast.Constant)
+                    and node.args[0].value == "sys.modules"
+                ):
                     if len(node.args) > 1 and isinstance(node.args[1], ast.Dict):
                         datadict = node.args[1]
                         for key in datadict.keys:
-                            if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                            if isinstance(key, ast.Constant) and isinstance(
+                                key.value, str
+                            ):
                                 result["sub_modules"].add(key.value)
     return result
 
 
 def generate_fixture(
-    dependency_name: str, 
-    sub_modules: list[str], 
-    imported_names: dict[str, list[str]], 
-    config: TestSmithConfig
+    dependency_name: str,
+    sub_modules: list[str],
+    imported_names: dict[str, list[str]],
+    config: TestSmithConfig,
 ) -> str:
     """
     Generate content for a shared fixture.
@@ -81,11 +88,11 @@ def generate_fixture(
 
 
 def generate_or_update_fixture(
-    dependency_name: str, 
-    sub_modules: list[str], 
-    imported_names: dict[str, list[str]], 
+    dependency_name: str,
+    sub_modules: list[str],
+    imported_names: dict[str, list[str]],
     project_root: Path,
-    config: TestSmithConfig
+    config: TestSmithConfig,
 ) -> tuple[Path, str]:
     """
     Create or update a shared fixture file.
@@ -94,22 +101,22 @@ def generate_or_update_fixture(
     # Resolve absolute path
     rel_path = derive_fixture_filename(dependency_name, config)
     path = project_root / rel_path
-    
+
     if not path.exists():
         content = generate_fixture(dependency_name, sub_modules, imported_names, config)
         if safe_write(path, content):
             return path, "created"
         return path, "skipped"
-        
+
     # Update existing
     existing = parse_existing_fixture(path)
     existing_modules = existing["sub_modules"]
-    
+
     new_modules = [m for m in sub_modules if m not in existing_modules]
-    
+
     if not new_modules:
         return path, "skipped"
-        
+
     # Attempt to update file using regex injection
     try:
         src = path.read_text(encoding="utf-8")
@@ -120,24 +127,26 @@ def generate_or_update_fixture(
         if match:
             # We found the start. We want to insert new keys after the opening brace.
             insertion_point = match.end()
-            
+
             # Construct new entries
-            # default indentation 8 spaces? 
+            # default indentation 8 spaces?
             # We assume standard formatting or try to detect?
             # Inserting: `\n        "module": mocker.Mock(),`
-            
+
             lines_to_add = []
             for mod in new_modules:
                 lines_to_add.append(f'\n        "{mod}": mocker.Mock(),')
-                
-            new_content = src[:insertion_point] + "".join(lines_to_add) + src[insertion_point:]
+
+            new_content = (
+                src[:insertion_point] + "".join(lines_to_add) + src[insertion_point:]
+            )
             safe_write(path, new_content, overwrite=True)
             return path, "updated"
-            
+
     except Exception:
         # Fallback if regex fails (e.g. formatting differs wildy)
         pass
-        
+
     return path, "skipped"
 
 
@@ -146,7 +155,7 @@ def generate_fixtures_conftest(fixture_dir: Path, fixture_files: list[Path]) -> 
     Generate conftest.py content importing all fixtures.
     """
     lines = ['"""Auto-generated conftest for fixtures."""', ""]
-    
+
     for f in fixture_files:
         # file: stripe_fixture.py
         # module: stripe_fixture
@@ -157,12 +166,12 @@ def generate_fixtures_conftest(fixture_dir: Path, fixture_files: list[Path]) -> 
         # But per requirements we use convention derived from filename/dep.
         # if file is stripe_fixture.py, dep is stripe?
         # derive_fixture_name("stripe") -> mock_stripe.
-        
+
         # Reverse dependency name from filename?
         # stripe_fixture -> stripe
         if mod_name.endswith("_fixture"):
-            dep_name = mod_name[:-8] # remove _fixture
+            dep_name = mod_name[:-8]  # remove _fixture
             func_name = derive_fixture_name(dep_name)
             lines.append(f"from .{mod_name} import {func_name}  # noqa: F401")
-            
+
     return "\n".join(lines) + "\n"
