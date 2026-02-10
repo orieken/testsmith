@@ -4,11 +4,11 @@ from testsmith.core.discovery import (
     discover_files_in_path,
     is_source_file,
 )
-from testsmith.support.config import TestSmithConfig
+from testsmith.support.config import TestSmithConfig as Config
 
 
 def test_is_source_file():
-    config = TestSmithConfig(exclude_dirs=["node_modules", ".venv"])
+    config = Config(exclude_dirs=["node_modules", ".venv"])
     root = Path("/project")
 
     # Valid
@@ -50,7 +50,7 @@ def test_discover_untested_files(tmp_path):
     (src / "untested.py").touch()
     (tests_src / "test_tested.py").touch()
 
-    config = TestSmithConfig()
+    config = Config()
 
     files = discover_untested_files(project, tests, config)
 
@@ -66,7 +66,7 @@ def test_discover_files_in_path(tmp_path):
     (src / "one.py").touch()
     (src / "two.py").touch()
 
-    config = TestSmithConfig()
+    config = Config()
 
     # Test directory discovery
     files = discover_files_in_path(src, project, project / "tests", config)

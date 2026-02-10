@@ -8,12 +8,12 @@ from testsmith.generation.fixture_generator import (
     generate_or_update_fixture,
     generate_fixtures_conftest,
 )
-from testsmith.support.config import TestSmithConfig
+from testsmith.support.config import TestSmithConfig as Config
 
 
 @pytest.fixture
 def config():
-    return TestSmithConfig()
+    return Config()
 
 
 def test_derive_fixture_name():

@@ -6,7 +6,7 @@ from testsmith.core.project_detector import (
     build_project_context,
 )
 from testsmith.support.exceptions import ProjectRootNotFoundError
-from testsmith.support.config import TestSmithConfig
+from testsmith.support.config import TestSmithConfig as Config
 
 
 def test_find_root_pyproject(tmp_path):
@@ -68,7 +68,7 @@ def test_build_context(tmp_path):
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "main.py").touch()
 
-    cfg = TestSmithConfig()
+    cfg = Config()
     ctx = build_project_context(tmp_path / "src" / "main.py", cfg)
 
     assert ctx.root == tmp_path

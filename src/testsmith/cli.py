@@ -397,7 +397,7 @@ def run(args: argparse.Namespace) -> int:
 
             # Build dependency graph for metrics
             print("Computing dependency metrics...")
-            graph = build_dependency_graph(project_context.root, config)
+            graph = build_dependency_graph(project_context, config)
             metrics = compute_metrics(graph)
 
             # Prioritize gaps
@@ -439,7 +439,7 @@ def run(args: argparse.Namespace) -> int:
             project_context = build_project_context(Path.cwd(), config)
 
             print("Building dependency graph...")
-            graph = build_dependency_graph(project_context.root, config)
+            graph = build_dependency_graph(project_context, config)
             metrics = compute_metrics(graph)
 
             # Render outputs

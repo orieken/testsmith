@@ -9,7 +9,7 @@ from testsmith.maintenance.coverage_analyzer import (
     prioritize_gaps,
     generate_report,
 )
-from testsmith.support.config import TestSmithConfig
+from testsmith.support.config import TestSmithConfig as Config
 from testsmith.support.models import ModuleMetrics
 
 
@@ -104,7 +104,7 @@ def test_qux():
 
 def test_detect_test_coverage_no_test(sample_project):
     """Test detection of files with no test."""
-    config = TestSmithConfig()
+    config = Config()
     test_root = sample_project / "tests"
 
     coverage = detect_test_coverage(sample_project, test_root, config)
@@ -116,7 +116,7 @@ def test_detect_test_coverage_no_test(sample_project):
 
 def test_detect_test_coverage_skeleton(sample_project):
     """Test detection of skeleton-only tests."""
-    config = TestSmithConfig()
+    config = Config()
     test_root = sample_project / "tests"
 
     coverage = detect_test_coverage(sample_project, test_root, config)
@@ -128,7 +128,7 @@ def test_detect_test_coverage_skeleton(sample_project):
 
 def test_detect_test_coverage_partial(sample_project):
     """Test detection of partial coverage."""
-    config = TestSmithConfig()
+    config = Config()
     test_root = sample_project / "tests"
 
     coverage = detect_test_coverage(sample_project, test_root, config)
@@ -140,7 +140,7 @@ def test_detect_test_coverage_partial(sample_project):
 
 def test_detect_test_coverage_covered(sample_project):
     """Test detection of fully covered files."""
-    config = TestSmithConfig()
+    config = Config()
     test_root = sample_project / "tests"
 
     coverage = detect_test_coverage(sample_project, test_root, config)

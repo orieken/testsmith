@@ -5,12 +5,12 @@ from testsmith.generation.conftest_updater import (
     diff_paths,
     update_conftest,
 )
-from testsmith.support.config import TestSmithConfig
+from testsmith.support.config import TestSmithConfig as Config
 
 
 @pytest.fixture
 def config():
-    return TestSmithConfig()
+    return Config()
 
 
 def test_parse_paths_to_add():

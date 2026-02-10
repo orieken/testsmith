@@ -5,7 +5,7 @@ from testsmith.generation.test_generator import (
     generate_test_file,
     generate_test,
 )
-from testsmith.support.config import TestSmithConfig
+from testsmith.support.config import TestSmithConfig as Config
 from testsmith.support.models import (
     AnalysisResult,
     ProjectContext,
@@ -17,7 +17,7 @@ from testsmith.support.models import (
 
 @pytest.fixture
 def config():
-    return TestSmithConfig()
+    return Config()
 
 
 def test_derive_test_path(config, tmp_path):

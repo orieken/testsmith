@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch, MagicMock
 from watchdog.events import FileModifiedEvent, FileCreatedEvent, DirModifiedEvent
 
 from testsmith.watch import DebounceHandler, watch_project
-from testsmith.support.config import TestSmithConfig
+from testsmith.support.config import TestSmithConfig as Config
 
 
 def test_debounce_handler_ignores_directories():
@@ -96,7 +96,7 @@ def test_watch_project_starts_observer(mock_observer_class):
     mock_observer = MagicMock()
     mock_observer_class.return_value = mock_observer
 
-    config = TestSmithConfig()
+    config = Config()
     project_root = Path("/fake/project")
     process_func = Mock()
 
@@ -120,7 +120,7 @@ def test_watch_project_handles_keyboard_interrupt(mock_observer_class):
     mock_observer = MagicMock()
     mock_observer_class.return_value = mock_observer
 
-    config = TestSmithConfig()
+    config = Config()
     project_root = Path("/fake/project")
     process_func = Mock()
 

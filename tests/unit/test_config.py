@@ -1,8 +1,8 @@
-from testsmith.support.config import TestSmithConfig, load_config
+from testsmith.support.config import TestSmithConfig as Config, load_config
 
 
 def test_default_config():
-    cfg = TestSmithConfig()
+    cfg = Config()
     assert cfg.test_root == "tests/"
     assert "node_modules" in cfg.exclude_dirs
 

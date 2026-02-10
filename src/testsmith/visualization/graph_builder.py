@@ -11,18 +11,20 @@ from testsmith.support.models import (
     GraphNode,
     GraphEdge,
     ModuleMetrics,
+    ProjectContext,
 )
 from testsmith.core.source_analyzer import analyze_file
 
 
 def build_dependency_graph(
-    project_root: Path, config: TestSmithConfig
+    project_context: ProjectContext, config: TestSmithConfig
 ) -> DependencyGraph:
     """
     Build a dependency graph for the entire project.
 
     Scans all Python source files, analyzes imports, and constructs a directed graph.
     """
+    project_root = project_context.root
     nodes = []
     edges = []
 
@@ -46,7 +48,7 @@ def build_dependency_graph(
     module_data = {}
     for source_path in python_files:
         try:
-            analysis = analyze_file(source_path, project_root, config)
+            analysis = analyze_file(source_path, project_context)
 
             # Derive module name
             try:

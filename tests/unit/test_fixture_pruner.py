@@ -11,7 +11,7 @@ from testsmith.maintenance.fixture_pruner import (
     prune_fixtures,
     update_test_imports,
 )
-from testsmith.support.config import TestSmithConfig
+from testsmith.support.config import TestSmithConfig as Config
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ def get_cache():
 
 def test_scan_used_dependencies(sample_project):
     """Test scanning for used dependencies."""
-    config = TestSmithConfig()
+    config = Config()
     used = scan_used_dependencies(sample_project, config)
 
     assert "requests" in used
@@ -81,7 +81,7 @@ def test_scan_used_dependencies(sample_project):
 
 def test_scan_existing_fixtures(sample_project):
     """Test scanning for existing fixtures."""
-    config = TestSmithConfig()
+    config = Config()
     fixture_dir = sample_project / "tests" / "fixtures"
 
     existing = scan_existing_fixtures(fixture_dir, config)
@@ -95,7 +95,7 @@ def test_scan_existing_fixtures(sample_project):
 
 def test_identify_unused_fixtures(sample_project):
     """Test identifying unused fixtures."""
-    config = TestSmithConfig()
+    config = Config()
 
     used = scan_used_dependencies(sample_project, config)
     fixture_dir = sample_project / "tests" / "fixtures"
@@ -169,7 +169,7 @@ def test_something(mock_boto3, mock_requests):
 
 def test_scan_existing_fixtures_no_directory(tmp_path):
     """Test scanning when fixture directory doesn't exist."""
-    config = TestSmithConfig()
+    config = Config()
     non_existent = tmp_path / "nonexistent"
 
     existing = scan_existing_fixtures(non_existent, config)
