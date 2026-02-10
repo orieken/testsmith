@@ -90,9 +90,7 @@ def _call_openai_compatible(prompt: str, config: LLMConfig, api_key: str) -> str
     try:
         from openai import OpenAI
     except ImportError:
-        raise TestSmithError(
-            "OpenAI library not installed. Run 'pip install openai'."
-        )
+        raise TestSmithError("OpenAI library not installed. Run 'pip install openai'.")
 
     # Create client with optional base_url for custom endpoints
     client_kwargs = {"api_key": api_key}
