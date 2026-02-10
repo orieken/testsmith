@@ -1,10 +1,15 @@
-from testsmith.support.file_operations import safe_write, safe_append, ensure_init_files, read_file
+from testsmith.support.file_operations import safe_write, safe_append, ensure_init_files
 import pytest
 from pathlib import Path
+from unittest.mock import patch, mock_open
 
 def test_safe_write(tmp_path):
     p = tmp_path / "foo.txt"
     assert safe_write(p, "hello")
+    assert p.read_text(encoding="utf-8") == "hello"
+    
+    with patch("builtins.open", mock_open()) as mock_file:
+        _ = safe_write("test.txt", "content")
     assert p.read_text(encoding="utf-8") == "hello"
     
     # Should not overwrite

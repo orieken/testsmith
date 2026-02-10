@@ -2,8 +2,7 @@
 Integration tests for LLM features in CLI.
 """
 import pytest
-from unittest.mock import patch, MagicMock
-from pathlib import Path
+from unittest.mock import patch
 from testsmith.cli import main
 
 @pytest.fixture

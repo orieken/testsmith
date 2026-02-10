@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 from testsmith.generation.conftest_updater import (
     parse_paths_to_add,
     compute_required_paths,

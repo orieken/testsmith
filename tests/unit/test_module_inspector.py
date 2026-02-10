@@ -1,8 +1,8 @@
+
 import pytest
 import ast
 from testsmith.core.module_inspector import extract_public_functions, extract_public_classes, inspect_module
 from testsmith.support.exceptions import SourceParseError
-from testsmith.support.models import PublicMember
 
 def test_extract_functions():
     code = """

@@ -44,6 +44,7 @@ target-version = ['py310']
 [tool.ruff]
 line-length = 88
 target-version = "py310"
+exclude = ["tests/fixtures/sample_sources/syntax_error_module.py"]
 
 [tool.poe.tasks]
 # Testing

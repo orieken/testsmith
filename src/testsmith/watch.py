@@ -8,7 +8,6 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 
 from testsmith.support.config import TestSmithConfig
-from testsmith.core.project_detector import build_project_context
 
 
 class DebounceHandler(FileSystemEventHandler):

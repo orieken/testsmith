@@ -1,9 +1,7 @@
-
 import sys
-import shutil
 import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from testsmith.cli import main
 
 @pytest.fixture

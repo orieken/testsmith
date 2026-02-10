@@ -81,7 +81,7 @@ def test_render_metrics_table():
     
     # Check data rows (should be sorted by coupling score descending)
     lines = result.split("\n")
-    data_lines = [l for l in lines if l.startswith("| myapp") or l.startswith("| utils")]
+    data_lines = [line for line in lines if line.startswith("| myapp") or line.startswith("| utils")]
     
     # First should be highest coupling (myapp.api with 4.0)
     assert "myapp.api" in data_lines[0]

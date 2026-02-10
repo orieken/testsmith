@@ -1,6 +1,6 @@
 from pathlib import Path
 from testsmith.support.models import (
-    ProjectContext, ImportInfo, ClassifiedImports, PublicMember, AnalysisResult
+    DependencyGraph, GraphNode, GraphEdge, ModuleMetrics
 )
 
 def test_classified_imports_defaults():

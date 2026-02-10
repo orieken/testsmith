@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 from testsmith.core.project_detector import find_project_root, scan_packages, detect_conftest, build_project_context
 from testsmith.support.exceptions import ProjectRootNotFoundError
 from testsmith.support.config import TestSmithConfig

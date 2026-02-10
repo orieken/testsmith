@@ -1,6 +1,5 @@
 from pathlib import Path
 from testsmith.support.config import TestSmithConfig, load_config
-import sys
 
 def test_default_config():
     cfg = TestSmithConfig()

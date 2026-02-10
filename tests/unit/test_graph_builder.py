@@ -1,11 +1,11 @@
+
 """
 Unit tests for graph_builder module.
 """
 import pytest
-from pathlib import Path
 from testsmith.visualization.graph_builder import build_dependency_graph, compute_metrics
 from testsmith.support.config import TestSmithConfig
-from testsmith.support.models import DependencyGraph, GraphNode, GraphEdge
+from testsmith.support.models import DependencyGraph
 
 
 @pytest.fixture

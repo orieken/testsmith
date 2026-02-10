@@ -2,7 +2,6 @@
 Safe file I/O operations.
 """
 from pathlib import Path
-import os
 
 
 def safe_write(path: Path, content: str, overwrite: bool = False) -> bool:

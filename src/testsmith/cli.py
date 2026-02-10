@@ -6,14 +6,14 @@ import sys
 from pathlib import Path
 
 from testsmith.support.config import load_config
-from testsmith.support.exceptions import TestSmithError, ProjectRootNotFoundError, SourceParseError
+from testsmith.support.exceptions import TestSmithConfigError
 from testsmith.core.project_detector import build_project_context
 from testsmith.core.source_analyzer import analyze_file
-from testsmith.generation.fixture_generator import generate_or_update_fixture, generate_fixtures_conftest
-from testsmith.generation.test_generator import generate_test
-from testsmith.generation.conftest_updater import compute_required_paths, update_conftest
-from testsmith.core.discovery import discover_untested_files, discover_files_in_path
-from testsmith.generation.llm_generator import generate_test_bodies
+from testsmith.core.discovery import discover_tests, discover_untested_files, discover_files_in_path
+from testsmith.generation.test_generator import generate_test_file
+from testsmith.generation.fixture_generator import generate_shared_mocks
+from testsmith.generation.conftest_updater import ensure_conftest_paths, update_conftest
+from testsmith.generation.llm_generator import generate_test_body_paths, generate_test_bodies
 from testsmith.visualization.graph_builder import build_dependency_graph, compute_metrics
 from testsmith.visualization.mermaid_renderer import render_mermaid, render_metrics_table
 from testsmith.maintenance.fixture_pruner import (
@@ -526,7 +526,7 @@ def run(args: argparse.Namespace) -> int:
             skipped_tests = len([r for r in results if r["test"] == "skipped"])
             errors = len([r for r in results if r["error"]])
             
-            print(f"\nCreated:  {created_tests} test files")
+            print(f"Created:  {created_tests} test files")
             print(f"Skipped:  {skipped_tests} test files (already exist)")
             if errors > 0:
                 print(f"Errors:   {errors} files failed")

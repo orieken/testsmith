@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 from testsmith.generation.test_generator import (
     derive_test_path,
     determine_fixture_params,
