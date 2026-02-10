@@ -156,4 +156,6 @@ def test_debounce_handler_custom_debounce_time():
     # Third event after debounce window - should trigger callback
     time.sleep(0.25)  # More than debounce time from first event
     handler.on_modified(event)
-    assert callback.call_count == 2, "Event after debounce window should trigger callback"
+    assert (
+        callback.call_count == 2
+    ), "Event after debounce window should trigger callback"
