@@ -17,6 +17,9 @@ tomli = "^2.0"
 anthropic = "^0.42.0"
 watchdog = "^3.0"
 
+[tool.poetry.group.dev.dependencies]
+poethepoet = "^0.24.0"
+
 [tool.poetry.group.build.dependencies]
 pyinstaller = "^6.0"
 
@@ -40,3 +43,27 @@ target-version = ['py310']
 [tool.ruff]
 line-length = 88
 target-version = "py310"
+
+[tool.poe.tasks]
+# Testing
+test = "pytest tests/ --cov=src/testsmith --cov-report=term-missing -v"
+test-unit = "pytest tests/unit/ -v"
+test-integration = "pytest tests/integration/ -v"
+test-fast = "pytest tests/ -x --ff"  # Stop on first failure, run failed tests first
+
+# Linting & Formatting
+lint = "ruff check src/ tests/"
+format = "black src/ tests/"
+format-check = "black --check src/ tests/"
+check = ["lint", "format-check", "test"]  # Run all checks
+
+# Building
+build = "pyinstaller testsmith.spec --clean --noconfirm"
+build-test = { shell = "pyinstaller testsmith.spec --clean --noconfirm && ./dist/testsmith --version" }
+
+# Cleaning
+clean = { shell = "rm -rf build/ dist/ .pytest_cache/ .coverage htmlcov/ .ruff_cache/ **/__pycache__" }
+
+# Development
+install = "poetry install --with dev,build"
+version = { shell = "python -c 'from testsmith import __version__; print(__version__)'" }

@@ -241,9 +241,42 @@ See [docs/architecture.md](docs/architecture.md) for detailed design documentati
 git clone https://github.com/orieken/testsmith.git
 cd testsmith
 
-# Install dependencies
+# Install dependencies (including dev tools)
 poetry install --with dev,build
+```
 
+### Development Tasks
+
+TestSmith uses [poethepoet](https://github.com/nat-n/poethepoet) for task automation. Run `poe` to see all available tasks:
+
+```bash
+# Testing
+poe test              # Run all tests with coverage
+poe test-unit         # Run only unit tests
+poe test-integration  # Run only integration tests
+poe test-fast         # Stop on first failure, run failed tests first
+
+# Linting & Formatting
+poe lint              # Check code with ruff
+poe format            # Format code with black
+poe format-check      # Check formatting without modifying
+poe check             # Run all checks (lint + format + test)
+
+# Building
+poe build             # Build binary with PyInstaller
+poe build-test        # Build and test binary
+
+# Cleaning
+poe clean             # Remove build artifacts and caches
+
+# Development
+poe install           # Install all dependencies
+poe version           # Show current version
+```
+
+### Manual Commands (if not using poe)
+
+```bash
 # Run tests
 poetry run pytest tests/ --cov=src/testsmith --cov-report=term-missing
 
@@ -255,6 +288,10 @@ poetry run black --check src/ tests/
 ### Build Binary Locally
 
 ```bash
+# Using poe (recommended)
+poe build
+
+# Or using scripts directly
 # Linux/macOS
 ./scripts/build-local.sh
 
