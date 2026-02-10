@@ -20,13 +20,17 @@ TestSmith uses [python-semantic-release](https://python-semantic-release.readthe
 **How it works:**
 1. Merge a PR to `main` with conventional commit messages
 2. GitHub Actions automatically:
-   - Analyzes commit messages
-   - Determines version bump (major/minor/patch)
-   - Updates `__version__` in `__init__.py` and `pyproject.toml`
-   - Creates and pushes a git tag
-   - Builds binaries for all platforms
-   - Creates GitHub Release with binaries and checksums
-   - Publishes to PyPI (for stable releases)
+   - Runs full CI suite on all platforms (Ubuntu, macOS, Windows) with Python 3.10, 3.11, 3.12
+   - Lints code with ruff and black
+   - Runs tests with minimum 85% coverage
+   - **Only if all CI checks pass:**
+     - Analyzes commit messages
+     - Determines version bump (major/minor/patch)
+     - Updates `__version__` in `__init__.py` and `pyproject.toml`
+     - Creates and pushes a git tag
+     - Builds binaries for all platforms (Linux amd64, macOS amd64, macOS arm64, Windows amd64)
+     - Creates GitHub Release with binaries and checksums
+     - Publishes to PyPI (for stable releases)
 
 **Commit message format:**
 ```bash
@@ -87,16 +91,20 @@ Pre-release tags will:
 
 ## What Happens Automatically
 
-### CI Workflow (on every push/PR)
+### CI Workflow (on every push/PR to main)
 - Runs on: Ubuntu, macOS, Windows
 - Python versions: 3.10, 3.11, 3.12
 - Steps: lint (ruff + black) → test with coverage (85% minimum)
 - Uploads coverage report artifact
+- **Triggers Release workflow on success**
 
-### Release Workflow (on version tag)
-1. **Build** job: Creates 4 platform-specific binaries
-2. **Release** job: Creates GitHub Release with binaries + SHA256 checksums
-3. **Publish** job: Publishes to PyPI (skipped for pre-release tags)
+### Release Workflow (triggered after CI completes successfully on main)
+1. **Semantic Release** job: Analyzes commits and creates version tag (if needed)
+2. **Build** job: Creates 4 platform-specific binaries using PyInstaller
+3. **Publish** job: Creates GitHub Release with binaries + SHA256 checksums
+4. **PyPI** job: Publishes to PyPI (skipped for pre-release tags)
+
+**Important:** Release workflow ONLY runs if CI passes on all platforms!
 
 ## Local Testing
 
