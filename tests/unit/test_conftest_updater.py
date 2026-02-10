@@ -33,6 +33,8 @@ def pytest_configure(config):
 
 
 def test_compute_required_paths(tmp_path):
+    import os
+
     root = tmp_path
     src = root / "src/pkg/mod.py"
     test = root / "tests/src/pkg/test_mod.py"
@@ -41,7 +43,8 @@ def test_compute_required_paths(tmp_path):
     paths = compute_required_paths(src, test, fix, root)
     assert "src" in paths
     assert "tests" in paths
-    assert "tests/fixtures" in paths
+    # Normalize path for cross-platform comparison
+    assert "tests/fixtures" in paths or f"tests{os.sep}fixtures" in paths
 
 
 def test_diff_paths():

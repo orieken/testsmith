@@ -201,7 +201,8 @@ def test_prioritize_gaps_suggested_commands():
 
     # No test should suggest basic testsmith command
     no_test_gap = [g for g in gaps if g.status == "no_test"][0]
-    assert "testsmith /src/no_test.py" in no_test_gap.suggested_command
+    # Normalize path separators for cross-platform compatibility
+    assert "/src/no_test.py" in no_test_gap.suggested_command.replace("\\", "/")
     assert "--generate-bodies" not in no_test_gap.suggested_command
 
     # Skeleton should suggest --generate-bodies

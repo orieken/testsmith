@@ -2,6 +2,7 @@
 Integration tests for TestSmith CLI.
 """
 
+import os
 import pytest
 from unittest.mock import patch
 from testsmith.cli import main
@@ -92,11 +93,12 @@ def test_cli_end_to_end(sample_project, capsys):
     assert (
         "TestSmith Summary" in captured.out
     ), f"Summary header missing. Output:\n{captured.out}"
+    # Use os.sep for platform-agnostic path checking
     assert (
-        "tests/fixtures/requests_fixture.py" in captured.out
+        f"tests{os.sep}fixtures{os.sep}requests_fixture.py" in captured.out
     ), f"Fixture output missing. Output:\n{captured.out}"
     assert (
-        "tests/src/sample/test_user_service.py" in captured.out
+        f"tests{os.sep}src{os.sep}sample{os.sep}test_user_service.py" in captured.out
     ), f"Test file output missing. Output:\n{captured.out}"
     assert (
         "conftest.py" in captured.out
