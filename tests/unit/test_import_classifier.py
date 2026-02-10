@@ -1,5 +1,3 @@
-import pytest
-import sys
 from pathlib import Path
 from testsmith.core.import_classifier import get_stdlib_modules, extract_root_package, classify_import, classify_all, ImportInfo
 

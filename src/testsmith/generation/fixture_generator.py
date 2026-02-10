@@ -27,7 +27,6 @@ def derive_fixture_filename(dependency_name: str, config: TestSmithConfig) -> Pa
     safe_name = dependency_name.replace("-", "_").replace(".", "_")
     # Prompt example was 'stripe.fixture.py', but dots are bad for imports.
     # We use '_fixture.py' pattern for safety if suffix allows, or just verify valid identifier.
-    suffix = config.fixture_suffix # e.g. ".fixture.py" or "_fixture.py"
     
     # If suffix starts with '.', we might create invalid module name if we prepend name.
     # e.g. stripe.fixture.py

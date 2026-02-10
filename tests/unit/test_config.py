@@ -1,4 +1,3 @@
-from pathlib import Path
 from testsmith.support.config import TestSmithConfig, load_config
 
 def test_default_config():

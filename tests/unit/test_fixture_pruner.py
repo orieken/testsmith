@@ -96,7 +96,6 @@ def test_identify_unused_fixtures(sample_project):
 
 def test_prune_fixtures_dry_run(sample_project):
     """Test pruning in dry-run mode."""
-    config = TestSmithConfig()
     fixture_dir = sample_project / "tests" / "fixtures"
     
     unused = [("boto3", fixture_dir / "boto3.fixture.py")]
@@ -111,7 +110,6 @@ def test_prune_fixtures_dry_run(sample_project):
 
 def test_prune_fixtures_confirm(sample_project):
     """Test pruning with confirmation."""
-    config = TestSmithConfig()
     fixture_dir = sample_project / "tests" / "fixtures"
     
     unused = [("boto3", fixture_dir / "boto3.fixture.py")]

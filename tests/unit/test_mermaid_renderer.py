@@ -1,7 +1,6 @@
 """
 Unit tests for mermaid_renderer module.
 """
-import pytest
 from pathlib import Path
 from testsmith.visualization.mermaid_renderer import render_mermaid, render_metrics_table
 from testsmith.support.models import (

@@ -1,9 +1,8 @@
 
 import pytest
 import ast
-from pathlib import Path
 from testsmith.core.source_analyzer import extract_imports, analyze_file
-from testsmith.support.models import ImportInfo, ProjectContext, ClassifiedImports
+from testsmith.support.models import ProjectContext
 from testsmith.support.exceptions import SourceParseError
 
 def test_extract_imports_simple():

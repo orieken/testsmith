@@ -3,7 +3,6 @@ LLM-based test body generation using Anthropic API.
 """
 import os
 import re
-from typing import Any
 
 from testsmith.support.models import AnalysisResult, LLMConfig
 from testsmith.support.exceptions import TestSmithError

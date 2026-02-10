@@ -112,9 +112,8 @@ def watch_project(project_root: Path, config: TestSmithConfig, process_file_func
     print("Press Ctrl+C to stop watching.")
     print()
     
-    observer.start()
-    
     try:
+        observer.start()
         while True:
             time.sleep(1)
     except KeyboardInterrupt:

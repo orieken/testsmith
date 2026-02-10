@@ -6,14 +6,14 @@ import sys
 from pathlib import Path
 
 from testsmith.support.config import load_config
-from testsmith.support.exceptions import TestSmithConfigError
+from testsmith.support.exceptions import ProjectRootNotFoundError
 from testsmith.core.project_detector import build_project_context
 from testsmith.core.source_analyzer import analyze_file
-from testsmith.core.discovery import discover_tests, discover_untested_files, discover_files_in_path
-from testsmith.generation.test_generator import generate_test_file
-from testsmith.generation.fixture_generator import generate_shared_mocks
-from testsmith.generation.conftest_updater import ensure_conftest_paths, update_conftest
-from testsmith.generation.llm_generator import generate_test_body_paths, generate_test_bodies
+from testsmith.core.discovery import discover_untested_files, discover_files_in_path
+from testsmith.generation.conftest_updater import update_conftest, compute_required_paths
+from testsmith.generation.llm_generator import generate_test_bodies
+from testsmith.generation.test_generator import generate_test
+from testsmith.generation.fixture_generator import generate_or_update_fixture
 from testsmith.visualization.graph_builder import build_dependency_graph, compute_metrics
 from testsmith.visualization.mermaid_renderer import render_mermaid, render_metrics_table
 from testsmith.maintenance.fixture_pruner import (
@@ -284,7 +284,7 @@ def print_result_summary(result: dict, project_root: Path):
     c_action = result["conftest"]
     if c_action != "skipped" and result.get("conftest_path"):
         symbol = "✓"
-        rel_cpath = c_path.relative_to(project_root)
+        rel_cpath = result["conftest_path"].relative_to(project_root)
         print(f"  {symbol} {c_action.capitalize():<8} {rel_cpath}")
 
 def run(args: argparse.Namespace) -> int:
@@ -437,9 +437,7 @@ def run(args: argparse.Namespace) -> int:
             return 1
     
     # Original logic for test generation
-    if args.version:
-        print("TestSmith v0.1.0")
-        return 0
+
 
     try:
         # Load config
