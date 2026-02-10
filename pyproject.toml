@@ -81,7 +81,7 @@ branch = "main"
 upload_to_pypi = false
 upload_to_release = true
 build_command = "pip install poetry && poetry build"
-commit_parser = "angular"
+commit_parser = "conventional"
 major_on_zero = true
 tag_format = "v{version}"
 
