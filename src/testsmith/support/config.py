@@ -50,7 +50,7 @@ def load_config(path: Path | None = None) -> TestSmithConfig:
     if path is None:
         # Default to current working directory
         path = Path.cwd()
-    
+
     if path.is_dir():
         config_path = path / "pyproject.toml"
     else:

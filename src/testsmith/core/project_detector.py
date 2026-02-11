@@ -187,7 +187,9 @@ def scan_packages(root: Path, exclude_dirs: list[str]) -> dict[str, Path]:
     return package_map
 
 
-def detect_conftest(root: Path, custom_path: Path | None = None) -> tuple[Path | None, list[str]]:
+def detect_conftest(
+    root: Path, custom_path: Path | None = None
+) -> tuple[Path | None, list[str]]:
     """
     Look for conftest.py at project root (or custom path) and parse paths_to_add.
     """
@@ -195,7 +197,7 @@ def detect_conftest(root: Path, custom_path: Path | None = None) -> tuple[Path |
         conftest = custom_path
     else:
         conftest = root / "conftest.py"
-    
+
     if not conftest.exists():
         return None, []
 
@@ -234,7 +236,9 @@ def build_project_context(source_path: Path, config: TestSmithConfig) -> Project
     if config.root:
         root = Path(config.root).resolve()
         if not root.exists():
-            raise ProjectRootNotFoundError(f"Configured root directory does not exist: {root}")
+            raise ProjectRootNotFoundError(
+                f"Configured root directory does not exist: {root}"
+            )
     else:
         try:
             root = find_project_root(abs_source)
@@ -255,7 +259,7 @@ def build_project_context(source_path: Path, config: TestSmithConfig) -> Project
         pass
 
     package_map = scan_packages(root, config.exclude_dirs)
-    
+
     # Check if a custom conftest path is configured (absolute or relative to root)
     custom_conftest = None
     if config.conftest_path and config.conftest_path != "conftest.py":
@@ -265,7 +269,7 @@ def build_project_context(source_path: Path, config: TestSmithConfig) -> Project
             custom_conftest = p
         else:
             custom_conftest = root / config.conftest_path
-            
+
     conftest_path, existing_paths = detect_conftest(root, custom_path=custom_conftest)
 
     return ProjectContext(
