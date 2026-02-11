@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.1 (2026-02-11)
+
+### Bug Fixes
+
+- Remove legacy semantic-release config to trigger release
+  ([`f8a62f2`](https://github.com/orieken/testsmith/commit/f8a62f243d78a76e778bd90c2ecbe09afc9d5816))
+
+
 ## v1.1.0 (2026-02-11)
 
 ### Bug Fixes
