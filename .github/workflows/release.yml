@@ -110,3 +110,4 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@106e0b0b7c337fa67ed433972f777c6357f78598  # v1.13.0
+        # Poetry builds to dist/ by default, which is what the action expects
