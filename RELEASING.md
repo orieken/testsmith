@@ -4,10 +4,15 @@ This document describes how to create and publish a new release of TestSmith.
 
 ## Prerequisites
 
-1. **PyPI API Token**: Set up `PYPI_API_TOKEN` in GitHub repository secrets
-   - Go to: Settings → Secrets and variables → Actions → New repository secret
-   - Name: `PYPI_API_TOKEN`
-   - Value: Your PyPI API token (starts with `pypi-`)
+1. **PyPI Trusted Publisher**: Configure Trusted Publisher on PyPI for secure publishing
+   - Go to: https://pypi.org/manage/account/publishing/
+   - Add a new publisher with these details:
+     - PyPI Project Name: `testsmith`
+     - Owner: `orieken`
+     - Repository name: `testsmith`
+     - Workflow name: `release.yml`
+     - Environment name: `pypi`
+   - See: https://docs.pypi.org/trusted-publishers/adding-a-publisher/
 
 2. **Permissions**: You need write access to the repository and permission to create tags
 
@@ -186,9 +191,12 @@ pip install testsmith
 - For RHEL/CentOS, the Linux binary should work on RHEL 7+
 
 ### PyPI publish failed
-- Verify `PYPI_API_TOKEN` secret is set correctly
+- Verify Trusted Publisher is configured correctly on PyPI
+  - Check https://pypi.org/manage/account/publishing/
+  - Ensure repository, workflow name, and environment name match
 - Check that the version doesn't already exist on PyPI
 - Ensure the version in `__init__.py` matches the git tag
+- Verify the workflow has `id-token: write` permission
 
 ## Platform Compatibility
 

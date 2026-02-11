@@ -89,6 +89,11 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     if: "!contains(github.ref, '-')"  # Skip pre-releases
+    environment:
+      name: pypi
+      url: https://pypi.org/p/testsmith
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -103,4 +108,4 @@ jobs:
         run: poetry build
 
       - name: Publish to PyPI
-        run: poetry publish --username __token__ --password ${{ secrets.PYPI_API_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@release/v1
