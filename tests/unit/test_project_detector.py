@@ -72,4 +72,42 @@ def test_build_context(tmp_path):
     ctx = build_project_context(tmp_path / "src" / "main.py", cfg)
 
     assert ctx.root == tmp_path
+
     assert ctx.conftest_path is None
+
+
+def test_build_context_configured_root(tmp_path):
+    """Test that explicit root config bypasses marker detection."""
+    # No markers at tmp_path, generally find_project_root would fail
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "main.py").touch()
+
+    # Provide explicit root
+    cfg = Config(root=str(tmp_path))
+    ctx = build_project_context(src / "main.py", cfg)
+
+    assert ctx.root == tmp_path
+
+
+def test_build_context_custom_conftest(tmp_path):
+    """Test using a custom conftest path."""
+    (tmp_path / "pyproject.toml").touch()
+    
+    # Create custom conftest location
+    fixtures_dir = tmp_path / "tests" / "fixtures"
+    fixtures_dir.mkdir(parents=True)
+    conftest = fixtures_dir / "conftest.py"
+    conftest.write_text("paths_to_add = []", encoding="utf-8")
+    
+    # Configure usage
+    cfg = Config()
+    cfg.conftest_path = "tests/fixtures/conftest.py"
+    
+    # Also need source file
+    src = tmp_path / "main.py"
+    src.touch()
+    
+    ctx = build_project_context(src, cfg)
+    
+    assert ctx.conftest_path == conftest

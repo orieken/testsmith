@@ -19,6 +19,7 @@ class TestSmithConfig:
     """Configuration settings for TestSmith."""
 
     test_root: str = "tests/"
+    root: str | None = None  # Optional explicit project root
     fixture_dir: str = "tests/fixtures/"
     fixture_suffix: str = ".fixture.py"
     conftest_path: str = "conftest.py"
