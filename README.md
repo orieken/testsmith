@@ -245,6 +245,27 @@ cd testsmith
 poetry install --with dev,build
 ```
 
+### Using Source Version Locally
+
+To use the development version of TestSmith in other projects on your machine:
+
+1. **Activate the environment**:
+   ```bash
+   # Activate the virtual environment in your shell
+   source $(poetry env info --path)/bin/activate
+   ```
+
+2. **Navigate to your target project**:
+   ```bash
+   cd ../my-other-project
+   ```
+
+3. **Run TestSmith**:
+   ```bash
+   # The 'testsmith' command is now available in your PATH
+   testsmith --generate-bodies src/app.py
+   ```
+
 ### Development Tasks
 
 TestSmith uses [poethepoet](https://github.com/nat-n/poethepoet) for task automation. Run `poe` to see all available tasks:
