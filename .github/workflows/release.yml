@@ -1,17 +1,73 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
 
 permissions:
   contents: write
   id-token: write
 
 jobs:
+  # ── Semantic Release ──────────────────────────────────
+  # This job only runs when:
+  # 1. CI workflow completed successfully (workflow_run.conclusion == 'success')
+  # 2. CI was triggered by a push to main, not a PR (workflow_run.event == 'push')
+  semantic-release:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install python-semantic-release
+        run: pip install python-semantic-release
+
+      - name: Python Semantic Release
+        id: release
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          
+          # Run semantic-release to create version and tag
+          semantic-release version
+          
+          # Check if a new version was released
+          if git describe --exact-match --tags HEAD 2>/dev/null; then
+            NEW_TAG=$(git describe --exact-match --tags HEAD)
+            echo "released=true" >> $GITHUB_OUTPUT
+            echo "version=${NEW_TAG#v}" >> $GITHUB_OUTPUT
+            echo "tag=${NEW_TAG}" >> $GITHUB_OUTPUT
+            echo "✅ Released version: ${NEW_TAG}"
+            
+            # Push the tag and changes to main
+            # Note: This may fail if another commit was pushed to main concurrently.
+            # In that case, the workflow will fail, which is correct behavior since
+            # the release should be based on the latest code.
+            git push origin main --follow-tags
+          else
+            echo "released=false" >> $GITHUB_OUTPUT
+            echo "ℹ️  No new version to release"
+          fi
+
   # ── Build binaries for each platform ──────────────────────
   build:
+    needs: semantic-release
+    if: needs.semantic-release.outputs.released == 'true'
     strategy:
       matrix:
         include:
@@ -27,6 +83,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.semantic-release.outputs.tag }}
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -57,10 +116,13 @@ jobs:
 
   # ── Create GitHub Release ─────────────────────────────────
   publish:
-    needs: [build]
+    needs: [build, semantic-release]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.semantic-release.outputs.tag }}
+          fetch-depth: 0
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -80,6 +142,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.semantic-release.outputs.tag }}
           generate_release_notes: true
           files: |
             release/*
@@ -87,9 +150,14 @@ jobs:
   # ── Build PyPI distribution ──────────────────────────────
   build-dists:
     name: Build PyPI distribution
+    needs: semantic-release
+    if: needs.semantic-release.outputs.released == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.semantic-release.outputs.tag }}
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
