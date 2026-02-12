@@ -4,4 +4,4 @@ Copyright (c) 2026 Oscar Rieken <oriekenjr@gmail.com>
 Licensed under the MIT License. See LICENSE file for details.
 """
 
-__version__ = "1.1.6"
+__version__ = "1.1.7"

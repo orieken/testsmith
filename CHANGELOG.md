@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.7 (2026-02-12)
+
+### Bug Fixes
+
+- **ci**: Add GH_TOKEN to semantic-release job
+  ([`d59bca5`](https://github.com/orieken/testsmith/commit/d59bca5cce1b8f85fda6b7432acc2c59e03437d2))
+
+
 ## v1.1.6 (2026-02-12)
 
 ### Bug Fixes
