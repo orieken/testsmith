@@ -2,6 +2,22 @@
 
 <!-- version list -->
 
+## v1.1.6 (2026-02-12)
+
+### Bug Fixes
+
+- Address code review feedback on workflow conditions
+  ([`f7318f8`](https://github.com/orieken/testsmith/commit/f7318f8c8bf2a33bc3bf855f4605dc93c96e4dd1))
+
+- Move semantic-release to release workflow to fix trigger issue
+  ([`a10d070`](https://github.com/orieken/testsmith/commit/a10d070bfb3c503bef2ad9fe29cb8dcfe13e912d))
+
+### Documentation
+
+- Add comments explaining workflow behavior
+  ([`56bb36d`](https://github.com/orieken/testsmith/commit/56bb36d764030477e53d1e45f2d51a507e2a3ad1))
+
+
 ## v1.1.5 (2026-02-12)
 
 ### Bug Fixes
