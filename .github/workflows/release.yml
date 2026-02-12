@@ -14,6 +14,9 @@ permissions:
 
 jobs:
   # ── Semantic Release ──────────────────────────────────
+  # This job only runs when:
+  # 1. CI workflow completed successfully (workflow_run.conclusion == 'success')
+  # 2. CI was triggered by a push to main, not a PR (workflow_run.event == 'push')
   semantic-release:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
@@ -51,7 +54,10 @@ jobs:
             echo "tag=${NEW_TAG}" >> $GITHUB_OUTPUT
             echo "✅ Released version: ${NEW_TAG}"
             
-            # Push the tag and changes
+            # Push the tag and changes to main
+            # Note: This may fail if another commit was pushed to main concurrently.
+            # In that case, the workflow will fail, which is correct behavior since
+            # the release should be based on the latest code.
             git push origin main --follow-tags
           else
             echo "released=false" >> $GITHUB_OUTPUT
