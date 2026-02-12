@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.5 (2026-02-12)
+
+### Bug Fixes
+
+- **ci**: Add build-dists job for pypi release
+  ([`f6dda40`](https://github.com/orieken/testsmith/commit/f6dda40a9bc61028a7c12a2c2cba917dd80bada1))
+
+
 ## v1.1.1 (2026-02-11)
 
 ### Bug Fixes
