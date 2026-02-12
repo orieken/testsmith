@@ -15,7 +15,7 @@ permissions:
 jobs:
   # ── Semantic Release ──────────────────────────────────
   semantic-release:
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
     outputs:
       released: ${{ steps.release.outputs.released }}
@@ -52,7 +52,7 @@ jobs:
             echo "✅ Released version: ${NEW_TAG}"
             
             # Push the tag and changes
-            git push origin HEAD:main --follow-tags
+            git push origin main --follow-tags
           else
             echo "released=false" >> $GITHUB_OUTPUT
             echo "ℹ️  No new version to release"
