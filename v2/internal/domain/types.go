@@ -1,5 +1,7 @@
 package domain
 
+import "path/filepath"
+
 // ---- Project ----------------------------------------------------------------
 
 // ProjectContext is the language-agnostic representation of a detected project.
@@ -24,6 +26,23 @@ type SourceAnalysis struct {
 	PublicAPI  []PublicMember
 	Project    *ProjectContext
 	RawSource  string // full source text, available for LLM prompts
+}
+
+// ModuleName returns the stem of the source file (e.g. "payment" from "payment.py").
+func (a *SourceAnalysis) ModuleName() string {
+	base := filepath.Base(a.SourcePath)
+	ext := filepath.Ext(base)
+	return base[:len(base)-len(ext)]
+}
+
+// ModuleName returns per-language config values stored in ProjectContext.Metadata["lang_config"].
+func (p *ProjectContext) LanguageConfig() map[string]string {
+	if v, ok := p.Metadata["lang_config"]; ok {
+		if m, ok := v.(map[string]string); ok {
+			return m
+		}
+	}
+	return map[string]string{}
 }
 
 // ClassifiedImports groups ImportInfo values by resolved category.

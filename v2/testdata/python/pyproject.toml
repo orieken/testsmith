@@ -1,0 +1,11 @@
+[tool.poetry]
+name = "testsmith-testdata-python"
+version = "0.1.0"
+description = "Python testdata fixtures for TestSmith v2 integration tests"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

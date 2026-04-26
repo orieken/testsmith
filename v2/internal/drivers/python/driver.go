@@ -9,8 +9,6 @@
 package python
 
 import (
-	"errors"
-
 	"github.com/orieken/testsmith/internal/domain"
 )
 
@@ -54,7 +52,7 @@ func (d *Driver) DetectProject(dir string) (*domain.ProjectContext, error) {
 }
 
 func (d *Driver) AnalyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysis, error) {
-	return nil, errors.New("python: AnalyzeFile not yet implemented — Phase 1")
+	return analyzeFile(path, ctx)
 }
 
 func (d *Driver) ClassifyDependency(dep domain.ImportInfo, ctx *domain.ProjectContext) domain.DependencyCategory {
@@ -70,15 +68,15 @@ func (d *Driver) DeriveModulePath(sourcePath string, ctx *domain.ProjectContext)
 }
 
 func (d *Driver) GenerateTestFile(analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {
-	return nil, errors.New("python: GenerateTestFile not yet implemented — Phase 1")
+	return generateTestFile(analysis, opts)
 }
 
 func (d *Driver) GenerateFixture(dep string, analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {
-	return nil, errors.New("python: GenerateFixture not yet implemented — Phase 1")
+	return generateFixture(dep, analysis, opts)
 }
 
 func (d *Driver) GenerateBootstrap(plan *domain.GenerationPlan, ctx *domain.ProjectContext) (*domain.GeneratedFile, error) {
-	return nil, errors.New("python: GenerateBootstrap not yet implemented — Phase 1")
+	return generateBootstrap(plan, ctx)
 }
 
 // pythonBodyPrompt is the default LLM prompt template for Python pytest bodies.
