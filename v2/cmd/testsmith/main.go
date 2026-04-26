@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/orieken/testsmith/internal/drivers/csharp"
 	"github.com/orieken/testsmith/internal/drivers/golang"
 	"github.com/orieken/testsmith/internal/drivers/java"
 	"github.com/orieken/testsmith/internal/drivers/python"
@@ -21,6 +22,7 @@ func main() {
 	reg.Register(typescript.New())
 	reg.Register(golang.New())
 	reg.Register(java.New())
+	reg.Register(csharp.New())
 
 	execute()
 }

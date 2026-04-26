@@ -194,13 +194,27 @@ All LLM providers use plain `net/http` — no Anthropic or OpenAI SDK dependency
 
 ---
 
-### Phase 6 — Java Driver + Monorepo Config (Week 7)
-**Goal**: Four-language support; monorepo workspaces in `.testsmith.yaml` work.
+### Phase 6 — Java + C# Drivers + Monorepo Config (Weeks 7–8)
+**Goal**: Five-language support; monorepo workspaces in `.testsmith.yaml` work.
 
+#### Java
 - [ ] `internal/drivers/java/` — full driver
 - [ ] `pom.xml` / `build.gradle` parsing
-- [ ] Workspace config loading in `internal/config/loader.go`
+- [ ] JUnit 5 + Mockito test generation
 - [ ] Integration tests using `testdata/java/` samples
+
+#### C#
+- [ ] `internal/drivers/csharp/detector.go` — `.sln` / `.csproj` root detection + namespace map
+- [ ] `internal/drivers/csharp/analyzer.go` — tree-sitter `using_directive`, class/method extraction
+- [ ] `internal/drivers/csharp/classifier.go` — `System.*`, `Microsoft.*` stdlib prefixes
+- [ ] `internal/drivers/csharp/generator.go` — xUnit `[Fact]`/`[Theory]` test class + Moq setup
+- [ ] `internal/drivers/csharp/queries/imports.scm` — tree-sitter `using_directive` query
+- [ ] `internal/drivers/csharp/queries/public_api.scm` — class / method query
+- [ ] `.Tests` project scaffold in `testsmith init`
+- [ ] Integration tests using `testdata/csharp/` samples
+
+#### Shared
+- [ ] Workspace config loading in `internal/config/loader.go`
 
 ---
 

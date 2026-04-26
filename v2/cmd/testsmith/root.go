@@ -18,7 +18,7 @@ var rootCmd = &cobra.Command{
 	Short: "Language-agnostic test scaffold generator",
 	Long: `TestSmith v2 — generate test scaffolds for any language from a single binary.
 
-Supported languages: Python, TypeScript/JavaScript, Go, Java
+Supported languages: Python, TypeScript/JavaScript, Go, Java, C#
 Run 'testsmith help <command>' for detailed usage of each subcommand.`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
