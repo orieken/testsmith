@@ -95,3 +95,9 @@ Requirements:
 - Use ` + "`assert`" + ` statements.
 - Use the provided fixtures for mocking.
 - Output ONLY valid Python code in a single markdown code block.`
+
+func (d *Driver) ListAdapters(ctx *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {
+	return registry.All(), selectAdapter(ctx)
+}
+
+func (d *Driver) ListMigrators() []domain.Migrator { return pyMigrators }

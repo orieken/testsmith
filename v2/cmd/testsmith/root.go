@@ -31,12 +31,17 @@ func init() {
 
 	rootCmd.AddCommand(
 		newGenerateCmd(),
+		newAdaptersCmd(),
+		newConfigCmd(),
+		newMigrateCmd(),
+		newValidateCmd(),
 		newGraphCmd(),
 		newPruneCmd(),
 		newGapsCmd(),
 		newWatchCmd(),
 		newInitCmd(),
 		newVersionCmd(),
+		newCompletionCmd(),
 	)
 }
 

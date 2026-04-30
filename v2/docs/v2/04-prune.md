@@ -14,33 +14,34 @@ By default prune runs as a **dry-run** — it prints what would be deleted witho
 testsmith prune [flags]
 
 Flags:
-  --confirm     Actually delete unused fixtures (default: dry-run)
-  --verbose     List the source files checked for each dependency
+  --confirm           Actually delete unused fixtures (default: dry-run / list only)
+  --workspace <name>  Prune only this workspace (name or path)
+  --verbose, -v       List the source files checked for each dependency
 ```
+
+### Workspace Mode
+
+When `workspaces:` are configured, each workspace is pruned independently with its own fixture directory resolved from the driver's `TestFrameworkConfig.FixtureDir`. Use `--workspace <name>` to limit to one workspace.
 
 ---
 
 ## Example Output
 
 ```
-TestSmith Prune Summary
-───────────────────────
-Unused fixtures found: 2
+  · would delete  sendgrid_fixture
+  · would delete  boto3_fixture
 
-  ✗ tests/fixtures/sendgrid_fixture.py — no source files import sendgrid
-  ✗ tests/fixtures/boto3_fixture.py    — no source files import boto3
-
-Run with --prune --confirm to delete these fixtures.
+  2 unused fixture(s) found. Run with --confirm to delete.
 ```
 
 After `--confirm`:
 
 ```
-Deleted fixtures:
-  ✓ sendgrid_fixture.py
-  ✓ boto3_fixture.py
+  ✓ deleted  sendgrid_fixture
+  ✓ deleted  boto3_fixture
+  · commented out stale imports in tests/test_payment.py
 
-Updated 3 test file(s) to comment out deleted fixture imports.
+  Pruned 2 fixture(s).
 ```
 
 ---
@@ -50,30 +51,35 @@ Updated 3 test file(s) to comment out deleted fixture imports.
 ```go
 // internal/generation/prune.go
 func ScanUsedDependencies(analyses []*domain.SourceAnalysis) map[string]bool
-func ScanExistingFixtures(fixtureDir string, cfg *config.Config) []FixtureFile
+func ScanExistingFixtures(fixtureDir string, cfg domain.TestFrameworkConfig) ([]FixtureFile, error)
 func IdentifyUnused(used map[string]bool, existing []FixtureFile) []FixtureFile
-func PruneFixtures(unused []FixtureFile, dryRun bool) ([]PruneResult, error)
+func PruneFixtures(unused []FixtureFile, dryRun bool) []PruneResult
 func UpdateTestImports(root string, deletedNames []string) ([]string, error)
 ```
 
-### FixtureFile
+### FixtureFile / PruneResult
 
 ```go
 type FixtureFile struct {
     AbsPath string
     DepName string // root dependency name this fixture mocks
 }
+
+type PruneResult struct {
+    DepName string
+    Action  string // "deleted" | "skipped" | "error"
+    Err     error
+}
 ```
 
-### Driver Integration
+### Fixture Directory Resolution
 
-`ScanExistingFixtures` delegates to the language driver to determine the fixture directory and naming convention. The Go driver returns an empty list since it has no fixture directory.
+The fixture directory is resolved from the driver's `TestFrameworkConfig.FixtureDir` field, joined against the workspace or project root. Drivers that have no fixture directory (Go) return `""` and `ScanExistingFixtures` returns nil without error.
 
 ### Files Involved
 
 | File | Role |
 |------|------|
-| `cmd/testsmith/prune.go` | Cobra subcommand |
-| `internal/generation/prune.go` | Prune logic |
+| `cmd/testsmith/prune.go` | Cobra subcommand, workspace routing |
+| `internal/generation/prune.go` | `ScanUsedDependencies`, `ScanExistingFixtures`, prune + import cleanup |
 | `internal/analysis/pipeline.go` | `DiscoverAndAnalyzeAll` provides dependency sets |
-| `internal/fsutil/write.go` | Safe file deletion |

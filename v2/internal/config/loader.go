@@ -22,6 +22,7 @@ func Load(startDir string) (*Config, error) {
 	if err := loadYAML(path, cfg); err != nil {
 		return nil, err
 	}
+	cfg.ConfigPath = path
 	return cfg, nil
 }
 
@@ -31,6 +32,7 @@ func LoadFromFile(path string) (*Config, error) {
 	if err := loadYAML(path, cfg); err != nil {
 		return nil, err
 	}
+	cfg.ConfigPath = path
 	return cfg, nil
 }
 

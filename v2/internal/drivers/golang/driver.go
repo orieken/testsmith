@@ -1,11 +1,8 @@
 // Package golang implements the LanguageDriver for Go projects.
-// Uses the stdlib go/ast and go/parser packages — no tree-sitter dependency.
-// Phase 5 implementation target.
+// Uses stdlib go/ast and go/parser — no tree-sitter dependency.
 package golang
 
 import (
-	"errors"
-
 	"github.com/orieken/testsmith/internal/domain"
 )
 
@@ -14,8 +11,8 @@ type Driver struct{}
 
 func New() *Driver { return &Driver{} }
 
-func (d *Driver) Language() string         { return "go" }
-func (d *Driver) FileExtensions() []string { return []string{".go"} }
+func (d *Driver) Language() string            { return "go" }
+func (d *Driver) FileExtensions() []string    { return []string{".go"} }
 func (d *Driver) BodyGenerationPrompt() string { return goBodyPrompt }
 func (d *Driver) LLMContext() map[string]string {
 	return map[string]string{
@@ -36,34 +33,34 @@ func (d *Driver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
 }
 
 func (d *Driver) DetectProject(dir string) (*domain.ProjectContext, error) {
-	return nil, errors.New("go: not yet implemented — Phase 5")
+	return detectProject(dir)
 }
 
 func (d *Driver) AnalyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysis, error) {
-	return nil, errors.New("go: not yet implemented — Phase 5")
+	return analyzeFile(path, ctx)
 }
 
 func (d *Driver) ClassifyDependency(dep domain.ImportInfo, ctx *domain.ProjectContext) domain.DependencyCategory {
-	return domain.DepExternal
+	return classifyDependency(dep, ctx)
 }
 
 func (d *Driver) DeriveTestPath(sourcePath string, ctx *domain.ProjectContext) (string, error) {
-	return "", errors.New("go: not yet implemented — Phase 5")
+	return deriveTestPath(sourcePath, ctx)
 }
 
 func (d *Driver) DeriveModulePath(sourcePath string, ctx *domain.ProjectContext) (string, error) {
-	return "", errors.New("go: not yet implemented — Phase 5")
+	return deriveModulePath(sourcePath, ctx)
 }
 
 func (d *Driver) GenerateTestFile(analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {
-	return nil, errors.New("go: not yet implemented — Phase 5")
+	return generateTestFile(analysis, opts)
 }
 
-func (d *Driver) GenerateFixture(dep string, analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {
+func (d *Driver) GenerateFixture(_ string, _ *domain.SourceAnalysis, _ domain.GenerateOpts) (*domain.GeneratedFile, error) {
 	return nil, nil // Go uses interface mocks, not shared fixture files.
 }
 
-func (d *Driver) GenerateBootstrap(plan *domain.GenerationPlan, ctx *domain.ProjectContext) (*domain.GeneratedFile, error) {
+func (d *Driver) GenerateBootstrap(_ *domain.GenerationPlan, _ *domain.ProjectContext) (*domain.GeneratedFile, error) {
 	return nil, nil // Go has no bootstrap file equivalent.
 }
 
@@ -73,4 +70,14 @@ Write table-driven tests for the function named ` + "`{{.MemberName}}`" + ` usin
 Source:
 ` + "```go\n{{.SourceCode}}\n```" + `
 
-Output ONLY valid Go code in a single markdown code block.`
+Requirements:
+- Use table-driven tests with a slice of structs.
+- Cover the happy path and at least one error/edge case.
+- Use t.Errorf for assertions (no external dependencies).
+- Output ONLY valid Go code in a single markdown code block.`
+
+func (d *Driver) ListAdapters(ctx *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {
+	return registry.All(), selectAdapter(ctx)
+}
+
+func (d *Driver) ListMigrators() []domain.Migrator { return goMigrators }

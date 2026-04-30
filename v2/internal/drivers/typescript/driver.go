@@ -1,11 +1,8 @@
 // Package typescript implements the LanguageDriver for TypeScript/JavaScript projects.
 // Supports Jest and Vitest test frameworks (auto-detected from package.json).
-// Phase 4 implementation target.
 package typescript
 
 import (
-	"errors"
-
 	"github.com/orieken/testsmith/internal/domain"
 )
 
@@ -20,7 +17,7 @@ func (d *Driver) BodyGenerationPrompt() string { return typescriptBodyPrompt }
 func (d *Driver) LLMContext() map[string]string {
 	return map[string]string{
 		"assert_keyword": "expect(...).toBe / toEqual",
-		"framework":      "Jest",
+		"framework":      "Jest / Vitest",
 		"mock_library":   "jest.mock / vi.mock",
 	}
 }
@@ -36,34 +33,34 @@ func (d *Driver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
 }
 
 func (d *Driver) DetectProject(dir string) (*domain.ProjectContext, error) {
-	return nil, errors.New("typescript: not yet implemented — Phase 4")
+	return detectProject(dir)
 }
 
 func (d *Driver) AnalyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysis, error) {
-	return nil, errors.New("typescript: not yet implemented — Phase 4")
+	return analyzeFile(path, ctx)
 }
 
 func (d *Driver) ClassifyDependency(dep domain.ImportInfo, ctx *domain.ProjectContext) domain.DependencyCategory {
-	return domain.DepExternal
+	return classifyDependency(dep, ctx)
 }
 
 func (d *Driver) DeriveTestPath(sourcePath string, ctx *domain.ProjectContext) (string, error) {
-	return "", errors.New("typescript: not yet implemented — Phase 4")
+	return deriveTestPath(sourcePath, ctx)
 }
 
 func (d *Driver) DeriveModulePath(sourcePath string, ctx *domain.ProjectContext) (string, error) {
-	return "", errors.New("typescript: not yet implemented — Phase 4")
+	return deriveModulePath(sourcePath, ctx)
 }
 
 func (d *Driver) GenerateTestFile(analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {
-	return nil, errors.New("typescript: not yet implemented — Phase 4")
+	return generateTestFile(analysis, opts)
 }
 
 func (d *Driver) GenerateFixture(dep string, analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {
-	return nil, nil
+	return generateMock(dep, analysis, opts)
 }
 
-func (d *Driver) GenerateBootstrap(plan *domain.GenerationPlan, ctx *domain.ProjectContext) (*domain.GeneratedFile, error) {
+func (d *Driver) GenerateBootstrap(_ *domain.GenerationPlan, _ *domain.ProjectContext) (*domain.GeneratedFile, error) {
 	return nil, nil
 }
 
@@ -74,3 +71,9 @@ Source:
 ` + "```typescript\n{{.SourceCode}}\n```" + `
 
 Output ONLY valid TypeScript code in a single markdown code block.`
+
+func (d *Driver) ListAdapters(ctx *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {
+	return registry.All(), selectAdapter(ctx)
+}
+
+func (d *Driver) ListMigrators() []domain.Migrator { return tsMigrators }

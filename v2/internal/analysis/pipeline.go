@@ -96,6 +96,8 @@ func (p *Pipeline) discoverSources(root string, excludeDirs []string) ([]string,
 		excludeSet[d] = true
 	}
 
+	fwCfg := p.driver.GetTestFrameworkConfig()
+
 	var sources []string
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -109,6 +111,17 @@ func (p *Pipeline) discoverSources(root string, excludeDirs []string) ([]string,
 		}
 		ext := strings.ToLower(filepath.Ext(path))
 		if exts[ext] {
+			base := d.Name()
+			// Only apply suffix filter when it's more specific than a bare extension
+			// (e.g. "_test.go" or ".test.ts" qualify; ".py" alone does not).
+			if fwCfg.TestFileSuffix != "" &&
+				filepath.Ext(fwCfg.TestFileSuffix) != fwCfg.TestFileSuffix &&
+				strings.HasSuffix(base, fwCfg.TestFileSuffix) {
+				return nil
+			}
+			if fwCfg.TestFilePrefix != "" && strings.HasPrefix(base, fwCfg.TestFilePrefix) {
+				return nil
+			}
 			sources = append(sources, path)
 		}
 		return nil

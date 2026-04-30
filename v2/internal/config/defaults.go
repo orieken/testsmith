@@ -1,5 +1,7 @@
 package config
 
+import "github.com/orieken/testsmith/internal/domain"
+
 // Default returns a Config pre-populated with sensible defaults.
 func Default() *Config {
 	return &Config{
@@ -22,24 +24,56 @@ func Default() *Config {
 				TestRoot:      "tests/",
 				FixtureDir:    "tests/fixtures/",
 				FixtureSuffix: "_fixture.py",
+				// Defaults; overridden by auto-detection or explicit config.
+				Framework:   "pytest",
+				MockLibrary: "pytest-mock",
 				Extra: map[string]string{
-					"conftest_path":      "conftest.py",
-					"paths_to_add_var":   "paths_to_add",
+					"conftest_path":    "conftest.py",
+					"paths_to_add_var": "paths_to_add",
 				},
 			},
 			"typescript": {
-				TestRoot:   "src/",
-				FixtureDir: "__mocks__/",
+				TestRoot:    "src/",
+				FixtureDir:  "__mocks__/",
+				Framework:   "jest",   // auto-detection may upgrade to "vitest"
+				MockLibrary: "jest",
 				Extra: map[string]string{
 					"test_file_suffix": ".test.ts",
 				},
 			},
 			"go": {
-				FixtureDir: "",
+				FixtureDir:  "",
+				Framework:   "testing",
+				MockLibrary: "interfaces",
 			},
 			"java": {
-				TestRoot: "src/test/java/",
+				TestRoot:    "src/test/java/",
+				Framework:   "junit5",
+				MockLibrary: "mockito",
+			},
+			"csharp": {
+				Framework:   "xunit",
+				MockLibrary: "moq",
 			},
 		},
+	}
+}
+
+// ApplyToContext copies framework/mock_library config overrides into ctx.Metadata.
+// Driver auto-detection runs first (inside DetectProject); this runs after, so
+// explicit config always wins over auto-detected values.
+func ApplyToContext(cfg *Config, ctx *domain.ProjectContext) {
+	if ctx == nil || ctx.Metadata == nil {
+		return
+	}
+	langCfg, ok := cfg.Languages[ctx.Language]
+	if !ok {
+		return
+	}
+	if langCfg.Framework != "" {
+		ctx.Metadata["framework"] = langCfg.Framework
+	}
+	if langCfg.MockLibrary != "" {
+		ctx.Metadata["mock_library"] = langCfg.MockLibrary
 	}
 }

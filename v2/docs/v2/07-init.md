@@ -5,12 +5,10 @@
 `testsmith init` bootstraps the test infrastructure for a project that has not yet used TestSmith. It:
 
 1. Detects (or confirms with `--lang`) the project language.
-2. Creates the test root directory (`tests/` for Python/TypeScript, co-located for Go).
-3. Creates the fixture directory and any required stub files (`__init__.py`, etc.).
-4. Writes or updates the framework bootstrap file (`conftest.py`, `jest.setup.ts`, etc.) with the minimum required content.
-5. Writes a starter `.testsmith.yaml` with commented-out options so developers can discover available configuration.
+2. Creates the test root directory and fixture directory for the detected language.
+3. Writes a `.testsmith.yaml` pre-populated with language-appropriate defaults.
 
-Running `init` on an already-initialised project is safe — it only creates files that do not yet exist.
+Running `init` on an already-initialised project is safe — it skips the `.testsmith.yaml` write and prints `already exists`.
 
 ---
 
@@ -21,7 +19,7 @@ testsmith init [flags]
 
 Flags:
   --lang <lang>   Hint the primary language if auto-detection fails
-  --dry-run       Print what would be created without touching the filesystem
+  --dry-run       Print what would be created and the config content without writing files
 ```
 
 ---
@@ -29,38 +27,64 @@ Flags:
 ## Example Output
 
 ```
-TestSmith Init
-──────────────
-Language detected: python
+$ testsmith init
+  ✓ created  tests/
+  ✓ created  tests/fixtures/
+  ✓ created  .testsmith.yaml
 
-Created:
-  ✓ tests/
-  ✓ tests/__init__.py
-  ✓ tests/fixtures/
-  ✓ tests/fixtures/__init__.py
-  ✓ conftest.py
-  ✓ .testsmith.yaml
+Initialised python project. Run 'testsmith generate --all' to start.
+```
 
-Run 'testsmith generate <file>' to scaffold your first test.
+Dry-run output:
+
+```
+$ testsmith init --dry-run
+  ✓ created  tests/
+  ✓ created  tests/fixtures/
+
+-- .testsmith.yaml (dry-run) --
+language: python
+test_root: tests/
+fixture_dir: tests/fixtures/
+exclude_dirs:
+    - node_modules
+    - .venv
+    ...
+llm:
+    provider: anthropic
+    model: claude-sonnet-4-6
+    api_key_env_var: ANTHROPIC_API_KEY
 ```
 
 ---
 
 ## Go Implementation
 
-`init` is implemented as a specialised `GenerationPlan` — it produces a fixed set of `GeneratedFile` values representing the skeleton infrastructure and passes them to the same `Executor` used by `generate`.
+`init` detects the language via `reg.Detect(cwd)`, looks up per-language defaults from `config.Default()`, creates directories with `os.MkdirAll`, and marshals a typed `*config.Config` struct directly to YAML using `gopkg.in/yaml.v3`. All config fields have `yaml:"snake_case"` struct tags so the written file is immediately loadable by `config.LoadFromFile`.
 
 ```go
 // cmd/testsmith/init.go
-func buildInitPlan(driver domain.LanguageDriver, ctx *domain.ProjectContext, cfg *config.Config) *domain.GenerationPlan
+func runInit(langHint string) error
 ```
 
-No new infrastructure is required beyond what `generate` already uses.
+Key behaviour:
+- If `.testsmith.yaml` already exists the function prints `already exists — skipping` and returns nil (idempotent).
+- `--dry-run` prints the YAML to stdout via a `-- .testsmith.yaml (dry-run) --` banner instead of writing the file.
+- Directory creation is never skipped — `os.MkdirAll` is a no-op when the directory already exists.
+
+### YAML Round-trip Guarantee
+
+The `*config.Config` struct carries `yaml:"snake_case,omitempty"` tags on every field (see `internal/config/schema.go`). This means:
+
+```go
+data, _ := yaml.Marshal(cfg)           // writes  test_root: tests/
+loaded, _ := config.LoadFromFile(path) // reads   loaded.TestRoot == "tests/"
+```
 
 ### Files Involved
 
 | File | Role |
 |------|------|
-| `cmd/testsmith/init.go` | Cobra subcommand + plan construction |
-| `internal/generation/executor.go` | Shared file writer |
-| `internal/config/schema.go` | Starter YAML template |
+| `cmd/testsmith/init.go` | Cobra subcommand, directory creation, YAML write |
+| `internal/config/schema.go` | Config struct with yaml tags |
+| `internal/config/defaults.go` | Per-language default values |

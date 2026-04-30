@@ -47,6 +47,16 @@ func (r *Registry) ForLanguage(lang string) (domain.LanguageDriver, error) {
 	return nil, domain.ErrNoDriverForLanguage
 }
 
+// Languages returns the canonical language names of all registered drivers,
+// in registration order.
+func (r *Registry) Languages() []string {
+	langs := make([]string, len(r.drivers))
+	for i, d := range r.drivers {
+		langs[i] = d.Language()
+	}
+	return langs
+}
+
 // ForFile returns the driver that claims the given file's extension.
 func (r *Registry) ForFile(path string) (domain.LanguageDriver, error) {
 	ext := strings.ToLower(filepath.Ext(path))

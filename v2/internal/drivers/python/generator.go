@@ -11,24 +11,16 @@ import (
 	"github.com/orieken/testsmith/internal/domain"
 )
 
-// generateTestFile produces a pytest test scaffold for the given analysis.
+
+// generateTestFile produces a test scaffold for the given analysis using the
+// selected adapter (pytest+pytest-mock by default, overrideable via config).
 func generateTestFile(analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {
 	testPath, err := deriveTestPath(analysis.SourcePath, analysis.Project)
 	if err != nil {
 		return nil, err
 	}
 
-	fixtureFuncNames := fixtureParamNames(analysis.Imports.External)
-
-	data := testFileData{
-		ModuleName:    analysis.ModuleName(),
-		ModulePath:    analysis.ModulePath,
-		Members:       analysis.PublicAPI,
-		FixtureParams: fixtureFuncNames,
-		LLMBodies:     opts.LLMBodies,
-	}
-
-	content, err := renderTestFile(data)
+	content, err := selectAdapter(analysis.Project).GenerateTestFile(analysis, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -72,85 +64,6 @@ func generateFixture(dep string, analysis *domain.SourceAnalysis, opts domain.Ge
 		Content: content,
 		Role:    domain.RoleFixture,
 	}, nil
-}
-
-// ---- template data structs --------------------------------------------------
-
-type testFileData struct {
-	ModuleName    string
-	ModulePath    string
-	Members       []domain.PublicMember
-	FixtureParams []string
-	LLMBodies     map[string][]string
-}
-
-// publicMethods returns only the public (non-dunder) methods of a class member.
-func (d testFileData) publicMethods(m domain.PublicMember) []domain.MethodInfo {
-	var out []domain.MethodInfo
-	for _, method := range m.Methods {
-		if method.IsPublic && method.Name != "__init__" {
-			out = append(out, method)
-		}
-	}
-	return out
-}
-
-// bodyFor returns LLM-generated lines for a member, or nil if not available.
-func (d testFileData) bodyFor(name string) []string {
-	if d.LLMBodies == nil {
-		return nil
-	}
-	return d.LLMBodies[name]
-}
-
-// ---- test file template -----------------------------------------------------
-
-var testFileTmpl = template.Must(template.New("test").Funcs(template.FuncMap{
-	"join":       strings.Join,
-	"title":      strings.Title, //nolint:staticcheck
-	"hasPrefix":  strings.HasPrefix,
-	"indent":     indentLines,
-}).Parse(`"""Tests for {{ .ModuleName }} module."""
-import pytest
-{{ range .FixtureParams }}
-from tests.fixtures.{{ . }}_fixture import mock_{{ . }}
-{{ end }}
-
-{{ range .Members }}
-{{ if eq .Kind "function" -}}
-class Test{{ title .Name }}:
-    """Tests for {{ .Name }}."""
-{{ $body := $.bodyFor .Name -}}
-{{ if $body }}
-{{ indent $body 4 }}
-{{ else }}
-    def test_{{ .Name }}(self{{ range $.FixtureParams }}, mock_{{ . }}{{ end }}):
-        # TODO: implement
-        pass
-{{ end }}
-{{ else if eq .Kind "class" -}}
-class Test{{ .Name }}:
-    """Tests for {{ .Name }}."""
-{{ range ($.publicMethods .) }}
-{{ $body := $.bodyFor .Name -}}
-{{ if $body }}
-{{ indent $body 4 }}
-{{ else }}
-    def test_{{ .Name }}(self{{ range $.FixtureParams }}, mock_{{ . }}{{ end }}):
-        # TODO: implement
-        pass
-{{ end }}
-{{ end }}
-{{ end }}
-{{ end }}`))
-
-func renderTestFile(data testFileData) (string, error) {
-	var buf bytes.Buffer
-	if err := testFileTmpl.Execute(&buf, data); err != nil {
-		return "", fmt.Errorf("render test file: %w", err)
-	}
-	// Collapse more than two consecutive blank lines.
-	return normaliseBlankLines(buf.String()), nil
 }
 
 // ---- fixture file template --------------------------------------------------

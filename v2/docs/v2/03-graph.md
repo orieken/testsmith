@@ -20,10 +20,15 @@ This helps identify over-coupled modules that are good candidates for test cover
 testsmith graph [flags]
 
 Flags:
-  --output <file>   Output Markdown file (default: testsmith_graph.md)
-  --format          Output format: mermaid | dot | json (default: mermaid)
-  --lang <lang>     Override auto-detected language
+  --output <file>     Output Markdown file (default: testsmith_graph.md)
+  --workspace <name>  Graph only this workspace (name or path)
+  --dry-run           Print report to stdout instead of writing a file
+  --verbose, -v       Print per-workspace node/edge counts
 ```
+
+### Workspace Mode
+
+When `workspaces:` are configured each workspace produces a labelled `## Workspace: <name>` section in the same report file. Use `--workspace <name>` to limit to one workspace.
 
 ---
 
@@ -75,11 +80,11 @@ type ModuleMetrics struct {
 // internal/analysis/graph.go
 func BuildDependencyGraph(analyses []*domain.SourceAnalysis) *domain.DependencyGraph
 func ComputeMetrics(g *domain.DependencyGraph) []domain.ModuleMetrics
-func RenderMermaid(g *domain.DependencyGraph, metrics []domain.ModuleMetrics) string
+func RenderMermaid(g *domain.DependencyGraph) string
 func RenderMetricsTable(metrics []domain.ModuleMetrics) string
 ```
 
-The graph pipeline reuses the same `AnalysisPipeline.DiscoverAndAnalyzeAll()` call as `generate --all`, so no extra parsing is needed when both commands run together.
+The graph pipeline reuses `Pipeline.DiscoverAndAnalyzeAll()` — no extra parsing needed.
 
 ### Coupling Score Formula
 
@@ -87,12 +92,12 @@ The graph pipeline reuses the same `AnalysisPipeline.DiscoverAndAnalyzeAll()` ca
 coupling_score = (fan_out_external * 0.6 + fan_in * 0.4) / max_possible
 ```
 
-A score approaching 1.0 indicates high coupling — the module depends heavily on third-party code and is depended on by many internal modules.
+A score approaching 1.0 indicates high coupling.
 
 ### Files Involved
 
 | File | Role |
 |------|------|
-| `cmd/testsmith/graph.go` | Cobra subcommand |
-| `internal/analysis/graph.go` | Graph construction, metrics, Mermaid rendering |
-| `internal/analysis/pipeline.go` | `DiscoverAndAnalyzeAll` reused here |
+| `cmd/testsmith/graph.go` | Cobra subcommand, workspace routing, dry-run |
+| `internal/analysis/graph.go` | Graph construction, metrics, Mermaid + table rendering |
+| `internal/analysis/pipeline.go` | `DiscoverAndAnalyzeAll` |

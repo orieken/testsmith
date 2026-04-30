@@ -62,6 +62,20 @@ type LanguageDriver interface {
 	// LLMContext returns key-value pairs that are merged into the LLM prompt context,
 	// allowing drivers to inject language-specific vocabulary (e.g. "assert" vs "expect").
 	LLMContext() map[string]string
+
+	// ListAdapters returns every available adapter for this driver along with the
+	// one that would be selected for the given project context.
+	ListAdapters(ctx *ProjectContext) (available []TestAdapter, selected TestAdapter)
+
+	// ListMigrators returns all migration rules this driver can apply between
+	// test framework conventions. The slice is empty when no migrations are
+	// supported.
+	ListMigrators() []Migrator
+
+	// ValidateFile checks the content of a single test file against the
+	// conventions of the given framework and mock library. Returns nil when
+	// no issues are found or when no validator exists for that pair.
+	ValidateFile(framework, mockLib, content string) []ValidationIssue
 }
 
 // BodyGenerator is the optional LLM adapter interface. The generation pipeline

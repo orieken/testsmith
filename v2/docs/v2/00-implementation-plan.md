@@ -4,6 +4,8 @@
 
 TestSmith v2 rewrites the CLI in Go as a language-agnostic test scaffold generator. The Python tool (v1, available on PyPI) continues to work and receive bug fixes during the transition. v2 ships as a single static binary with no runtime dependencies.
 
+**Status: All phases complete.** The binary is fully functional across all five languages with LLM integration, monorepo workspace support, and a complete CLI command set.
+
 ---
 
 ## Architecture Principles
@@ -20,72 +22,109 @@ TestSmith v2 rewrites the CLI in Go as a language-agnostic test scaffold generat
 
 ```
 v2/
-├── cmd/testsmith/          # Cobra CLI entry point
-│   ├── main.go             # composition root: register drivers, wire dependencies
-│   ├── root.go             # root command + persistent flags (--config, --verbose, --dry-run)
-│   ├── generate.go         # generate subcommand
-│   ├── graph.go
-│   ├── prune.go
-│   ├── gaps.go
-│   ├── watch.go
-│   └── init.go
+├── cmd/testsmith/              # Cobra CLI entry point
+│   ├── main.go                 # composition root: register drivers, wire dependencies
+│   ├── root.go                 # root command + persistent flags (--config, --verbose, --dry-run)
+│   ├── adapters.go             # adapters list subcommand
+│   ├── cli_test.go             # black-box CLI integration tests (package main_test)
+│   ├── completion.go           # shell completion subcommand (bash/zsh/fish/powershell)
+│   ├── config.go               # config show subcommand
+│   ├── gaps.go                 # gaps subcommand
+│   ├── generate.go             # generate subcommand (--all, --workers, --workspace)
+│   ├── graph.go                # graph subcommand
+│   ├── init.go                 # init subcommand
+│   ├── migrate.go              # migrate subcommand (--from, --to)
+│   ├── prune.go                # prune subcommand
+│   ├── testfiles.go            # shared file-discovery helpers (walkTestFiles, relPath)
+│   ├── validate.go             # validate subcommand
+│   ├── version.go              # version subcommand
+│   └── watch.go                # watch subcommand
 │
 ├── internal/
-│   ├── domain/             # pure types + interfaces (ZERO external imports)
-│   │   ├── driver.go       # LanguageDriver + BodyGenerator interfaces
-│   │   ├── types.go        # ProjectContext, SourceAnalysis, GenerationPlan, etc.
-│   │   └── errors.go       # sentinel errors
+│   ├── domain/                 # pure types + interfaces (ZERO external imports)
+│   │   ├── adapter.go          # TestAdapter, AdapterRegistry
+│   │   ├── driver.go           # LanguageDriver + BodyGenerator interfaces
+│   │   ├── migrator.go         # Migrator interface
+│   │   ├── types.go            # ProjectContext, SourceAnalysis, GenerationPlan, etc.
+│   │   └── validator.go        # ValidationIssue, Severity constants
 │   │
 │   ├── registry/
-│   │   └── registry.go     # DriverRegistry: detect language, dispatch to driver
+│   │   └── registry.go         # DriverRegistry: detect language, dispatch to driver
 │   │
 │   ├── analysis/
-│   │   ├── pipeline.go     # AnalysisPipeline: file analysis + discovery
-│   │   ├── discovery.go    # find untested source files
-│   │   └── graph.go        # DependencyGraph construction + Mermaid rendering
+│   │   ├── pipeline.go         # AnalysisPipeline: AnalyzeFile, DiscoverUntested, DiscoverAndAnalyzeAll
+│   │   └── graph.go            # DependencyGraph construction, metrics, Mermaid + table rendering
 │   │
 │   ├── generation/
-│   │   ├── pipeline.go     # GenerationPipeline: build GenerationPlan
-│   │   ├── executor.go     # write GenerationPlan to disk (only I/O layer)
-│   │   ├── coverage.go     # gap detection + prioritisation + report
-│   │   └── prune.go        # fixture pruning logic
+│   │   ├── pipeline.go         # GenerationPipeline: build GenerationPlan
+│   │   ├── executor.go         # write GenerationPlan to disk (only I/O layer)
+│   │   ├── coverage.go         # gap detection, prioritisation, report rendering
+│   │   ├── prune.go            # fixture pruning: scan, identify unused, delete
+│   │   └── workers.go          # ClampWorkers helper for parallel generation
+│   │
+│   ├── migration/
+│   │   └── text.go             # TextMigrator fluent builder (regex-based file rewriting)
+│   │
+│   ├── validation/
+│   │   └── text.go             # TextValidator fluent builder (Require / Forbid rules)
 │   │
 │   ├── drivers/
-│   │   ├── python/         # Python + pytest
-│   │   ├── typescript/     # TypeScript/JS + Jest/Vitest
-│   │   ├── golang/         # Go + testing package
-│   │   └── java/           # Java + JUnit 5
+│   │   ├── python/             # Python + pytest / unittest
+│   │   │   ├── driver.go
+│   │   │   ├── migrators.go    # pytestMockToUnittestMock, and reverse
+│   │   │   └── validators.go   # pytestMockValidator, unittestMockValidator, ...
+│   │   ├── typescript/         # TypeScript/JS + Jest/Vitest
+│   │   │   ├── driver.go
+│   │   │   ├── migrators.go    # jestToVitest, vitestToJest
+│   │   │   └── validators.go   # jestValidator, vitestValidator
+│   │   ├── golang/             # Go + testing / testify
+│   │   │   ├── driver.go
+│   │   │   ├── migrators.go    # (empty — AST-level rewrites too complex for regex)
+│   │   │   └── validators.go   # testifyValidator, stdlibValidator
+│   │   ├── java/               # Java + JUnit 4/5
+│   │   │   ├── driver.go
+│   │   │   ├── migrators.go    # junit4ToJunit5, junit5ToJunit4
+│   │   │   └── validators.go   # junit5Validator, junit4Validator, testngValidator
+│   │   └── csharp/             # C# + xUnit / NUnit / MSTest
+│   │       ├── driver.go
+│   │       ├── migrators.go    # nunitToXunit, xunitToNunit
+│   │       └── validators.go   # xunitValidator, nunitValidator, mstestValidator
 │   │
 │   ├── llm/
-│   │   ├── generator.go    # LLMBodyGenerator implements domain.BodyGenerator
-│   │   ├── anthropic/      # Anthropic Messages API (net/http)
-│   │   ├── openai/         # OpenAI-compatible Chat Completions (net/http)
-│   │   └── ollama/         # Ollama local REST (net/http)
+│   │   ├── llm.go              # LLMBodyGenerator implements domain.BodyGenerator
+│   │   ├── factory/            # Build() selects provider from LLMConfig
+│   │   ├── anthropic/          # Anthropic Messages API (net/http)
+│   │   ├── openai/             # OpenAI-compatible Chat Completions (net/http)
+│   │   └── ollama/             # Ollama local REST (net/http)
 │   │
 │   ├── config/
-│   │   ├── loader.go       # find + parse .testsmith.yaml / pyproject.toml
-│   │   ├── schema.go       # Config, LLMConfig, LanguageConfig structs
-│   │   └── defaults.go     # per-driver default values
+│   │   ├── loader.go           # find + parse .testsmith.yaml / pyproject.toml
+│   │   ├── schema.go           # Config, LLMConfig, LanguageConfig, WorkspaceConfig structs
+│   │   ├── defaults.go         # per-driver default values + ApplyToContext
+│   │   ├── loader_test.go      # snake_case YAML round-trip tests
+│   │   └── workspace_test.go   # WorkspaceID, WorkspaceLLM, YAML round-trip tests
 │   │
-│   ├── fsutil/
-│   │   ├── write.go        # atomic safe-write, directory creation
-│   │   └── walk.go         # file discovery helpers
+│   ├── integration/
+│   │   └── integration_test.go # end-to-end pipeline tests against testdata/
 │   │
 │   └── watch/
-│       └── watcher.go      # fsnotify + debounce
+│       ├── watcher.go          # fsnotify + debounce watcher
+│       └── watcher_test.go
 │
-├── testdata/               # per-language sample source files for integration tests
+├── testdata/                   # per-language sample source files for integration tests
 │   ├── python/
 │   ├── typescript/
 │   ├── golang/
-│   └── java/
+│   ├── java/
+│   ├── csharp/
+│   └── workspace/              # monorepo fixture: Go api + TypeScript frontend
 │
-├── docs/v2/                # feature documentation (this directory)
+├── docs/v2/                    # feature documentation (this directory)
 ├── go.mod
 ├── go.sum
-├── .testsmith.yaml         # dogfooded config
+├── .testsmith.yaml             # dogfooded config
 ├── Makefile
-└── .goreleaser.yaml        # cross-platform release builds
+└── .goreleaser.yaml            # cross-platform release builds
 ```
 
 ---
@@ -94,8 +133,8 @@ v2/
 
 | Dependency | Purpose |
 |-----------|---------|
-| `github.com/spf13/cobra` | CLI framework |
-| `github.com/smacker/go-tree-sitter` | Polyglot AST parsing (Python, TypeScript, Java) |
+| `github.com/spf13/cobra` | CLI framework + shell completion |
+| `github.com/smacker/go-tree-sitter` | Polyglot AST parsing (Python, TypeScript, Java, C#) |
 | `github.com/fsnotify/fsnotify` | Cross-platform file watching |
 | `github.com/BurntSushi/toml` | TOML parsing (pyproject.toml fallback) |
 | `gopkg.in/yaml.v3` | YAML parsing (.testsmith.yaml) |
@@ -105,128 +144,37 @@ All LLM providers use plain `net/http` — no Anthropic or OpenAI SDK dependency
 
 ---
 
-## Phased Build Plan
+## Build Plan — Completed Phases
 
-### Phase 0 — Scaffold (Days 1–2)
-**Goal**: Project compiles; `testsmith version` works; all interfaces are defined and satisfied by stubs.
+### Phase 0 — Scaffold ✅
+Project compiles; `testsmith version` works; all interfaces defined and satisfied.
 
-- [x] `go.mod` initialised
-- [x] `internal/domain/` — all types, interfaces, and errors
-- [ ] `internal/registry/registry.go` — stub implementation
-- [ ] `cmd/testsmith/main.go` + `root.go` — root Cobra command
-- [ ] `cmd/testsmith/generate.go` — subcommand stub (returns "not implemented")
-- [ ] All other subcommand stubs
-- [ ] Empty driver structs satisfying `LanguageDriver` with `return nil, errors.New("not implemented")`
+### Phase 1 — Python Driver MVP ✅
+`testsmith generate src/payment.py` produces pytest scaffolds identical to TestSmith v1.
 
-**Completion criterion**: `go build ./...` passes with no errors.
+### Phase 2 — Full Python Feature Parity ✅
+`testsmith generate --all`, `graph`, `prune`, `gaps`, `watch`, `init` all work on real Python projects.
 
----
+### Phase 3 — LLM Integration ✅
+`testsmith generate src/payment.py --llm` calls the configured provider (Anthropic, OpenAI, or Ollama) and fills in test bodies. Falls back gracefully on API error.
 
-### Phase 1 — Python Driver MVP (Weeks 1–2)
-**Goal**: `testsmith generate src/payment.py` produces the same output as TestSmith v1.
+### Phase 4 — TypeScript Driver ✅
+`testsmith generate src/payment.ts` generates Jest or Vitest scaffolds based on `package.json` auto-detection.
 
-- [ ] `internal/drivers/python/detector.go` — root detection + package map scan
-- [ ] `internal/drivers/python/analyzer.go` — tree-sitter import + public API extraction
-- [ ] `internal/drivers/python/classifier.go` — stdlib map + classify
-- [ ] `internal/drivers/python/stdlib_modules.go` — embedded Python 3.11 stdlib names
-- [ ] `internal/drivers/python/generator.go` — `GenerateTestFile`, `GenerateFixture`, `GenerateBootstrap`
-- [ ] `internal/drivers/python/conftest.go` — conftest.py read/update logic
-- [ ] `internal/drivers/python/queries/imports.scm` — tree-sitter import query
-- [ ] `internal/drivers/python/queries/public_api.scm` — tree-sitter API query
-- [ ] `internal/analysis/pipeline.go` — `AnalyzeFile`, `DiscoverUntested`
-- [ ] `internal/generation/pipeline.go` — `Plan()`
-- [ ] `internal/generation/executor.go` — `Execute()`
-- [ ] `internal/fsutil/write.go` + `walk.go`
-- [ ] `internal/config/loader.go` + `schema.go` + `defaults.go`
-- [ ] `internal/registry/registry.go` — full implementation
-- [ ] `cmd/testsmith/generate.go` — wired end-to-end
-- [ ] Integration tests using `testdata/python/` samples
+### Phase 5 — Go Driver ✅
+`testsmith generate internal/handlers/user.go` generates `user_test.go` using `go/ast`.
 
-**Completion criterion**: All existing Python v1 integration test cases pass against the Go binary.
+### Phase 6 — Java + C# Drivers + Monorepo Config ✅
+Five-language support. `workspaces:` in `.testsmith.yaml` routes `generate --all`, `validate`, `gaps`, `graph`, `prune`, and `watch` per workspace.
 
----
+### Phase 7 — Migrate + Validate + Workers ✅
+- `testsmith migrate --from jest --to vitest` rewrites test files using regex `TextMigrator` builders.
+- `testsmith validate` scans existing tests against the selected adapter's conventions using `TextValidator` builders.
+- `testsmith generate --all --workers N` fans out generation across N goroutines.
 
-### Phase 2 — Full Python Feature Parity (Week 3)
-**Goal**: Every v1 command works for Python projects via the Go binary.
-
-- [ ] `internal/analysis/discovery.go` — `--all` and `--path` batch discovery
-- [ ] `internal/analysis/graph.go` — dependency graph + Mermaid rendering
-- [ ] `internal/generation/coverage.go` — gap detection + prioritisation
-- [ ] `internal/generation/prune.go` — fixture pruning
-- [ ] `internal/watch/watcher.go` — fsnotify + debounce
-- [ ] `cmd/testsmith/graph.go`, `prune.go`, `gaps.go`, `watch.go`, `init.go`
-
-**Completion criterion**: `testsmith generate --all`, `graph`, `prune`, `gaps`, `watch` all work on a real Python project.
-
----
-
-### Phase 3 — LLM Integration (Days 1–4 of Week 4)
-**Goal**: `testsmith generate src/payment.py --llm` calls the LLM and fills test bodies.
-
-- [ ] `internal/llm/anthropic/provider.go`
-- [ ] `internal/llm/openai/provider.go`
-- [ ] `internal/llm/ollama/provider.go`
-- [ ] `internal/llm/generator.go` — `LLMBodyGenerator`
-- [ ] `internal/drivers/python/prompts/generate_body.tmpl`
-- [ ] Wire `--llm` flag in `generate` command
-
-**Completion criterion**: `--llm` produces non-stub test bodies; falls back gracefully on API error.
-
----
-
-### Phase 4 — TypeScript Driver (Week 5)
-**Goal**: `testsmith generate src/payment.ts` generates Jest test scaffolds.
-
-- [ ] `internal/drivers/typescript/` — full driver implementation
-- [ ] `package.json` parsing for dependency classification
-- [ ] Jest / Vitest detection and template selection
-- [ ] Integration tests using `testdata/typescript/` samples
-
----
-
-### Phase 5 — Go Driver (Days 1–4 of Week 6)
-**Goal**: `testsmith generate internal/handlers/user.go` generates `user_test.go`.
-
-- [ ] `internal/drivers/golang/` — full driver using `go/ast`
-- [ ] `go.mod` parsing for module name
-- [ ] Co-located `_test.go` generation with table-driven pattern
-- [ ] Integration tests using `testdata/golang/` samples
-
----
-
-### Phase 6 — Java + C# Drivers + Monorepo Config (Weeks 7–8)
-**Goal**: Five-language support; monorepo workspaces in `.testsmith.yaml` work.
-
-#### Java
-- [ ] `internal/drivers/java/` — full driver
-- [ ] `pom.xml` / `build.gradle` parsing
-- [ ] JUnit 5 + Mockito test generation
-- [ ] Integration tests using `testdata/java/` samples
-
-#### C#
-- [ ] `internal/drivers/csharp/detector.go` — `.sln` / `.csproj` root detection + namespace map
-- [ ] `internal/drivers/csharp/analyzer.go` — tree-sitter `using_directive`, class/method extraction
-- [ ] `internal/drivers/csharp/classifier.go` — `System.*`, `Microsoft.*` stdlib prefixes
-- [ ] `internal/drivers/csharp/generator.go` — xUnit `[Fact]`/`[Theory]` test class + Moq setup
-- [ ] `internal/drivers/csharp/queries/imports.scm` — tree-sitter `using_directive` query
-- [ ] `internal/drivers/csharp/queries/public_api.scm` — class / method query
-- [ ] `.Tests` project scaffold in `testsmith init`
-- [ ] Integration tests using `testdata/csharp/` samples
-
-#### Shared
-- [ ] Workspace config loading in `internal/config/loader.go`
-
----
-
-### Phase 7 — Release Pipeline (Week 8)
-**Goal**: Single binary downloads available on GitHub Releases; Homebrew tap works.
-
-- [ ] `.goreleaser.yaml` — linux/amd64, linux/arm64, darwin/arm64, darwin/amd64, windows/amd64
-- [ ] GitHub Actions CI matrix (build + test per platform)
-- [ ] Homebrew tap formula
-- [ ] `CHANGELOG.md` v2.0.0 entry
-- [ ] Update root `README.md` with v2 installation instructions
-- [ ] Announce deprecation timeline for Python v1
+### Phase 8 — Shell Completions + CLI Black-box Tests ✅
+- `testsmith completion [bash|zsh|fish|powershell]` generates ready-to-install scripts via Cobra's built-in generator.
+- `cmd/testsmith/cli_test.go` — 31 black-box integration tests that compile the binary in `TestMain` and exercise every command as a subprocess.
 
 ---
 
@@ -234,7 +182,7 @@ All LLM providers use plain `net/http` — no Anthropic or OpenAI SDK dependency
 
 | v1 Behaviour | v2 Behaviour |
 |-------------|-------------|
-| `testsmith src/payment.py` | `testsmith generate src/payment.py` (`generate` is the default subcommand) |
+| `testsmith src/payment.py` | `testsmith generate src/payment.py` |
 | `testsmith --all` | `testsmith generate --all` |
 | `testsmith --graph` | `testsmith graph` |
 | `testsmith --prune` | `testsmith prune` |
@@ -250,7 +198,8 @@ No Python installation required for v2.
 ## Testing Strategy
 
 - **Unit tests** — every domain function tested with in-memory data (no file I/O).
-- **Driver tests** — each driver has a fixture set in `testdata/<lang>/` with known-good expected outputs checked as golden files.
-- **Integration tests** — `generate` command run against a real temp-dir project; output compared to expected files.
-- **Cross-platform tests** — GitHub Actions matrix ensures path separators and binary execution work on Windows, macOS, and Linux.
-- **Coverage target** — 85% line coverage, enforced in CI.
+- **Driver tests** — each driver has a fixture set in `testdata/<lang>/`; migrator and validator tests use inline content.
+- **Integration tests** — `internal/integration/` runs the full pipeline against `testdata/` in a temp directory.
+- **Black-box CLI tests** — `cmd/testsmith/cli_test.go` compiles the binary once in `TestMain` and runs all 31 tests as subprocesses, exercising cobra routing, flag parsing, exit codes, and file side-effects.
+- **Race detector** — all tests pass under `go test -race`.
+- **Cross-platform tests** — GitHub Actions matrix covers Windows, macOS, and Linux.

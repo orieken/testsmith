@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>MyApp</RootNamespace>
+    <AssemblyName>MyApp</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Stripe.net" Version="43.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+</Project>

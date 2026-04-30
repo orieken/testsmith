@@ -10,15 +10,112 @@ A **language driver** is a self-contained implementation of the `domain.Language
 
 When no `--lang` flag is given, the `DriverRegistry` probes every registered driver's `DetectProject()` against the current working directory. The first driver that finds a root marker wins.
 
-| Language | Winning Marker | Test Framework |
-|----------|---------------|----------------|
+| Language | Winning Marker | Default Test Framework |
+|----------|---------------|----------------------|
 | Python | `pyproject.toml`, `setup.py`, `setup.cfg` | pytest |
-| TypeScript/JS | `package.json` | Jest / Vitest (auto-detected) |
+| TypeScript/JS | `package.json` | Jest / Vitest (auto-detected from devDependencies) |
 | Go | `go.mod` | `testing` (stdlib) |
 | Java | `pom.xml`, `build.gradle` | JUnit 5 |
 | C# | `*.sln`, `*.csproj` | xUnit (default), NUnit, MSTest |
 
-If multiple drivers match (e.g. a monorepo with both `package.json` and `go.mod`), the most specific marker wins, or the user specifies `--lang`.
+If multiple drivers match (e.g. a monorepo with both `package.json` and `go.mod`), configure explicit `workspaces:` in `.testsmith.yaml` or use `--lang`.
+
+---
+
+## `LanguageDriver` Interface
+
+```go
+// internal/domain/driver.go
+type LanguageDriver interface {
+    Language() string
+    FileExtensions() []string
+    DetectProject(dir string) (*ProjectContext, error)
+    AnalyzeFile(path string, ctx *ProjectContext) (*SourceAnalysis, error)
+    DeriveTestPath(srcPath string, ctx *ProjectContext) (string, error)
+    GenerateTestFile(a *SourceAnalysis, bodies map[string][]string) (string, error)
+    GenerateFixture(dep ImportInfo, ctx *ProjectContext) (string, error)
+    GenerateBootstrap(ctx *ProjectContext) (string, error)
+    BootstrapPath(ctx *ProjectContext) string
+    ListAdapters(ctx *ProjectContext) ([]TestAdapter, TestAdapter)
+    GetTestFrameworkConfig() TestFrameworkConfig
+    // Migration support
+    ListMigrators() []Migrator
+    // Validation support
+    ValidateFile(framework, mockLib, content string) []ValidationIssue
+}
+```
+
+### `ListMigrators`
+
+Returns the set of `Migrator` implementations the driver provides. Each migrator rewrites test file content from one framework convention to another using a fluent `TextMigrator` regex pipeline.
+
+```go
+// internal/domain/migrator.go
+type Migrator interface {
+    From() string                                     // e.g. "jest"
+    To() string                                       // e.g. "vitest"
+    MigrateFile(content string) (string, error)
+}
+```
+
+### `ValidateFile`
+
+Checks the content of a test file against the conventions of the given framework and mock library. Returns a slice of `ValidationIssue` values (empty = clean).
+
+```go
+// internal/domain/validator.go
+type ValidationIssue struct {
+    Rule     string
+    Severity Severity   // "error" | "warning" | "info"
+    Message  string
+}
+```
+
+---
+
+## Migrators by Language
+
+| Language | Available Pairs |
+|----------|----------------|
+| Python | `pytest-mock` → `unittest.mock`, and reverse |
+| TypeScript | `jest` → `vitest`, and reverse |
+| Go | None (AST-level rewrites are too complex for regex) |
+| Java | `junit4` → `junit5`, and reverse |
+| C# | `nunit` → `xunit`, and reverse |
+
+Migrators are built with the `migration.TextMigrator` fluent builder:
+
+```go
+// internal/migration/text.go
+type TextMigrator struct { ... }
+
+func (m *TextMigrator) Add(pattern, replacement string) *TextMigrator
+func (m *TextMigrator) InjectImport(importLine string) *TextMigrator
+func (m *TextMigrator) MigrateFile(content string) (string, error)
+```
+
+---
+
+## Validators by Language
+
+| Language | Rules enforced |
+|----------|---------------|
+| Python | pytest-mock API present/absent, `def test_` prefix, unittest.mock imports |
+| TypeScript | `vi.` vs `jest.` API, `@jest/globals` vs `vitest` imports |
+| Go | testify import required/forbidden based on selected adapter |
+| Java | JUnit 4 vs JUnit 5 import and annotation mismatches, TestNG detection |
+| C# | xUnit, NUnit, MSTest attribute and namespace consistency |
+
+Validators are built with the `validation.TextValidator` fluent builder:
+
+```go
+// internal/validation/text.go
+type TextValidator struct { ... }
+
+func (v *TextValidator) Require(id, pattern, message string, sev domain.Severity) *TextValidator
+func (v *TextValidator) Forbid(id, pattern, message string, sev domain.Severity) *TextValidator
+func (v *TextValidator) Validate(content string) []domain.ValidationIssue
+```
 
 ---
 
@@ -26,15 +123,12 @@ If multiple drivers match (e.g. a monorepo with both `package.json` and `go.mod`
 
 | Concern | Approach |
 |---------|----------|
-| Project root | Walk up for `pyproject.toml` → `setup.py` → `setup.cfg` → `.git` → `conftest.py` |
-| Package map | Scan for `__init__.py`; strip `src/` prefix for src-layout projects |
-| Import parsing | go-tree-sitter + Python grammar; `import_statement` + `import_from_statement` nodes |
-| Stdlib detection | Embedded Go map of Python 3.11 stdlib names (600+ modules) |
-| Public API | tree-sitter: `function_definition` at module scope, `class_definition` + methods |
+| Project root | Walk up for `pyproject.toml` → `setup.py` → `setup.cfg` → `.git` |
+| Import parsing | go-tree-sitter + Python grammar |
+| Public API | `function_definition` at module scope, `class_definition` + methods |
 | Test path | `{test_root}/{rel_source}/test_{stem}.py` |
-| Test framework | pytest — class-based `TestFoo`, method-based `test_*` |
+| Test framework | pytest — `TestFoo` classes, `test_*` methods |
 | Fixture strategy | `mocker.patch.dict("sys.modules", {...})` in `tests/fixtures/{dep}_fixture.py` |
-| Bootstrap file | `conftest.py` with `pytest_configure` hook and `paths_to_add` |
 
 ---
 
@@ -43,14 +137,11 @@ If multiple drivers match (e.g. a monorepo with both `package.json` and `go.mod`
 | Concern | Approach |
 |---------|----------|
 | Project root | `package.json` → `tsconfig.json` → `.git` |
-| Package map | Parse `package.json` `name` and `paths` in `tsconfig.json` for internal aliases |
-| Import parsing | go-tree-sitter + TypeScript grammar; `import_statement`, `export_statement` |
-| Stdlib detection | Embedded list of Node.js built-in module names (60+ entries) + `node:` prefix stripping |
+| Import parsing | go-tree-sitter + TypeScript grammar |
 | Public API | Exported `function_declaration`, `class_declaration`, `interface_declaration` |
-| Test path | Adjacent `.test.ts` file or `__tests__/{stem}.test.ts` (detected from project convention) |
+| Test path | `{stem}.test.ts` adjacent or in `__tests__/` |
 | Test framework | Jest (default) or Vitest (detected from `package.json` devDependencies) |
-| Fixture strategy | `jest.mock(...)` / `vi.mock(...)` calls in `__mocks__/` directory |
-| Bootstrap file | `jest.setup.ts` / `vitest.setup.ts` |
+| Fixture strategy | `jest.mock(...)` / `vi.mock(...)` in `__mocks__/` |
 
 ---
 
@@ -59,14 +150,11 @@ If multiple drivers match (e.g. a monorepo with both `package.json` and `go.mod`
 | Concern | Approach |
 |---------|----------|
 | Project root | `go.mod` → `.git` |
-| Package map | Parse `module` directive from `go.mod` as the internal prefix |
-| Import parsing | Native `go/ast` + `go/parser` — no tree-sitter needed |
-| Stdlib detection | Embedded list of Go 1.22 stdlib package paths (100+ entries) |
-| Public API | Exported `FuncDecl` (capital first letter) and `TypeSpec` with `StructType` / `InterfaceType` |
-| Test path | `{source_stem}_test.go` co-located in the same directory and package |
-| Test framework | `testing` package — `func TestXxx(t *testing.T)`, table-driven pattern |
-| Fixture strategy | Interface-based mocks; optionally generate `testify/mock` stubs |
-| Bootstrap file | None (Go test setup via `TestMain` if needed) |
+| Import parsing | Native `go/ast` + `go/parser` — no tree-sitter |
+| Public API | Exported `FuncDecl` and `TypeSpec` |
+| Test path | `{source_stem}_test.go` co-located, same package |
+| Test framework | `testing` package — table-driven `TestXxx(t *testing.T)` |
+| Fixture strategy | Interface mocks; optionally `testify/mock` stubs |
 
 ---
 
@@ -75,41 +163,43 @@ If multiple drivers match (e.g. a monorepo with both `package.json` and `go.mod`
 | Concern | Approach |
 |---------|----------|
 | Project root | `pom.xml` → `build.gradle` → `.git` |
-| Package map | Parse `groupId`/`artifactId` from `pom.xml`; infer from Gradle `settings.gradle` |
-| Import parsing | go-tree-sitter + Java grammar; `import_declaration` nodes |
-| Stdlib detection | Embedded map of `java.*`, `javax.*`, `jakarta.*`, `sun.*` prefixes |
-| Public API | `class_declaration`, `interface_declaration` with `public` modifier; `method_declaration` |
+| Import parsing | go-tree-sitter + Java grammar |
+| Public API | `public` `class_declaration`, `interface_declaration`, `method_declaration` |
 | Test path | `src/test/java/{package}/Test{SourceName}.java` |
 | Test framework | JUnit 5 — `@Test`, `@ExtendWith(MockitoExtension.class)` |
 | Fixture strategy | Mockito `@Mock` fields + `when(...).thenReturn(...)` |
-| Bootstrap file | None standard; JUnit base class generated if needed |
 
 ---
 
-## Go Implementation: DriverRegistry
+## C# Driver (`internal/drivers/csharp/`)
+
+| Concern | Approach |
+|---------|----------|
+| Project root | Walk up for `*.sln` → `*.csproj` → `.git` |
+| Import parsing | go-tree-sitter + C# grammar; `using_directive` nodes |
+| Public API | `public` `class_declaration`, `interface_declaration`, `method_declaration` |
+| Test path | `{ProjectName}.Tests/{rel_source}/{Name}Tests.cs` |
+| Test framework | xUnit (default); NUnit or MSTest if detected in `.csproj` |
+| Fixture strategy | Moq constructor injection — `Mock<IFoo>` per test class |
+
+---
+
+## DriverRegistry
 
 ```go
 // internal/registry/registry.go
-type DriverRegistry struct {
-    drivers []domain.LanguageDriver
-}
+type Registry struct { ... }
 
-func (r *DriverRegistry) Register(d domain.LanguageDriver)
-
-// Detect returns the first driver whose DetectProject succeeds, or ErrNoDriverForFile.
-func (r *DriverRegistry) Detect(dir string) (domain.LanguageDriver, *domain.ProjectContext, error)
-
-// ForLanguage returns the driver registered for the given language name.
-func (r *DriverRegistry) ForLanguage(lang string) (domain.LanguageDriver, error)
-
-// ForFile returns the driver that claims a given file extension.
-func (r *DriverRegistry) ForFile(path string) (domain.LanguageDriver, error)
+func New() *Registry
+func (r *Registry) Register(d domain.LanguageDriver)
+func (r *Registry) Detect(dir string) (domain.LanguageDriver, *domain.ProjectContext, error)
+func (r *Registry) ForLanguage(lang string) (domain.LanguageDriver, error)
 ```
 
-Drivers are registered in `cmd/testsmith/main.go` composition root:
+Drivers are registered in `cmd/testsmith/main.go`:
 
 ```go
-reg := registry.New()
+reg = registry.New()
 reg.Register(python.New())
 reg.Register(typescript.New())
 reg.Register(golang.New())
@@ -119,87 +209,13 @@ reg.Register(csharp.New())
 
 ---
 
-## C# Driver (`internal/drivers/csharp/`)
-
-| Concern | Approach |
-|---------|----------|
-| Project root | Walk up for `*.sln` → `*.csproj` → `.git` |
-| Package map | Parse `<RootNamespace>` and `<AssemblyName>` from `.csproj`; infer namespace from directory structure |
-| Import parsing | go-tree-sitter + C# grammar; `using_directive` nodes |
-| Stdlib detection | Embedded prefix set: `System`, `Microsoft`, `Windows`, `mscorlib` |
-| Public API | `class_declaration`, `interface_declaration`, `method_declaration` with `public` modifier |
-| Test path | Separate `*.Tests` project convention: `{ProjectName}.Tests/{rel_source}/{Name}Tests.cs` |
-| Test framework | xUnit (default); NUnit or MSTest if detected in `.csproj` `<PackageReference>` |
-| Fixture strategy | Moq constructor injection — `Mock<IFoo>` declared per test class; no shared fixture files |
-| Bootstrap file | None — xUnit test discovery is assembly-based; no setup file required |
-| Test naming | `{Name}Tests.cs`, `[Fact]` single tests, `[Theory]` + `[InlineData]` for parameterised |
-| Mock strategy | `new Mock<IDependency>()`, `.Setup(x => x.Method()).Returns(value)`, `.Object` for SUT construction |
-
-### C# Test Structure (xUnit example)
-
-```csharp
-public class PaymentProcessorTests
-{
-    private readonly Mock<IStripeClient> _mockStripe;
-    private readonly PaymentProcessor _sut;
-
-    public PaymentProcessorTests()
-    {
-        _mockStripe = new Mock<IStripeClient>();
-        _sut = new PaymentProcessor(_mockStripe.Object);
-    }
-
-    [Fact]
-    public async Task Charge_WithValidToken_ReturnsSucceeded()
-    {
-        // Arrange
-        _mockStripe.Setup(x => x.CreateChargeAsync(It.IsAny<ChargeRequest>()))
-                   .ReturnsAsync(new ChargeResult { Status = "succeeded" });
-        // Act
-        var result = await _sut.ChargeAsync(amount: 1000, currency: "usd", token: "tok_test");
-        // Assert
-        Assert.Equal("succeeded", result.Status);
-    }
-
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public async Task Charge_WithInvalidAmount_ThrowsArgumentException(int amount)
-    {
-        // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            _sut.ChargeAsync(amount, "usd", "tok_test"));
-    }
-}
-```
-
-### Project Layout Convention
-
-C# projects typically separate source and test into sibling projects:
-
-```
-MyApp/
-├── MyApp.sln
-├── MyApp/                        ← source project
-│   ├── MyApp.csproj
-│   └── Services/
-│       └── PaymentProcessor.cs
-└── MyApp.Tests/                  ← test project (generated by testsmith init)
-    ├── MyApp.Tests.csproj        ← references MyApp + xUnit + Moq
-    └── Services/
-        └── PaymentProcessorTests.cs
-```
-
-`testsmith init` creates the `*.Tests` project and wires the `<ProjectReference>` in the test `.csproj`.
-
----
-
 ## Adding a New Language Driver
 
 1. Create `internal/drivers/<lang>/driver.go` implementing `domain.LanguageDriver`.
-2. Add tree-sitter grammar queries under `internal/drivers/<lang>/queries/*.scm`.
-3. Add prompt template under `internal/drivers/<lang>/prompts/generate_body.tmpl`.
-4. Register the driver in `cmd/testsmith/main.go`.
-5. Add testdata samples under `testdata/<lang>/`.
+2. Implement `ListMigrators()` — return `nil` if no regex-level migrations make sense.
+3. Implement `ValidateFile()` — use `validation.TextValidator` builders for each framework variant.
+4. Add tree-sitter grammar queries under `internal/drivers/<lang>/queries/*.scm` (if applicable).
+5. Register the driver in `cmd/testsmith/main.go`.
+6. Add source fixtures under `testdata/<lang>/` for integration tests.
 
 No other files need to change.

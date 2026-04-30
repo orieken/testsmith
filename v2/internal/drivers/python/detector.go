@@ -3,6 +3,7 @@ package python
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/orieken/testsmith/internal/domain"
 )
@@ -20,12 +21,14 @@ func detectProject(startDir string) (*domain.ProjectContext, error) {
 		return nil, err
 	}
 
+	framework, mockLib := detectPythonFramework(root)
+
 	ctx := &domain.ProjectContext{
 		Root:        root,
 		Language:    "python",
 		PackageMap:  pkgMap,
 		ExcludeDirs: []string{"__pycache__", ".venv", "venv", "build", "dist", ".eggs", ".tox"},
-		Metadata:    map[string]any{},
+		Metadata:    map[string]any{"framework": framework, "mock_library": mockLib},
 	}
 
 	// Record conftest.py path if it exists.
@@ -35,6 +38,52 @@ func detectProject(startDir string) (*domain.ProjectContext, error) {
 	}
 
 	return ctx, nil
+}
+
+// detectPythonFramework scans pyproject.toml and requirements files for known
+// test dependencies and returns the best-matching framework+mock_library pair.
+func detectPythonFramework(root string) (framework, mockLib string) {
+	framework, mockLib = "pytest", "pytest-mock"
+
+	deps := collectPythonDeps(root)
+	hasPytest := deps["pytest"]
+	hasPytestMock := deps["pytest-mock"]
+	hasUnittest := deps["unittest"] || deps["unittest2"]
+
+	switch {
+	case hasUnittest && !hasPytest:
+		return "unittest", "unittest.mock"
+	case hasPytest && !hasPytestMock:
+		return "pytest", "unittest.mock"
+	}
+	return framework, mockLib
+}
+
+// collectPythonDeps returns a set of normalized package names found in
+// pyproject.toml, requirements*.txt, or setup.cfg.
+func collectPythonDeps(root string) map[string]bool {
+	deps := make(map[string]bool)
+
+	candidates := []string{
+		"pyproject.toml",
+		"requirements.txt",
+		"requirements-dev.txt",
+		"requirements-test.txt",
+		"setup.cfg",
+	}
+	for _, name := range candidates {
+		data, err := os.ReadFile(filepath.Join(root, name))
+		if err != nil {
+			continue
+		}
+		content := strings.ToLower(string(data))
+		for _, pkg := range []string{"pytest", "pytest-mock", "unittest", "unittest2"} {
+			if strings.Contains(content, pkg) {
+				deps[pkg] = true
+			}
+		}
+	}
+	return deps
 }
 
 func findRoot(startDir string) (string, error) {
