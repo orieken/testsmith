@@ -65,3 +65,8 @@ Thumbs.db
 # Project specific
 testsmith_coverage_report.md
 testsmith_graph.md
+
+# Go build artifacts
+/dist/
+/debug_tmp/
+/testsmith

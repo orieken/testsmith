@@ -7,54 +7,52 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.10', '3.11', '3.12']
-    runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-go@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          go-version-file: go.mod
+          cache: true
 
-      - name: Install Poetry
-        run: pipx install poetry
-        
-      - name: Configure Poetry
-        run: |
-          poetry config virtualenvs.create true
-          poetry config virtualenvs.in-project true
+      # CGo (required by go-tree-sitter) needs a C compiler on every platform.
+      - name: Install GCC (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y gcc
 
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v4
+      - name: Build
+        run: go build ./...
+        env:
+          CGO_ENABLED: "1"
+
+      - name: Test
+        run: go test -race ./... -timeout 120s
+        env:
+          CGO_ENABLED: "1"
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
         with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+          go-version-file: go.mod
+          cache: true
 
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --with dev --no-interaction
-
-      - name: Lint (ruff)
-        run: poetry run ruff check src/ tests/
-
-      - name: Lint (black)
-        run: poetry run black --check src/ tests/
-
-      - name: Test with coverage
-        run: poetry run pytest tests/ --cov=src/testsmith --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=85 -v
-
-      - name: Upload coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-        uses: actions/upload-artifact@v4
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
         with:
-          name: coverage-report
-          path: coverage.xml
+          version: latest

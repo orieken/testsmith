@@ -1,65 +1,90 @@
-# CHANGELOG
+# Changelog
 
-<!-- version list -->
+All notable changes to TestSmith v2 are documented here.
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## v1.1.7 (2026-02-12)
+---
 
-### Bug Fixes
+## [Unreleased]
 
-- **ci**: Add GH_TOKEN to semantic-release job
-  ([`d59bca5`](https://github.com/orieken/testsmith/commit/d59bca5cce1b8f85fda6b7432acc2c59e03437d2))
+---
 
+## [2.0.0] — 2026-04-30
 
-## v1.1.6 (2026-02-12)
+### Added
 
-### Bug Fixes
+#### Language drivers
+- **Python** driver — pytest + pytest-mock / unittest.mock; class-based and function-based test generation; `conftest.py` bootstrap
+- **TypeScript** driver — Jest, Vitest, Mocha+Sinon; auto-detected from `package.json` devDependencies; `.test.ts` scaffold generation
+- **Go** driver — `go/ast`-based analysis; co-located `_test.go` generation; table-driven test pattern; testify and gomock adapter variants
+- **Java** driver — JUnit 5, JUnit 4, TestNG, Spring Boot; Mockito `@Mock` scaffolds; Maven/Gradle project detection
+- **C#** driver — xUnit, NUnit, MSTest; Moq and NSubstitute variants; `.csproj`-based root detection
 
-- Address code review feedback on workflow conditions
-  ([`f7318f8`](https://github.com/orieken/testsmith/commit/f7318f8c8bf2a33bc3bf855f4605dc93c96e4dd1))
+#### CLI commands
+- `generate` — scaffold tests for a single file, a directory (`--path`), or the whole project (`--all`)
+- `generate --workers N` — parallel fan-out generation across N goroutines
+- `generate --workspace <name>` — process a single workspace in a monorepo
+- `validate` — scan existing test files for framework convention mismatches; exits non-zero on errors (CI-safe)
+- `migrate --from X --to Y` — regex-based bulk rewrite between framework pairs (jest↔vitest, junit4↔junit5, pytest-mock↔unittest-mock, nunit↔xunit)
+- `gaps` — prioritised Markdown coverage gap report with coupling-score ranking
+- `graph` — Mermaid dependency graph + coupling-score table
+- `prune` — identify and optionally delete unused fixture files; comments out stale imports in test files
+- `watch` — debounced `fsnotify` watcher; regenerates on source file save; per-workspace goroutines in monorepo mode
+- `init` — scaffold `.testsmith.yaml` and test directories for the detected language
+- `adapters list` — list all adapters for the current or specified language with selection reason
+- `config show` — print the fully-resolved configuration (defaults merged with `.testsmith.yaml`)
+- `completion [bash|zsh|fish|powershell]` — generate shell completion scripts via Cobra's built-in generator
+- `version` — print the binary version
 
-- Move semantic-release to release workflow to fix trigger issue
-  ([`a10d070`](https://github.com/orieken/testsmith/commit/a10d070bfb3c503bef2ad9fe29cb8dcfe13e912d))
+#### Monorepo workspace support
+- `workspaces:` in `.testsmith.yaml` — named workspace entries with per-workspace `language` and `llm` overrides
+- `--workspace <name>` flag on `generate`, `validate`, `gaps`, `graph`, `prune`, and `watch`
+- `WorkspaceID()` / `WorkspaceLLM()` helpers in `internal/config`
 
-### Documentation
+#### LLM body generation
+- Anthropic (Claude), OpenAI-compatible, and Ollama providers via plain `net/http`
+- `--llm` flag on `generate` and `watch`
+- Per-workspace LLM config overrides
 
-- Add comments explaining workflow behavior
-  ([`56bb36d`](https://github.com/orieken/testsmith/commit/56bb36d764030477e53d1e45f2d51a507e2a3ad1))
+#### Migration system
+- `migration.TextMigrator` — fluent regex pipeline builder (`Add`, `InjectImport`)
+- `LanguageDriver.ListMigrators()` — each driver exposes its available migration pairs
 
+#### Validation system
+- `validation.TextValidator` — fluent `Require` / `Forbid` rule builder
+- `domain.ValidationIssue` with `error` / `warning` / `info` severity
+- `LanguageDriver.ValidateFile()` — per-framework validators for all five languages
 
-## v1.1.5 (2026-02-12)
+#### Configuration
+- `.testsmith.yaml` with full `yaml:"snake_case"` struct tags — files written by `init` are immediately loadable by `Load()`
+- Per-language `framework` and `mock_library` overrides
+- `exclude_dirs`, `test_root`, `fixture_dir` at root and per-language level
+- `pyproject.toml [tool.testsmith]` fallback for Python v1 compatibility
 
-### Bug Fixes
+#### Testing
+- 31 black-box CLI integration tests in `cmd/testsmith/cli_test.go` (`package main_test`) — compile binary once in `TestMain`, exercise every command as a subprocess
+- Race detector (`-race`) enforced in CI on all three platforms
+- Unit tests for all internal packages
+- End-to-end pipeline tests in `internal/integration/`
 
-- **ci**: Add build-dists job for pypi release
-  ([`f6dda40`](https://github.com/orieken/testsmith/commit/f6dda40a9bc61028a7c12a2c2cba917dd80bada1))
+#### CI / Release
+- GitHub Actions CI matrix: Ubuntu, macOS, Windows — build + `go test -race`
+- Release workflow: native CGo builds for linux/amd64, darwin/amd64, darwin/arm64, windows/amd64; SHA-256 checksums; GitHub Release auto-notes
 
+### Changed
+- Rewritten from Python (v1) to Go — single static binary, no runtime dependencies
+- `testsmith <file>` (v1 default) → `testsmith generate <file>` (explicit subcommand)
+- `testsmith --all` → `testsmith generate --all`
+- `testsmith --graph` → `testsmith graph`
+- `testsmith --prune` → `testsmith prune`
+- `testsmith --coverage-gaps` → `testsmith gaps`
+- `testsmith --watch` → `testsmith watch`
 
-## v1.1.1 (2026-02-11)
+### Migration from v1
 
-### Bug Fixes
+See the [v1 → v2 migration table](docs/v2/00-implementation-plan.md#migration-from-v1-python) for the full flag mapping. The v1 Python package (`pip install testsmith`) continues to receive bug fixes during the transition period.
 
-- Remove legacy semantic-release config to trigger release
-  ([`f8a62f2`](https://github.com/orieken/testsmith/commit/f8a62f243d78a76e778bd90c2ecbe09afc9d5816))
+---
 
-
-## v1.1.0 (2026-02-11)
-
-### Bug Fixes
-
-- Add contents:read permission to pypi job
-  ([`08e5c8a`](https://github.com/orieken/testsmith/commit/08e5c8ac1a507befba0fe62831dda1e8002e0756))
-
-### Documentation
-
-- Add comment clarifying dist directory usage
-  ([`ae1363e`](https://github.com/orieken/testsmith/commit/ae1363e360b0b05c04f69cdd6e1aeb1989fc1540))
-
-### Features
-
-- Migrate PyPI publishing to Trusted Publisher (OIDC)
-  ([`98e22c8`](https://github.com/orieken/testsmith/commit/98e22c844063dc58c69cba7148ecf451aecb7d8f))
-
-
-## v1.0.0 (2026-02-10)
-
-- Initial Release
+[Unreleased]: https://github.com/orieken/testsmith/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/orieken/testsmith/releases/tag/v2.0.0
