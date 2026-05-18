@@ -173,10 +173,13 @@ func deriveTestPath(sourcePath string, ctx *domain.ProjectContext) (string, erro
 		return "", err
 	}
 
-	// Strip src/ prefix if present.
-	if len(rel) > 4 && rel[:4] == "src/" {
-		rel = rel[4:]
+	// Normalise to forward slashes for the prefix check so this works on
+	// Windows (where filepath.Rel returns backslash-separated paths).
+	slashed := filepath.ToSlash(rel)
+	if strings.HasPrefix(slashed, "src/") {
+		slashed = slashed[4:]
 	}
+	rel = filepath.FromSlash(slashed)
 
 	dir := filepath.Dir(rel)
 	base := filepath.Base(rel)
@@ -192,10 +195,12 @@ func deriveModulePath(sourcePath string, ctx *domain.ProjectContext) (string, er
 		return "", err
 	}
 
-	// Strip src/ prefix.
-	if len(rel) > 4 && rel[:4] == "src/" {
-		rel = rel[4:]
+	// Normalise to forward slashes for the prefix check (Windows compatibility).
+	slashed := filepath.ToSlash(rel)
+	if strings.HasPrefix(slashed, "src/") {
+		slashed = slashed[4:]
 	}
+	rel = filepath.FromSlash(slashed)
 
 	// Remove .py suffix and replace separators with dots.
 	module := rel[:len(rel)-len(filepath.Ext(rel))]
