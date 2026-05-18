@@ -14,12 +14,10 @@ func New() *Driver { return &Driver{} }
 func (d *Driver) Language() string            { return "go" }
 func (d *Driver) FileExtensions() []string    { return []string{".go"} }
 func (d *Driver) BodyGenerationPrompt() string { return goBodyPrompt }
-func (d *Driver) LLMContext() map[string]string {
-	return map[string]string{
-		"assert_keyword": "t.Errorf / testify/assert",
-		"framework":      "testing",
-		"test_prefix":    "Test",
-	}
+func (d *Driver) LLMContext(ctx *domain.ProjectContext) map[string]string {
+	vocab := registry.SelectFromContext(ctx).LLMVocabulary()
+	vocab["language"] = "go"
+	return vocab
 }
 
 func (d *Driver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
@@ -65,15 +63,28 @@ func (d *Driver) GenerateBootstrap(_ *domain.GenerationPlan, _ *domain.ProjectCo
 }
 
 const goBodyPrompt = `You are an expert Go testing assistant.
-Write table-driven tests for the function named ` + "`{{.MemberName}}`" + ` using the standard ` + "`testing`" + ` package.
+Write a comprehensive Go test body for the {{.MemberKind}} ` + "`{{.MemberName}}`" + ` in package ` + "`{{.ModulePath}}`" + `.
 
 Source:
 ` + "```go\n{{.SourceCode}}\n```" + `
+{{- if .DepsSignatures}}
+
+Internal dependency signatures:
+{{.DepsSignatures}}
+{{- end}}
+{{- if .ExistingTestSnippet}}
+
+Follow the style of existing tests in this package:
+` + "```go\n{{.ExistingTestSnippet}}\n```" + `
+{{- end}}
+
+Mock style: {{index .Extra "mock_style"}}
+Assert style: {{index .Extra "assert_style"}}
+Test function prefix: {{index .Extra "test_prefix"}}
 
 Requirements:
-- Use table-driven tests with a slice of structs.
+- Use table-driven tests where appropriate.
 - Cover the happy path and at least one error/edge case.
-- Use t.Errorf for assertions (no external dependencies).
 - Output ONLY valid Go code in a single markdown code block.`
 
 func (d *Driver) ListAdapters(ctx *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {

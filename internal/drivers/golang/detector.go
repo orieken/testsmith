@@ -45,11 +45,27 @@ func detectGoMockLib(gomodPath string) string {
 	}
 }
 
+var goStopMarkers = []string{".git", ".hg", ".svn"}
+
 // findModuleRoot walks up from startDir looking for go.mod and returns
-// (root, moduleName, error).
+// (root, moduleName, error). Stop markers (.git etc.) are checked before
+// go.mod at every level above startDir — this prevents claiming an ancestor
+// module as the project root when the binary is invoked inside a sub-project
+// nested inside a larger VCS repository. At startDir itself, go.mod is
+// checked first so a root module that also hosts .git is detected correctly.
 func findModuleRoot(startDir string) (string, string, error) {
 	dir := startDir
 	for {
+		// At ancestor directories, stop at VCS boundaries before looking for
+		// go.mod so we don't accidentally adopt a parent project's module.
+		if dir != startDir {
+			for _, stop := range goStopMarkers {
+				if _, err := os.Stat(filepath.Join(dir, stop)); err == nil {
+					return "", "", domain.ErrProjectNotFound
+				}
+			}
+		}
+
 		modFile := filepath.Join(dir, "go.mod")
 		if data, err := os.ReadFile(modFile); err == nil {
 			mod := parseModuleName(data)
@@ -57,6 +73,7 @@ func findModuleRoot(startDir string) (string, string, error) {
 				return dir, mod, nil
 			}
 		}
+
 		parent := filepath.Dir(dir)
 		if parent == dir {
 			break

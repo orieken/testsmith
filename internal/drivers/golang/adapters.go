@@ -334,3 +334,35 @@ func Test{{ title $className }}_{{ title .Name }}(t *testing.T) {
 {{ end -}}
 {{ end -}}
 {{ end }}`))
+
+// ── LLMVocabulary ─────────────────────────────────────────────────────────────
+
+func (a *stdlibAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":    "testing",
+		"mock_library": "interfaces",
+		"assert_style": `t.Errorf("got %v, want %v", got, want)`,
+		"mock_style":   "define a local fake struct implementing the interface",
+		"test_prefix":  "Test",
+	}
+}
+
+func (a *testifyAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":    "testing",
+		"mock_library": "testify",
+		"assert_style": "assert.Equal(t, expected, actual)",
+		"mock_style":   "embed mock.Mock, define On/Return expectations",
+		"test_prefix":  "Test",
+	}
+}
+
+func (a *gomockAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":    "testing",
+		"mock_library": "gomock",
+		"assert_style": `t.Errorf("got %v, want %v", got, want)`,
+		"mock_style":   "ctrl := gomock.NewController(t); mock := NewMockX(ctrl)",
+		"test_prefix":  "Test",
+	}
+}

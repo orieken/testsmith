@@ -6,6 +6,7 @@ package factory
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/orieken/testsmith/internal/config"
 	"github.com/orieken/testsmith/internal/domain"
@@ -27,10 +28,21 @@ func Build(cfg config.LLMConfig, driver domain.LanguageDriver) (domain.BodyGener
 		return nil, fmt.Errorf("LLM provider %q requires env var %s to be set", cfg.Provider, cfg.APIKeyEnvVar)
 	}
 
-	provider, err := buildProvider(cfg, apiKey)
+	rawProvider, err := buildProvider(cfg, apiKey)
 	if err != nil {
 		return nil, err
 	}
+
+	// Layer middleware: semaphore caps concurrency, retry handles transient errors.
+	// Order: retry wraps semaphore wraps raw provider — so each retry attempt
+	// waits for a semaphore slot independently, preventing slot starvation.
+	limited  := llm.WithSemaphore(rawProvider, cfg.MaxConcurrentCalls)
+	provider := llm.WithRetry(limited, llm.RetryStrategy{
+		MaxAttempts: cfg.MaxRetryAttempts,
+		BaseDelay:   500 * time.Millisecond,
+		MaxDelay:    30 * time.Second,
+		Multiplier:  2.0,
+	})
 
 	prompts := map[string]string{
 		driver.Language(): driver.BodyGenerationPrompt(),

@@ -9,7 +9,8 @@ import (
 	"github.com/orieken/testsmith/internal/domain"
 )
 
-var rootMarkers = []string{"pom.xml", "build.gradle", "build.gradle.kts", ".git"}
+var rootMarkers = []string{"pom.xml", "build.gradle", "build.gradle.kts"}
+var stopMarkers = []string{".git", ".hg", ".svn"}
 
 func detectProject(startDir string) (*domain.ProjectContext, error) {
 	root, err := findRoot(startDir)
@@ -57,6 +58,13 @@ func detectJavaFramework(root string) string {
 func findRoot(startDir string) (string, error) {
 	dir := startDir
 	for {
+		if dir != startDir {
+			for _, stop := range stopMarkers {
+				if _, err := os.Stat(filepath.Join(dir, stop)); err == nil {
+					return "", domain.ErrProjectNotFound
+				}
+			}
+		}
 		for _, marker := range rootMarkers {
 			if _, err := os.Stat(filepath.Join(dir, marker)); err == nil {
 				return dir, nil

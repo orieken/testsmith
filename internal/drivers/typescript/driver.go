@@ -14,12 +14,10 @@ func New() *Driver { return &Driver{} }
 func (d *Driver) Language() string         { return "typescript" }
 func (d *Driver) FileExtensions() []string { return []string{".ts", ".tsx", ".js", ".jsx"} }
 func (d *Driver) BodyGenerationPrompt() string { return typescriptBodyPrompt }
-func (d *Driver) LLMContext() map[string]string {
-	return map[string]string{
-		"assert_keyword": "expect(...).toBe / toEqual",
-		"framework":      "Jest / Vitest",
-		"mock_library":   "jest.mock / vi.mock",
-	}
+func (d *Driver) LLMContext(ctx *domain.ProjectContext) map[string]string {
+	vocab := registry.SelectFromContext(ctx).LLMVocabulary()
+	vocab["language"] = "typescript"
+	return vocab
 }
 
 func (d *Driver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
@@ -65,12 +63,29 @@ func (d *Driver) GenerateBootstrap(_ *domain.GenerationPlan, _ *domain.ProjectCo
 }
 
 const typescriptBodyPrompt = `You are an expert TypeScript testing assistant.
-Write Jest test bodies for the {{.MemberKind}} named ` + "`{{.MemberName}}`" + `.
+Write a comprehensive {{index .Extra "framework"}} test body for the {{.MemberKind}} ` + "`{{.MemberName}}`" + ` in module ` + "`{{.ModulePath}}`" + `.
 
 Source:
 ` + "```typescript\n{{.SourceCode}}\n```" + `
+{{- if .DepsSignatures}}
 
-Output ONLY valid TypeScript code in a single markdown code block.`
+Internal dependency signatures:
+{{.DepsSignatures}}
+{{- end}}
+{{- if .ExistingTestSnippet}}
+
+Follow the style of existing tests in this module:
+` + "```typescript\n{{.ExistingTestSnippet}}\n```" + `
+{{- end}}
+
+Import style: {{index .Extra "import_style"}}
+Mock style: {{index .Extra "mock_style"}}
+Assert style: {{index .Extra "assert_style"}}
+
+Requirements:
+- Include a happy-path test and at least one edge-case.
+- Use the import and mock styles shown above.
+- Output ONLY valid TypeScript code in a single markdown code block.`
 
 func (d *Driver) ListAdapters(ctx *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {
 	return registry.All(), selectAdapter(ctx)

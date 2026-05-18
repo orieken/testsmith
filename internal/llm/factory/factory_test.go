@@ -75,7 +75,7 @@ func (s *stubDriver) Language() string                    { return "python" }
 func (s *stubDriver) BodyGenerationPrompt() string        { return "generate tests for {{.MemberName}}" }
 func (s *stubDriver) FileExtensions() []string            { return []string{".py"} }
 func (s *stubDriver) GetTestFrameworkConfig() domain.TestFrameworkConfig { return domain.TestFrameworkConfig{} }
-func (s *stubDriver) LLMContext() map[string]string       { return nil }
+func (s *stubDriver) LLMContext(_ *domain.ProjectContext) map[string]string       { return nil }
 func (s *stubDriver) DetectProject(dir string) (*domain.ProjectContext, error) { return nil, nil }
 func (s *stubDriver) AnalyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysis, error) {
 	return nil, nil

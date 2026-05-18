@@ -315,3 +315,35 @@ describe('{{ .Name }}', () => {
 
 {{ end -}}
 {{ end }}`))
+
+// ── LLMVocabulary ─────────────────────────────────────────────────────────────
+
+func (a *jestAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":    "jest",
+		"mock_library": "jest",
+		"assert_style": "expect(value).toBe(expected)",
+		"mock_style":   "jest.fn() / jest.mock('module')",
+		"import_style": "import { describe, it, expect } from '@jest/globals'",
+	}
+}
+
+func (a *vitestAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":    "vitest",
+		"mock_library": "vitest",
+		"assert_style": "expect(value).toBe(expected)",
+		"mock_style":   "vi.fn() / vi.mock('module')",
+		"import_style": "import { describe, it, expect, vi } from 'vitest'",
+	}
+}
+
+func (a *mochaSinonAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":    "mocha",
+		"mock_library": "sinon",
+		"assert_style": "expect(value).to.equal(expected)",
+		"mock_style":   "sinon.stub(obj, 'method') / sinon.spy()",
+		"import_style": "import { expect } from 'chai'; import sinon from 'sinon'",
+	}
+}

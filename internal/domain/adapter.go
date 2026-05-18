@@ -36,6 +36,10 @@ type TestAdapter interface {
 	// GenerateTestFile produces the full content of a test scaffold file.
 	// Implementations must NOT perform any I/O.
 	GenerateTestFile(analysis *SourceAnalysis, opts GenerateOpts) (string, error)
+
+	// LLMVocabulary returns adapter-specific key-value pairs injected into LLM
+	// prompt context: framework name, assert style, mock style, import style.
+	LLMVocabulary() map[string]string
 }
 
 // AdapterRegistry maps (framework, mockLibrary) → TestAdapter.

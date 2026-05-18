@@ -18,6 +18,9 @@ func Default() *Config {
 			MaxTokensPerFunction: 1500,
 			Temperature:          0.0,
 			APIKeyEnvVar:         "ANTHROPIC_API_KEY",
+			PromptTokenBudget:    6000, // conservative ceiling; fits most model context windows
+			MaxConcurrentCalls:   5,    // safe default; raise for high-throughput runs
+			MaxRetryAttempts:     3,    // first attempt + 2 retries with exponential backoff
 		},
 		Languages: map[string]LanguageConfig{
 			"python": {

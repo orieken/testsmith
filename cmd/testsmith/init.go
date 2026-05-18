@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/orieken/testsmith/internal/config"
+	"github.com/orieken/testsmith/internal/projectknowledge"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -103,6 +105,24 @@ func runInit(langHint string) error {
 		return fmt.Errorf("write .testsmith.yaml: %w", err)
 	}
 	fmt.Println("  ✓ created  .testsmith.yaml")
-	fmt.Printf("\nInitialised %s project. Run 'testsmith generate --all' to start.\n", detectedLang)
+
+	// Scaffold TESTSMITH.md — the project knowledge file the LLM reads for every
+	// file it generates tests for. Skip if it already exists.
+	knowledgePath := filepath.Join(cwd, "TESTSMITH.md")
+	if _, err := os.Stat(knowledgePath); errors.Is(err, os.ErrNotExist) {
+		if !dryRun {
+			tmpl := projectknowledge.Template(detectedLang)
+			if err := os.WriteFile(knowledgePath, []byte(tmpl), 0o644); err != nil {
+				return fmt.Errorf("write TESTSMITH.md: %w", err)
+			}
+			fmt.Println("  ✓ created  TESTSMITH.md")
+		} else {
+			fmt.Printf("\n-- TESTSMITH.md (dry-run) --\n%s\n", projectknowledge.Template(detectedLang))
+		}
+	} else {
+		fmt.Println("TESTSMITH.md already exists — skipping.")
+	}
+
+	fmt.Printf("\nInitialised %s project. Edit TESTSMITH.md with your conventions, then run 'testsmith generate --all'.\n", detectedLang)
 	return nil
 }

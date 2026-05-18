@@ -15,12 +15,10 @@ func New() *Driver { return &Driver{} }
 func (d *Driver) Language() string            { return "java" }
 func (d *Driver) FileExtensions() []string    { return []string{".java"} }
 func (d *Driver) BodyGenerationPrompt() string { return javaBodyPrompt }
-func (d *Driver) LLMContext() map[string]string {
-	return map[string]string{
-		"assert_keyword": "Assertions.assertEquals / assertThat",
-		"framework":      "JUnit 5",
-		"mock_library":   "Mockito",
-	}
+func (d *Driver) LLMContext(ctx *domain.ProjectContext) map[string]string {
+	vocab := registry.SelectFromContext(ctx).LLMVocabulary()
+	vocab["language"] = "java"
+	return vocab
 }
 
 func (d *Driver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
@@ -66,16 +64,29 @@ func (d *Driver) GenerateBootstrap(_ *domain.GenerationPlan, _ *domain.ProjectCo
 }
 
 const javaBodyPrompt = `You are an expert Java testing assistant.
-Write JUnit 5 test methods for the class or method named ` + "`{{.MemberName}}`" + `.
+Write a comprehensive {{index .Extra "framework"}} test body for the {{.MemberKind}} ` + "`{{.MemberName}}`" + `.
 
 Source:
 ` + "```java\n{{.SourceCode}}\n```" + `
+{{- if .DepsSignatures}}
+
+Internal dependency signatures:
+{{.DepsSignatures}}
+{{- end}}
+{{- if .ExistingTestSnippet}}
+
+Follow the style of existing tests in this class:
+` + "```java\n{{.ExistingTestSnippet}}\n```" + `
+{{- end}}
+
+Test annotation: {{index .Extra "test_annotation"}}
+Mock style: {{index .Extra "mock_style"}}
+Assert style: {{index .Extra "assert_style"}}
 
 Requirements:
-- Use @Test annotation for each test method.
-- Use Mockito for mocking: mock(), when(), verify().
-- Use Assertions.assertEquals / assertThrows for assertions.
+- Include a happy-path test and at least one edge-case.
 - Follow Arrange / Act / Assert structure with comments.
+- Use the mock and assert styles shown above.
 - Output ONLY valid Java code in a single markdown code block.`
 
 func (d *Driver) ListAdapters(ctx *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {

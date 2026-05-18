@@ -61,7 +61,7 @@ type LanguageDriver interface {
 
 	// LLMContext returns key-value pairs that are merged into the LLM prompt context,
 	// allowing drivers to inject language-specific vocabulary (e.g. "assert" vs "expect").
-	LLMContext() map[string]string
+	LLMContext(ctx *ProjectContext) map[string]string
 
 	// ListAdapters returns every available adapter for this driver along with the
 	// one that would be selected for the given project context.
@@ -82,4 +82,16 @@ type LanguageDriver interface {
 // accepts nil and falls back to TODO stubs when no generator is wired in.
 type BodyGenerator interface {
 	GenerateBodies(ctx context.Context, req BodyGenRequest) ([]BodyGenResult, error)
+}
+
+// BatchBodyGenerator is an optional extension of BodyGenerator. When an
+// implementation also satisfies this interface the pipeline calls
+// GenerateBatchBodies with all members of a file in a single request, reducing
+// API round-trips from N→1 and giving the LLM full inter-member context.
+//
+// Implementations that do not satisfy this interface automatically fall back to
+// the per-member goroutine fan-out path — no changes to existing code required.
+type BatchBodyGenerator interface {
+	BodyGenerator
+	GenerateBatchBodies(ctx context.Context, reqs []BodyGenRequest) ([]BodyGenResult, error)
 }

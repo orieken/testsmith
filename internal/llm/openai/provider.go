@@ -9,11 +9,19 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/orieken/testsmith/internal/llm"
 )
 
 const defaultBaseURL = "https://api.openai.com/v1"
+
+// sharedTransport is reused across all Provider instances to enable connection pooling.
+var sharedTransport = &http.Transport{
+	MaxIdleConns:        10,
+	MaxIdleConnsPerHost: 10,
+	IdleConnTimeout:     30 * time.Second,
+}
 
 // Provider calls the OpenAI Chat Completions API (or any compatible endpoint).
 type Provider struct {
@@ -26,7 +34,14 @@ func New(apiKey, baseURL string) *Provider {
 	if baseURL == "" {
 		baseURL = defaultBaseURL
 	}
-	return &Provider{apiKey: apiKey, baseURL: baseURL, client: &http.Client{}}
+	return &Provider{
+		apiKey:  apiKey,
+		baseURL: baseURL,
+		client: &http.Client{
+			Timeout:   90 * time.Second,
+			Transport: sharedTransport,
+		},
+	}
 }
 
 func (p *Provider) Complete(ctx context.Context, req llm.CompletionRequest) (llm.CompletionResponse, error) {
@@ -38,6 +53,9 @@ func (p *Provider) Complete(ctx context.Context, req llm.CompletionRequest) (llm
 			{"role": "system", "content": req.SystemPrompt},
 			{"role": "user", "content": req.UserPrompt},
 		},
+	}
+	if req.ResponseFormat != "" {
+		body["response_format"] = map[string]string{"type": req.ResponseFormat}
 	}
 
 	data, err := json.Marshal(body)

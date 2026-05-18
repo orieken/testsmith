@@ -13,6 +13,7 @@ import (
 	"github.com/orieken/testsmith/internal/domain"
 	"github.com/orieken/testsmith/internal/generation"
 	"github.com/orieken/testsmith/internal/llm/factory"
+	"github.com/orieken/testsmith/internal/projectknowledge"
 	"github.com/spf13/cobra"
 )
 
@@ -91,6 +92,7 @@ func runGenerate(args []string, all bool, pathFlag string, llmFlag bool, overwri
 
 	ctx.ExcludeDirs = append(ctx.ExcludeDirs, cfg.ExcludeDirs...)
 	config.ApplyToContext(cfg, ctx)
+	ctx.ProjectKnowledge = projectknowledge.Load(ctx.Root)
 
 	pipeline := analysis.New(driver)
 	bodyGen, err := buildBodyGen(llmFlag, cfg.LLM, driver)
@@ -98,17 +100,32 @@ func runGenerate(args []string, all bool, pathFlag string, llmFlag bool, overwri
 		return err
 	}
 
-	genPipeline := generation.NewPipeline(driver, bodyGen)
-	executor := &generation.Executor{}
+	genPipeline := generation.NewPipeline(driver, bodyGen).
+		WithPromptTokenBudget(cfg.LLM.PromptTokenBudget)
+
+	// Build a project-wide dep index when LLM is enabled and multiple files are
+	// in scope. This lets the LLM prompt include internal dependency signatures.
+	if llmFlag && (all || pathFlag != "") {
+		if idx, idxErr := buildDepIndex(pipeline, ctx.Root, ctx); idxErr == nil {
+			genPipeline = genPipeline.WithDepIndex(idx)
+		}
+	}
+
+	executor := generation.NewVerifiedExecutor(ctx.Language)
 	opts := domain.GenerateOpts{DryRun: dryRun, OverwriteExisting: overwrite}
 
-	var files []string
+	var (
+		files        []string
+		knownUntested bool
+	)
 	switch {
 	case all:
 		files, err = pipeline.DiscoverUntested(ctx.Root, ctx)
+		knownUntested = true
 	case pathFlag != "":
 		abs, _ := filepath.Abs(pathFlag)
 		files, err = pipeline.DiscoverInPath(abs, ctx)
+		knownUntested = true
 	case len(args) > 0:
 		abs, _ := filepath.Abs(args[0])
 		files = []string{abs}
@@ -118,6 +135,7 @@ func runGenerate(args []string, all bool, pathFlag string, llmFlag bool, overwri
 	if err != nil {
 		return err
 	}
+	opts.TestFileKnownNew = knownUntested
 
 	if len(files) == 0 {
 		fmt.Println("No files found to process.")
@@ -131,6 +149,7 @@ func runGenerate(args []string, all bool, pathFlag string, llmFlag bool, overwri
 
 	fmt.Printf("\nProcessed %d file(s): %d created/updated, %d skipped, %d failed\n",
 		len(files), created, skipped, failed)
+	printCacheStats(bodyGen)
 
 	if failed > 0 {
 		return fmt.Errorf("%d file(s) failed", failed)
@@ -161,6 +180,7 @@ func runGenerateWorkspaces(cfg *config.Config, cwd, wsFilter string, llmFlag, ov
 
 		ctx.ExcludeDirs = append(ctx.ExcludeDirs, cfg.ExcludeDirs...)
 		config.ApplyToContext(cfg, ctx)
+		ctx.ProjectKnowledge = projectknowledge.LoadForDir(wsRoot, cwd)
 
 		llmCfg := config.WorkspaceLLM(cfg.LLM, ws)
 		bodyGen, err := buildBodyGen(llmFlag, llmCfg, driver)
@@ -170,9 +190,17 @@ func runGenerateWorkspaces(cfg *config.Config, cwd, wsFilter string, llmFlag, ov
 		}
 
 		pipeline := analysis.New(driver)
-		genPipeline := generation.NewPipeline(driver, bodyGen)
-		executor := &generation.Executor{}
-		opts := domain.GenerateOpts{DryRun: dryRun, OverwriteExisting: overwrite}
+		genPipeline := generation.NewPipeline(driver, bodyGen).
+			WithPromptTokenBudget(llmCfg.PromptTokenBudget)
+
+		if llmFlag {
+			if idx, idxErr := buildDepIndex(pipeline, wsRoot, ctx); idxErr == nil {
+				genPipeline = genPipeline.WithDepIndex(idx)
+			}
+		}
+
+		executor := generation.NewVerifiedExecutor(ctx.Language)
+		opts := domain.GenerateOpts{DryRun: dryRun, OverwriteExisting: overwrite, TestFileKnownNew: true}
 
 		files, err := pipeline.DiscoverUntested(wsRoot, ctx)
 		if err != nil {
@@ -189,6 +217,7 @@ func runGenerateWorkspaces(cfg *config.Config, cwd, wsFilter string, llmFlag, ov
 			context.Background(), files, generation.ClampWorkers(workers, len(files)),
 			pipeline, genPipeline, executor, ctx, opts,
 		)
+		printCacheStats(bodyGen)
 		totalFiles += len(files)
 		totalCreated += created
 		totalSkipped += skipped
@@ -203,6 +232,7 @@ func runGenerateWorkspaces(cfg *config.Config, cwd, wsFilter string, llmFlag, ov
 	}
 	return nil
 }
+
 
 // resolveWorkspaceDriver returns the driver and context for a workspace.
 func resolveWorkspaceDriver(ws *config.WorkspaceConfig, wsRoot string) (domain.LanguageDriver, *domain.ProjectContext, error) {
@@ -222,6 +252,24 @@ func resolveWorkspaceDriver(ws *config.WorkspaceConfig, wsRoot string) (domain.L
 		return nil, nil, fmt.Errorf("auto-detect language: %w", err)
 	}
 	return driver, ctx, nil
+}
+
+// cacheStatsReporter is satisfied by *llm.LLMBodyGenerator. It is declared here
+// so generate.go does not import the llm package directly (domain boundary).
+type cacheStatsReporter interface {
+	CacheStats() (hits, misses, size int)
+}
+
+// printCacheStats emits LLM result-cache statistics when verbose mode is active
+// and the body generator supports reporting (i.e. it wraps an LLMBodyGenerator).
+func printCacheStats(bg domain.BodyGenerator) {
+	if !verbose {
+		return
+	}
+	if r, ok := bg.(cacheStatsReporter); ok {
+		hits, misses, size := r.CacheStats()
+		fmt.Printf("LLM cache — hits: %d  misses: %d  entries: %d\n", hits, misses, size)
+	}
 }
 
 // buildBodyGen constructs a BodyGenerator when llmFlag is true, else returns nil.
@@ -313,6 +361,29 @@ func processFiles(
 		mu.Unlock()
 	}
 	return
+}
+
+// buildDepIndex analyses every source file in root and returns a module-path →
+// SourceAnalysis map. The index is used by generation.Pipeline.WithDepIndex to
+// inject internal dependency signatures into LLM prompts.
+// Errors from individual file analyses are silently swallowed — a partial index
+// is always better than no index.
+func buildDepIndex(
+	pipeline *analysis.Pipeline,
+	root string,
+	ctx *domain.ProjectContext,
+) (map[string]*domain.SourceAnalysis, error) {
+	analyses, err := pipeline.DiscoverAndAnalyzeAll(root, ctx)
+	if err != nil {
+		return nil, err
+	}
+	idx := make(map[string]*domain.SourceAnalysis, len(analyses))
+	for _, a := range analyses {
+		if a.ModulePath != "" {
+			idx[a.ModulePath] = a
+		}
+	}
+	return idx, nil
 }
 
 // processOne runs the full analyze → plan → execute pipeline for one file.

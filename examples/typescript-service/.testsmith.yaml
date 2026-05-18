@@ -1,0 +1,15 @@
+version: "2"
+language: typescript
+exclude_dirs:
+  - node_modules
+  - dist
+  - .git
+llm:
+  provider: anthropic
+  model: claude-3-5-haiku-20241022
+  api_key_env_var: ANTHROPIC_API_KEY
+  max_tokens: 1024
+  temperature: 0.2
+  prompt_token_budget: 6000
+  max_concurrent_calls: 5
+  max_retry_attempts: 3

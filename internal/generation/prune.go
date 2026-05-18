@@ -2,6 +2,7 @@ package generation
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -43,7 +44,7 @@ func ScanExistingFixtures(fixtureDir string, cfg domain.TestFrameworkConfig) ([]
 	}
 
 	entries, err := os.ReadDir(fixtureDir)
-	if os.IsNotExist(err) {
+	if errors.Is(err, os.ErrNotExist) {
 		return nil, nil
 	}
 	if err != nil {

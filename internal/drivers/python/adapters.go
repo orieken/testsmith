@@ -294,3 +294,35 @@ class Test{{ .Name }}(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()`))
+
+// ── LLMVocabulary ─────────────────────────────────────────────────────────────
+
+func (a *pytestPytestMockAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":         "pytest",
+		"mock_library":      "pytest-mock",
+		"assert_style":      "assert value == expected",
+		"mock_style":        "mocker.patch('module.ClassName')",
+		"fixture_decorator": "@pytest.fixture",
+	}
+}
+
+func (a *pytestUnittestMockAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":         "pytest",
+		"mock_library":      "unittest.mock",
+		"assert_style":      "assert value == expected",
+		"mock_style":        "@patch('module.ClassName')",
+		"fixture_decorator": "@patch",
+	}
+}
+
+func (a *unittestAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":         "unittest",
+		"mock_library":      "unittest.mock",
+		"assert_style":      "self.assertEqual(expected, value)",
+		"mock_style":        "@patch('module.ClassName')",
+		"fixture_decorator": "@patch",
+	}
+}

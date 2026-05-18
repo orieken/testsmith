@@ -1,6 +1,7 @@
 package generation
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -112,7 +113,7 @@ func GenerateReport(gaps []domain.CoverageGap, totalSources int) string {
 // assessTestFile categorises how complete a test file is.
 func assessTestFile(testPath string, driver domain.LanguageDriver) domain.CoverageStatus {
 	data, err := os.ReadFile(testPath)
-	if os.IsNotExist(err) {
+	if errors.Is(err, os.ErrNotExist) {
 		return domain.CoverageNoTest
 	}
 	if err != nil {

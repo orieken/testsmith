@@ -331,3 +331,45 @@ class {{ .Name }}Test {
 }
 {{ end -}}
 {{ end }}`))
+
+// ── LLMVocabulary ─────────────────────────────────────────────────────────────
+
+func (a *junit5MockitoAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":       "JUnit 5",
+		"mock_library":    "Mockito",
+		"assert_style":    "Assertions.assertEquals(expected, actual)",
+		"mock_style":      "@Mock + @ExtendWith(MockitoExtension.class), when(x).thenReturn(y)",
+		"test_annotation": "@Test",
+	}
+}
+
+func (a *junit4MockitoAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":       "JUnit 4",
+		"mock_library":    "Mockito",
+		"assert_style":    "Assert.assertEquals(expected, actual)",
+		"mock_style":      "@Mock + @RunWith(MockitoJUnitRunner.class), when(x).thenReturn(y)",
+		"test_annotation": "@Test",
+	}
+}
+
+func (a *testngMockitoAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":       "TestNG",
+		"mock_library":    "Mockito",
+		"assert_style":    "Assert.assertEquals(actual, expected)",
+		"mock_style":      "@Mock + MockitoAnnotations.openMocks(this), when(x).thenReturn(y)",
+		"test_annotation": "@Test",
+	}
+}
+
+func (a *springBootMockitoAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":       "Spring Boot Test",
+		"mock_library":    "Mockito",
+		"assert_style":    "Assertions.assertEquals(expected, actual)",
+		"mock_style":      "@MockBean, when(x).thenReturn(y)",
+		"test_annotation": "@SpringBootTest",
+	}
+}

@@ -2,6 +2,7 @@
 package analysis
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -38,7 +39,7 @@ func (p *Pipeline) DiscoverUntested(root string, ctx *domain.ProjectContext) ([]
 		if err != nil {
 			continue
 		}
-		if _, err := os.Stat(testPath); os.IsNotExist(err) {
+		if _, err := os.Stat(testPath); errors.Is(err, os.ErrNotExist) {
 			untested = append(untested, src)
 		}
 	}
@@ -58,7 +59,7 @@ func (p *Pipeline) DiscoverInPath(dir string, ctx *domain.ProjectContext) ([]str
 		if err != nil {
 			continue
 		}
-		if _, err := os.Stat(testPath); os.IsNotExist(err) {
+		if _, err := os.Stat(testPath); errors.Is(err, os.ErrNotExist) {
 			untested = append(untested, src)
 		}
 	}

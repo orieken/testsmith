@@ -60,18 +60,24 @@ func detectCSharpFramework(root string) (framework, mockLib string) {
 	return
 }
 
+var csharpStopMarkers = []string{".git", ".hg", ".svn"}
+
 func findRoot(startDir string) (string, error) {
 	dir := startDir
 	for {
+		if dir != startDir {
+			for _, stop := range csharpStopMarkers {
+				if _, err := os.Stat(filepath.Join(dir, stop)); err == nil {
+					return "", domain.ErrProjectNotFound
+				}
+			}
+		}
 		entries, _ := os.ReadDir(dir)
 		for _, e := range entries {
 			name := e.Name()
 			if strings.HasSuffix(name, ".csproj") || strings.HasSuffix(name, ".sln") {
 				return dir, nil
 			}
-		}
-		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
-			return dir, nil
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {

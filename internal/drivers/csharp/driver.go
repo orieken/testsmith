@@ -15,13 +15,10 @@ func New() *Driver { return &Driver{} }
 func (d *Driver) Language() string            { return "csharp" }
 func (d *Driver) FileExtensions() []string    { return []string{".cs"} }
 func (d *Driver) BodyGenerationPrompt() string { return csharpBodyPrompt }
-func (d *Driver) LLMContext() map[string]string {
-	return map[string]string{
-		"assert_keyword": "Assert.Equal / Assert.True (xUnit)",
-		"framework":      "xUnit",
-		"mock_library":   "Moq (Mock<T>, .Setup(), .Returns())",
-		"test_attribute": "[Fact] / [Theory]",
-	}
+func (d *Driver) LLMContext(ctx *domain.ProjectContext) map[string]string {
+	vocab := registry.SelectFromContext(ctx).LLMVocabulary()
+	vocab["language"] = "csharp"
+	return vocab
 }
 
 func (d *Driver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
@@ -67,16 +64,29 @@ func (d *Driver) GenerateBootstrap(_ *domain.GenerationPlan, _ *domain.ProjectCo
 }
 
 const csharpBodyPrompt = `You are an expert C# testing assistant.
-Write xUnit test methods for the class or method named ` + "`{{.MemberName}}`" + `.
+Write a comprehensive {{index .Extra "framework"}} test body for the {{.MemberKind}} ` + "`{{.MemberName}}`" + `.
 
 Source:
 ` + "```csharp\n{{.SourceCode}}\n```" + `
+{{- if .DepsSignatures}}
+
+Internal dependency signatures:
+{{.DepsSignatures}}
+{{- end}}
+{{- if .ExistingTestSnippet}}
+
+Follow the style of existing tests in this class:
+` + "```csharp\n{{.ExistingTestSnippet}}\n```" + `
+{{- end}}
+
+Test attribute: {{index .Extra "test_attribute"}}
+Mock style: {{index .Extra "mock_style"}}
+Assert style: {{index .Extra "assert_style"}}
 
 Requirements:
-- Use xUnit [Fact] for single-case tests and [Theory] + [InlineData] for parameterised tests.
-- Use Moq for mocking: ` + "`new Mock<IDependency>()`" + `, ` + "`.Setup()`, `.Returns()`" + `.
-- Use ` + "`Assert.Equal`, `Assert.True`, `Assert.Throws<T>`" + ` for assertions.
+- Include a happy-path test and at least one edge-case.
 - Follow Arrange / Act / Assert comment structure.
+- Use the mock and assert styles shown above.
 - Output ONLY valid C# code in a single markdown code block.`
 
 func (d *Driver) ListAdapters(ctx *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {

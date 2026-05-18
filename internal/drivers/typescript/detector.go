@@ -8,7 +8,8 @@ import (
 	"github.com/orieken/testsmith/internal/domain"
 )
 
-var rootMarkers = []string{"package.json", "tsconfig.json", "tsconfig.base.json", ".git"}
+var rootMarkers     = []string{"package.json", "tsconfig.json", "tsconfig.base.json"}
+var stopMarkers     = []string{".git", ".hg", ".svn"}
 
 type packageJSON struct {
 	Dependencies    map[string]string `json:"dependencies"`
@@ -35,6 +36,13 @@ func detectProject(startDir string) (*domain.ProjectContext, error) {
 func findRoot(startDir string) (string, error) {
 	dir := startDir
 	for {
+		if dir != startDir {
+			for _, stop := range stopMarkers {
+				if _, err := os.Stat(filepath.Join(dir, stop)); err == nil {
+					return "", domain.ErrProjectNotFound
+				}
+			}
+		}
 		for _, marker := range rootMarkers {
 			if _, err := os.Stat(filepath.Join(dir, marker)); err == nil {
 				return dir, nil

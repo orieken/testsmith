@@ -21,13 +21,10 @@ func New() *Driver { return &Driver{} }
 func (d *Driver) Language() string           { return "python" }
 func (d *Driver) FileExtensions() []string   { return []string{".py"} }
 func (d *Driver) BodyGenerationPrompt() string { return pythonBodyPrompt }
-func (d *Driver) LLMContext() map[string]string {
-	return map[string]string{
-		"assert_keyword":  "assert",
-		"test_decorator":  "@pytest.fixture",
-		"mock_library":    "pytest-mock (mocker fixture)",
-		"framework":       "pytest",
-	}
+func (d *Driver) LLMContext(ctx *domain.ProjectContext) map[string]string {
+	vocab := registry.SelectFromContext(ctx).LLMVocabulary()
+	vocab["language"] = "python"
+	return vocab
 }
 
 func (d *Driver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
@@ -79,21 +76,30 @@ func (d *Driver) GenerateBootstrap(plan *domain.GenerationPlan, ctx *domain.Proj
 	return generateBootstrap(plan, ctx)
 }
 
-// pythonBodyPrompt is the default LLM prompt template for Python pytest bodies.
-// Replaced at build time by the embedded prompts/generate_body.tmpl file.
 const pythonBodyPrompt = `You are an expert Python testing assistant.
-Write comprehensive pytest test bodies for the {{.MemberKind}} named ` + "`{{.MemberName}}`" + `.
+Write a comprehensive {{index .Extra "framework"}} test body for the {{.MemberKind}} ` + "`{{.MemberName}}`" + ` in module ` + "`{{.ModulePath}}`" + `.
 
-Source module:
+Source:
 ` + "```python\n{{.SourceCode}}\n```" + `
+{{- if .DepsSignatures}}
+
+Internal dependency signatures:
+{{.DepsSignatures}}
+{{- end}}
+{{- if .ExistingTestSnippet}}
+
+Follow the style of existing tests in this module:
+` + "```python\n{{.ExistingTestSnippet}}\n```" + `
+{{- end}}
 
 Available fixtures: {{range .FixtureNames}}{{.}} {{end}}
+Mock style: {{index .Extra "mock_style"}}
+Assert style: {{index .Extra "assert_style"}}
 
 Requirements:
 - Include a happy-path test.
 - Include at least one edge-case or error test.
-- Use ` + "`assert`" + ` statements.
-- Use the provided fixtures for mocking.
+- Use the mock and assert styles shown above.
 - Output ONLY valid Python code in a single markdown code block.`
 
 func (d *Driver) ListAdapters(ctx *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {

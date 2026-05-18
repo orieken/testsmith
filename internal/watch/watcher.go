@@ -56,7 +56,7 @@ func New(
 		ctx:         ctx,
 		pipeline:    analysis.New(driver),
 		genPipeline: genPipeline,
-		executor:    &generation.Executor{},
+		executor:    generation.NewVerifiedExecutor(ctx.Language),
 		opts:        domain.GenerateOpts{},
 		debounce:    time.Duration(debounceMs) * time.Millisecond,
 		excludeDirs: excludeSet,
@@ -137,6 +137,10 @@ func (w *Watcher) process(path string) {
 		fmt.Printf("  ✗ %s: %v\n", filepath.Base(path), err)
 		return
 	}
+
+	// Keep the dep index current so subsequent generations of files that import
+	// this module receive its up-to-date public API signatures.
+	w.genPipeline.UpdateDepEntry(a.ModulePath, a)
 
 	plan, err := w.genPipeline.Plan(context.Background(), a, w.opts)
 	if err != nil {

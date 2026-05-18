@@ -8,12 +8,20 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/orieken/testsmith/internal/llm"
 )
 
 const defaultBaseURL = "https://api.anthropic.com/v1"
 const anthropicVersion = "2023-06-01"
+
+// sharedTransport is reused across all Provider instances to enable connection pooling.
+var sharedTransport = &http.Transport{
+	MaxIdleConns:        10,
+	MaxIdleConnsPerHost: 10,
+	IdleConnTimeout:     30 * time.Second,
+}
 
 // Provider calls the Anthropic Messages API.
 type Provider struct {
@@ -27,16 +35,36 @@ func New(apiKey, baseURL string) *Provider {
 	if baseURL == "" {
 		baseURL = defaultBaseURL
 	}
-	return &Provider{apiKey: apiKey, baseURL: baseURL, client: &http.Client{}}
+	return &Provider{
+		apiKey:  apiKey,
+		baseURL: baseURL,
+		client: &http.Client{
+			Timeout:   90 * time.Second,
+			Transport: sharedTransport,
+		},
+	}
 }
 
 func (p *Provider) Complete(ctx context.Context, req llm.CompletionRequest) (llm.CompletionResponse, error) {
+	// Use the structured content format so we can attach cache_control blocks.
+	// The system prompt and user prompt are both marked ephemeral — Anthropic
+	// caches these for up to 5 minutes, cutting repeat token costs by ~90%.
+	systemBlock := map[string]any{
+		"type": "text",
+		"text": req.SystemPrompt,
+		"cache_control": map[string]string{"type": "ephemeral"},
+	}
+	userBlock := map[string]any{
+		"type": "text",
+		"text": req.UserPrompt,
+		"cache_control": map[string]string{"type": "ephemeral"},
+	}
 	body := map[string]any{
 		"model":      req.Model,
 		"max_tokens": req.MaxTokens,
-		"system":     req.SystemPrompt,
-		"messages": []map[string]string{
-			{"role": "user", "content": req.UserPrompt},
+		"system":     []map[string]any{systemBlock},
+		"messages": []map[string]any{
+			{"role": "user", "content": []map[string]any{userBlock}},
 		},
 	}
 
@@ -52,6 +80,7 @@ func (p *Provider) Complete(ctx context.Context, req llm.CompletionRequest) (llm
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("x-api-key", p.apiKey)
 	httpReq.Header.Set("anthropic-version", anthropicVersion)
+	httpReq.Header.Set("anthropic-beta", "prompt-caching-2024-07-31")
 
 	resp, err := p.client.Do(httpReq)
 	if err != nil {
@@ -73,8 +102,10 @@ func (p *Provider) Complete(ctx context.Context, req llm.CompletionRequest) (llm
 			Text string `json:"text"`
 		} `json:"content"`
 		Usage struct {
-			InputTokens  int `json:"input_tokens"`
-			OutputTokens int `json:"output_tokens"`
+			InputTokens              int `json:"input_tokens"`
+			OutputTokens             int `json:"output_tokens"`
+			CacheReadInputTokens     int `json:"cache_read_input_tokens"`
+			CacheCreationInputTokens int `json:"cache_creation_input_tokens"`
 		} `json:"usage"`
 	}
 	if err := json.Unmarshal(raw, &result); err != nil {
@@ -86,8 +117,12 @@ func (p *Provider) Complete(ctx context.Context, req llm.CompletionRequest) (llm
 		text = result.Content[0].Text
 	}
 
+	// Total tokens: include cache-related tokens so callers see accurate usage.
+	tokensUsed := result.Usage.InputTokens + result.Usage.OutputTokens +
+		result.Usage.CacheReadInputTokens + result.Usage.CacheCreationInputTokens
+
 	return llm.CompletionResponse{
 		Content:    text,
-		TokensUsed: result.Usage.InputTokens + result.Usage.OutputTokens,
+		TokensUsed: tokensUsed,
 	}, nil
 }

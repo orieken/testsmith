@@ -19,7 +19,7 @@ type fakeDriver struct {
 func (f *fakeDriver) Language() string                       { return f.lang }
 func (f *fakeDriver) FileExtensions() []string               { return f.extensions }
 func (f *fakeDriver) BodyGenerationPrompt() string           { return "" }
-func (f *fakeDriver) LLMContext() map[string]string          { return nil }
+func (f *fakeDriver) LLMContext(_ *domain.ProjectContext) map[string]string          { return nil }
 func (f *fakeDriver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
 	return domain.TestFrameworkConfig{}
 }

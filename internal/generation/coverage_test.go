@@ -134,7 +134,7 @@ func (s *stubDriver) GenerateBootstrap(plan *domain.GenerationPlan, ctx *domain.
 	return nil, nil
 }
 func (s *stubDriver) BodyGenerationPrompt() string          { return "" }
-func (s *stubDriver) LLMContext() map[string]string         { return nil }
+func (s *stubDriver) LLMContext(_ *domain.ProjectContext) map[string]string         { return nil }
 func (s *stubDriver) ListAdapters(_ *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {
 	return nil, nil
 }

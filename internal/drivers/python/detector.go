@@ -8,7 +8,12 @@ import (
 	"github.com/orieken/testsmith/internal/domain"
 )
 
-var rootMarkers = []string{"pyproject.toml", "setup.py", "setup.cfg", "conftest.py", ".git"}
+// pythonRootMarkers are files that positively identify a Python project root.
+var pythonRootMarkers = []string{"pyproject.toml", "setup.py", "setup.cfg", "conftest.py"}
+
+// searchStopMarkers halt upward traversal when no Python marker was found in a
+// directory — they prevent crossing a git/VCS boundary into a parent project.
+var searchStopMarkers = []string{".git", ".hg", ".svn"}
 
 func detectProject(startDir string) (*domain.ProjectContext, error) {
 	root, err := findRoot(startDir)
@@ -89,7 +94,17 @@ func collectPythonDeps(root string) map[string]bool {
 func findRoot(startDir string) (string, error) {
 	dir := startDir
 	for {
-		for _, marker := range rootMarkers {
+		// Stop at VCS boundaries when searching ancestor directories so we do not
+		// claim a parent project's root. At startDir itself we skip this check
+		// because a Python project root may legitimately host .git at the same level.
+		if dir != startDir {
+			for _, stop := range searchStopMarkers {
+				if _, err := os.Stat(filepath.Join(dir, stop)); err == nil {
+					return "", domain.ErrProjectNotFound
+				}
+			}
+		}
+		for _, marker := range pythonRootMarkers {
 			if _, err := os.Stat(filepath.Join(dir, marker)); err == nil {
 				return dir, nil
 			}

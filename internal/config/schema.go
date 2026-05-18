@@ -26,6 +26,17 @@ type LLMConfig struct {
 	Temperature          float64 `yaml:"temperature,omitempty"`
 	APIKeyEnvVar         string  `yaml:"api_key_env_var,omitempty"`
 	BaseURL              string  `yaml:"base_url,omitempty"`
+	// PromptTokenBudget is the maximum estimated tokens allowed for the user
+	// prompt (source + deps + style + project knowledge combined). Lower-priority
+	// tiers are dropped when the total exceeds this value. 0 = no limit.
+	PromptTokenBudget int `yaml:"prompt_token_budget,omitempty"`
+	// MaxConcurrentCalls caps the number of in-flight LLM API calls at any time.
+	// Prevents rate-limit bursts when many files are processed in parallel.
+	// 0 = no limit (not recommended for large codebases).
+	MaxConcurrentCalls int `yaml:"max_concurrent_calls,omitempty"`
+	// MaxRetryAttempts is the total attempts per call (first + retries) for
+	// transient errors (429, 500, 502, 503, 504). 1 = no retries.
+	MaxRetryAttempts int `yaml:"max_retry_attempts,omitempty"`
 }
 
 // LanguageConfig holds per-language overrides that are merged over the root Config.

@@ -376,3 +376,55 @@ public class {{ .Name }}Tests
 {{ end }}`))
 
 // csNamespace is defined in generator.go and available to all files in this package.
+
+// ── LLMVocabulary ─────────────────────────────────────────────────────────────
+
+func (a *xunitMoqAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":      "xUnit",
+		"mock_library":   "Moq",
+		"assert_style":   "Assert.Equal(expected, actual)",
+		"mock_style":     "var mock = new Mock<IFoo>(); mock.Setup(x => x.Method()).Returns(value)",
+		"test_attribute": "[Fact]",
+	}
+}
+
+func (a *nunitMoqAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":      "NUnit",
+		"mock_library":   "Moq",
+		"assert_style":   "Assert.AreEqual(expected, actual)",
+		"mock_style":     "var mock = new Mock<IFoo>(); mock.Setup(x => x.Method()).Returns(value)",
+		"test_attribute": "[Test]",
+	}
+}
+
+func (a *mstestMoqAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":      "MSTest",
+		"mock_library":   "Moq",
+		"assert_style":   "Assert.AreEqual(expected, actual)",
+		"mock_style":     "var mock = new Mock<IFoo>(); mock.Setup(x => x.Method()).Returns(value)",
+		"test_attribute": "[TestMethod]",
+	}
+}
+
+func (a *xunitNSubstituteAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":      "xUnit",
+		"mock_library":   "NSubstitute",
+		"assert_style":   "Assert.Equal(expected, actual)",
+		"mock_style":     "var sub = Substitute.For<IFoo>(); sub.Method().Returns(value)",
+		"test_attribute": "[Fact]",
+	}
+}
+
+func (a *nunitNSubstituteAdapter) LLMVocabulary() map[string]string {
+	return map[string]string{
+		"framework":      "NUnit",
+		"mock_library":   "NSubstitute",
+		"assert_style":   "Assert.AreEqual(expected, actual)",
+		"mock_style":     "var sub = Substitute.For<IFoo>(); sub.Method().Returns(value)",
+		"test_attribute": "[Test]",
+	}
+}
