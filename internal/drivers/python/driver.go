@@ -18,8 +18,8 @@ type Driver struct{}
 // New returns a ready-to-use Python Driver.
 func New() *Driver { return &Driver{} }
 
-func (d *Driver) Language() string           { return "python" }
-func (d *Driver) FileExtensions() []string   { return []string{".py"} }
+func (d *Driver) Language() string             { return "python" }
+func (d *Driver) FileExtensions() []string     { return []string{".py"} }
 func (d *Driver) BodyGenerationPrompt() string { return pythonBodyPrompt }
 func (d *Driver) LLMContext(ctx *domain.ProjectContext) map[string]string {
 	vocab := registry.SelectFromContext(ctx).LLMVocabulary()

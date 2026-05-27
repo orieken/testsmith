@@ -176,8 +176,8 @@ func parseFunctionDecl(n *sitter.Node, src []byte) *domain.PublicMember {
 	}
 	params := extractFormalParams(childByType(n, "formal_parameters"), src)
 	return &domain.PublicMember{
-		Name:   name,
-		Kind:   domain.KindFunction,
+		Name:       name,
+		Kind:       domain.KindFunction,
 		Parameters: params,
 	}
 }
@@ -229,8 +229,8 @@ func parseLexicalDeclaration(n *sitter.Node, src []byte) []domain.PublicMember {
 			if gc.Type() == "arrow_function" {
 				params := extractFormalParams(childByType(gc, "formal_parameters"), src)
 				members = append(members, domain.PublicMember{
-					Name:   name,
-					Kind:   domain.KindFunction,
+					Name:       name,
+					Kind:       domain.KindFunction,
 					Parameters: params,
 				})
 				break

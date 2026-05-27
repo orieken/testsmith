@@ -62,15 +62,6 @@ func moduleImportPath(testPath, sourcePath string) string {
 	return rel
 }
 
-func detectFramework(ctx *domain.ProjectContext) string {
-	if ctx != nil && ctx.Metadata != nil {
-		if fw, ok := ctx.Metadata["framework"].(string); ok {
-			return fw
-		}
-	}
-	return "jest"
-}
-
 // ---- mock file template ------------------------------------------------------
 
 func renderMockFile(dep string) string {

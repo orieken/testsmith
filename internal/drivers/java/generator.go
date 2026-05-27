@@ -1,7 +1,6 @@
 package java
 
 import (
-	"path/filepath"
 	"strings"
 
 	"github.com/orieken/testsmith/internal/domain"
@@ -57,10 +56,4 @@ func normaliseBlankLines(s string) string {
 		}
 	}
 	return strings.Join(out, "\n")
-}
-
-// packageName returns the last path component as a Go-friendly name (unused here
-// but kept consistent with other drivers).
-func packageNameFromPath(p string) string {
-	return filepath.Base(filepath.Dir(p))
 }

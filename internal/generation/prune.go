@@ -118,16 +118,16 @@ func UpdateTestImports(root string, deletedNames []string) ([]string, error) {
 	}
 
 	var modified []string
-	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
-			return nil
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() {
+			return nil //nolint:nilerr // skip unreadable entries; continue the walk
 		}
 		if !isTestFile(path) {
 			return nil
 		}
 		changed, err := commentOutImports(path, patterns)
 		if err != nil {
-			return nil // non-fatal
+			return nil //nolint:nilerr // non-fatal; skip this file and continue
 		}
 		if changed {
 			modified = append(modified, path)

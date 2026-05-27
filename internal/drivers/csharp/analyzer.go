@@ -2,7 +2,6 @@ package csharp
 
 import (
 	"os"
-	"strings"
 
 	sitter "github.com/smacker/go-tree-sitter"
 	sittercsharp "github.com/smacker/go-tree-sitter/csharp"
@@ -192,25 +191,4 @@ func childByType(n *sitter.Node, typ string) *sitter.Node {
 		}
 	}
 	return nil
-}
-
-// qualifiedNameToString reconstructs a dotted name from a qualified_name node.
-func qualifiedNameToString(n *sitter.Node, src []byte) string {
-	if n == nil {
-		return ""
-	}
-	var parts []string
-	var collect func(node *sitter.Node)
-	collect = func(node *sitter.Node) {
-		switch node.Type() {
-		case "identifier":
-			parts = append(parts, node.Content(src))
-		case "qualified_name":
-			for i := 0; i < int(node.ChildCount()); i++ {
-				collect(node.Child(i))
-			}
-		}
-	}
-	collect(n)
-	return strings.Join(parts, ".")
 }

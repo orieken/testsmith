@@ -4,7 +4,6 @@ import (
 	"testing"
 )
 
-
 func TestEstimateTokens(t *testing.T) {
 
 	tests := []struct {
@@ -19,7 +18,6 @@ func TestEstimateTokens(t *testing.T) {
 		})
 	}
 }
-
 
 func TestTrimToBudget(t *testing.T) {
 
@@ -36,7 +34,6 @@ func TestTrimToBudget(t *testing.T) {
 	}
 }
 
-
 func TestJoinTiers(t *testing.T) {
 
 	tests := []struct {
@@ -51,4 +48,3 @@ func TestJoinTiers(t *testing.T) {
 		})
 	}
 }
-

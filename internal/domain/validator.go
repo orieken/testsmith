@@ -12,7 +12,7 @@ const (
 // ValidationIssue is a single finding from validating a test file against its
 // configured adapter's conventions.
 type ValidationIssue struct {
-	Rule     string   // stable identifier, e.g. "junit4-import-in-junit5"
+	Rule     string // stable identifier, e.g. "junit4-import-in-junit5"
 	Severity Severity
 	Message  string
 }

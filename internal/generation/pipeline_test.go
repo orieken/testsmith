@@ -13,14 +13,14 @@ import (
 // ---- fakes ------------------------------------------------------------------
 
 type fakeDriver struct {
-	lang        string
-	testSuffix  string
+	lang             string
+	testSuffix       string
 	generatedContent string
 }
 
-func (f *fakeDriver) Language() string            { return f.lang }
-func (f *fakeDriver) FileExtensions() []string    { return []string{".go"} }
-func (f *fakeDriver) BodyGenerationPrompt() string { return "" }
+func (f *fakeDriver) Language() string                                      { return f.lang }
+func (f *fakeDriver) FileExtensions() []string                              { return []string{".go"} }
+func (f *fakeDriver) BodyGenerationPrompt() string                          { return "" }
 func (f *fakeDriver) LLMContext(_ *domain.ProjectContext) map[string]string { return nil }
 func (f *fakeDriver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
 	return domain.TestFrameworkConfig{TestFileSuffix: f.testSuffix}
@@ -58,7 +58,7 @@ func (f *fakeDriver) GenerateBootstrap(p *domain.GenerationPlan, ctx *domain.Pro
 func (f *fakeDriver) ListAdapters(_ *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {
 	return nil, nil
 }
-func (f *fakeDriver) ListMigrators() []domain.Migrator { return nil }
+func (f *fakeDriver) ListMigrators() []domain.Migrator                     { return nil }
 func (f *fakeDriver) ValidateFile(_, _, _ string) []domain.ValidationIssue { return nil }
 
 type fakeBodyGen struct {

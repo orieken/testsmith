@@ -106,8 +106,8 @@ func coverageGapsWith(testFileContent string) []domain.CoverageGap {
 // stubDriver satisfies domain.LanguageDriver minimally for coverage tests.
 type stubDriver struct{}
 
-func (s *stubDriver) Language() string                { return "python" }
-func (s *stubDriver) FileExtensions() []string        { return []string{".py"} }
+func (s *stubDriver) Language() string         { return "python" }
+func (s *stubDriver) FileExtensions() []string { return []string{".py"} }
 func (s *stubDriver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
 	return domain.TestFrameworkConfig{TestFilePrefix: "test_", FixtureSuffix: "_fixture.py"}
 }
@@ -133,10 +133,10 @@ func (s *stubDriver) GenerateFixture(dep string, a *domain.SourceAnalysis, opts 
 func (s *stubDriver) GenerateBootstrap(plan *domain.GenerationPlan, ctx *domain.ProjectContext) (*domain.GeneratedFile, error) {
 	return nil, nil
 }
-func (s *stubDriver) BodyGenerationPrompt() string          { return "" }
-func (s *stubDriver) LLMContext(_ *domain.ProjectContext) map[string]string         { return nil }
+func (s *stubDriver) BodyGenerationPrompt() string                          { return "" }
+func (s *stubDriver) LLMContext(_ *domain.ProjectContext) map[string]string { return nil }
 func (s *stubDriver) ListAdapters(_ *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {
 	return nil, nil
 }
-func (s *stubDriver) ListMigrators() []domain.Migrator { return nil }
+func (s *stubDriver) ListMigrators() []domain.Migrator                     { return nil }
 func (s *stubDriver) ValidateFile(_, _, _ string) []domain.ValidationIssue { return nil }

@@ -38,7 +38,7 @@ func Default() *Config {
 			"typescript": {
 				TestRoot:    "src/",
 				FixtureDir:  "__mocks__/",
-				Framework:   "jest",   // auto-detection may upgrade to "vitest"
+				Framework:   "jest", // auto-detection may upgrade to "vitest"
 				MockLibrary: "jest",
 				Extra: map[string]string{
 					"test_file_suffix": ".test.ts",

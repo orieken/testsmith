@@ -158,4 +158,3 @@ func TestUpdateTestImports_NoMatch(t *testing.T) {
 		t.Errorf("no match expected, got %d modified", len(modified))
 	}
 }
-

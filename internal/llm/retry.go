@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -136,18 +135,4 @@ func parseRetryAfter(err error) time.Duration {
 		secs = max
 	}
 	return time.Duration(secs) * time.Second
-}
-
-// retryableStatusCode is kept for tests that want to simulate specific codes
-// without going through the error-string path.
-func retryableStatusCode(code int) bool {
-	switch code {
-	case http.StatusTooManyRequests,
-		http.StatusInternalServerError,
-		http.StatusBadGateway,
-		http.StatusServiceUnavailable,
-		http.StatusGatewayTimeout:
-		return true
-	}
-	return false
 }

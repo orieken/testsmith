@@ -175,17 +175,17 @@ type TestFrameworkConfig struct {
 
 // BodyGenRequest is the input to a BodyGenerator call for a single member.
 type BodyGenRequest struct {
-	Language   string
-	MemberName string
-	MemberKind MemberKind
-	SourceCode string // full source file for context window
-	Fixtures   []FixtureImport
-	Framework  TestFrameworkConfig
-	Extra      map[string]string // driver-injected language vocabulary
-	ModulePath          string // importable path of the source module
-	DepsSignatures      string // compact public API block of internal deps
-	ExistingTestSnippet string // style sample mined from existing test files in same package
-	ProjectKnowledge    string // content of TESTSMITH.md, injected as system prompt prefix
+	Language            string
+	MemberName          string
+	MemberKind          MemberKind
+	SourceCode          string // full source file for context window
+	Fixtures            []FixtureImport
+	Framework           TestFrameworkConfig
+	Extra               map[string]string // driver-injected language vocabulary
+	ModulePath          string            // importable path of the source module
+	DepsSignatures      string            // compact public API block of internal deps
+	ExistingTestSnippet string            // style sample mined from existing test files in same package
+	ProjectKnowledge    string            // content of TESTSMITH.md, injected as system prompt prefix
 }
 
 // BodyGenResult is the LLM output for one member.
@@ -197,11 +197,11 @@ type BodyGenResult struct {
 
 // BodyPromptData is injected into a driver's BodyGenerationPrompt template.
 type BodyPromptData struct {
-	MemberName   string
-	MemberKind   string
-	SourceCode   string
-	FixtureNames []string
-	Extra        map[string]string
+	MemberName          string
+	MemberKind          string
+	SourceCode          string
+	FixtureNames        []string
+	Extra               map[string]string
 	ModulePath          string
 	DepsSignatures      string
 	ExistingTestSnippet string

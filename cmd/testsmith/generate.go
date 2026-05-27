@@ -115,7 +115,7 @@ func runGenerate(args []string, all bool, pathFlag string, llmFlag bool, overwri
 	opts := domain.GenerateOpts{DryRun: dryRun, OverwriteExisting: overwrite}
 
 	var (
-		files        []string
+		files         []string
 		knownUntested bool
 	)
 	switch {
@@ -232,7 +232,6 @@ func runGenerateWorkspaces(cfg *config.Config, cwd, wsFilter string, llmFlag, ov
 	}
 	return nil
 }
-
 
 // resolveWorkspaceDriver returns the driver and context for a workspace.
 func resolveWorkspaceDriver(ws *config.WorkspaceConfig, wsRoot string) (domain.LanguageDriver, *domain.ProjectContext, error) {
@@ -410,4 +409,3 @@ func processOne(
 	}
 	return fileResult{srcPath: srcPath, results: res}
 }
-

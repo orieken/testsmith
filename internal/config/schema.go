@@ -3,14 +3,14 @@ package config
 
 // Config is the fully-resolved configuration for a TestSmith invocation.
 type Config struct {
-	Language    string            `yaml:"language,omitempty"`
-	Root        string            `yaml:"root,omitempty"`
-	TestRoot    string            `yaml:"test_root,omitempty"`
-	FixtureDir  string            `yaml:"fixture_dir,omitempty"`
-	ExcludeDirs []string          `yaml:"exclude_dirs,omitempty"`
-	LLM         LLMConfig         `yaml:"llm,omitempty"`
+	Language    string                    `yaml:"language,omitempty"`
+	Root        string                    `yaml:"root,omitempty"`
+	TestRoot    string                    `yaml:"test_root,omitempty"`
+	FixtureDir  string                    `yaml:"fixture_dir,omitempty"`
+	ExcludeDirs []string                  `yaml:"exclude_dirs,omitempty"`
+	LLM         LLMConfig                 `yaml:"llm,omitempty"`
 	Languages   map[string]LanguageConfig `yaml:"languages,omitempty"`
-	Workspaces  []WorkspaceConfig `yaml:"workspaces,omitempty"`
+	Workspaces  []WorkspaceConfig         `yaml:"workspaces,omitempty"`
 
 	// ConfigPath is set by the loader to the absolute path of the file that
 	// was read. Empty when only defaults are in effect (no file found).

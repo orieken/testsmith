@@ -56,7 +56,7 @@ type TypeScriptVerifier struct{}
 func (v TypeScriptVerifier) Verify(testFilePath string) error {
 	tsc, err := exec.LookPath("tsc")
 	if err != nil {
-		return nil // tsc not installed — skip silently
+		return nil //nolint:nilerr // tsc not installed — skip verification silently
 	}
 
 	// Walk up to find the tsconfig.json so tsc gets the right project settings.
@@ -106,8 +106,8 @@ func (v PythonVerifier) Verify(testFilePath string) error {
 	python := "python3"
 	if _, err := exec.LookPath(python); err != nil {
 		python = "python"
-		if _, err := exec.LookPath(python); err != nil {
-			return nil // no python interpreter — skip
+		if _, err2 := exec.LookPath(python); err2 != nil {
+			return nil //nolint:nilerr // no python interpreter — skip verification silently
 		}
 	}
 

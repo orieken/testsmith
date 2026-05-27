@@ -174,4 +174,3 @@ func listAvailableMigrations(driver domain.LanguageDriver) string {
 	}
 	return sb.String()
 }
-

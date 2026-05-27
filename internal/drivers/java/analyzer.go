@@ -2,7 +2,6 @@ package java
 
 import (
 	"os"
-	"strings"
 
 	sitter "github.com/smacker/go-tree-sitter"
 	sitterjava "github.com/smacker/go-tree-sitter/java"
@@ -216,19 +215,4 @@ func childByType(n *sitter.Node, typ string) *sitter.Node {
 		}
 	}
 	return nil
-}
-
-// scopedToPackage converts a dotted scoped_identifier to a package path,
-// dropping the terminal class name (capitalised last segment).
-func scopedToPackage(s string) string {
-	parts := strings.Split(s, ".")
-	if len(parts) == 0 {
-		return s
-	}
-	// If last part starts with uppercase, it's a class name — drop it.
-	last := parts[len(parts)-1]
-	if len(last) > 0 && last[0] >= 'A' && last[0] <= 'Z' {
-		parts = parts[:len(parts)-1]
-	}
-	return strings.Join(parts, ".")
 }

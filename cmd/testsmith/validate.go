@@ -195,8 +195,9 @@ func countBySeverity(issues []domain.ValidationIssue) (errors, warnings int) {
 			errors++
 		case domain.SeverityWarning:
 			warnings++
+		case domain.SeverityInfo:
+			// info-level issues are not counted toward error/warning totals
 		}
 	}
 	return
 }
-

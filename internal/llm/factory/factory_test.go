@@ -71,11 +71,13 @@ func TestBuild_AnthropicWithKey_ReturnsGenerator(t *testing.T) {
 // stubDriver satisfies domain.LanguageDriver minimally for factory tests.
 type stubDriver struct{}
 
-func (s *stubDriver) Language() string                    { return "python" }
-func (s *stubDriver) BodyGenerationPrompt() string        { return "generate tests for {{.MemberName}}" }
-func (s *stubDriver) FileExtensions() []string            { return []string{".py"} }
-func (s *stubDriver) GetTestFrameworkConfig() domain.TestFrameworkConfig { return domain.TestFrameworkConfig{} }
-func (s *stubDriver) LLMContext(_ *domain.ProjectContext) map[string]string       { return nil }
+func (s *stubDriver) Language() string             { return "python" }
+func (s *stubDriver) BodyGenerationPrompt() string { return "generate tests for {{.MemberName}}" }
+func (s *stubDriver) FileExtensions() []string     { return []string{".py"} }
+func (s *stubDriver) GetTestFrameworkConfig() domain.TestFrameworkConfig {
+	return domain.TestFrameworkConfig{}
+}
+func (s *stubDriver) LLMContext(_ *domain.ProjectContext) map[string]string    { return nil }
 func (s *stubDriver) DetectProject(dir string) (*domain.ProjectContext, error) { return nil, nil }
 func (s *stubDriver) AnalyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysis, error) {
 	return nil, nil
@@ -101,5 +103,5 @@ func (s *stubDriver) GenerateBootstrap(plan *domain.GenerationPlan, ctx *domain.
 func (s *stubDriver) ListAdapters(_ *domain.ProjectContext) ([]domain.TestAdapter, domain.TestAdapter) {
 	return nil, nil
 }
-func (s *stubDriver) ListMigrators() []domain.Migrator { return nil }
+func (s *stubDriver) ListMigrators() []domain.Migrator                     { return nil }
 func (s *stubDriver) ValidateFile(_, _, _ string) []domain.ValidationIssue { return nil }

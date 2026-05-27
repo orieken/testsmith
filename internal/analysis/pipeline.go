@@ -100,9 +100,9 @@ func (p *Pipeline) discoverSources(root string, excludeDirs []string) ([]string,
 	fwCfg := p.driver.GetTestFrameworkConfig()
 
 	var sources []string
-	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return nil // skip unreadable entries
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return nil // skip unreadable entries; continue the walk
 		}
 		if d.IsDir() {
 			if excludeSet[d.Name()] {

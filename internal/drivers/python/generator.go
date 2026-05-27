@@ -11,7 +11,6 @@ import (
 	"github.com/orieken/testsmith/internal/domain"
 )
 
-
 // generateTestFile produces a test scaffold for the given analysis using the
 // selected adapter (pytest+pytest-mock by default, overrideable via config).
 func generateTestFile(analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {

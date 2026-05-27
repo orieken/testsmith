@@ -11,8 +11,8 @@ type Driver struct{}
 
 func New() *Driver { return &Driver{} }
 
-func (d *Driver) Language() string            { return "go" }
-func (d *Driver) FileExtensions() []string    { return []string{".go"} }
+func (d *Driver) Language() string             { return "go" }
+func (d *Driver) FileExtensions() []string     { return []string{".go"} }
 func (d *Driver) BodyGenerationPrompt() string { return goBodyPrompt }
 func (d *Driver) LLMContext(ctx *domain.ProjectContext) map[string]string {
 	vocab := registry.SelectFromContext(ctx).LLMVocabulary()

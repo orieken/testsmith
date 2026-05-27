@@ -20,11 +20,11 @@ type Provider interface {
 
 // CompletionRequest is the provider-agnostic request payload.
 type CompletionRequest struct {
-	SystemPrompt   string
-	UserPrompt     string
-	Model          string
-	MaxTokens      int
-	Temperature    float64
+	SystemPrompt string
+	UserPrompt   string
+	Model        string
+	MaxTokens    int
+	Temperature  float64
 	// ResponseFormat instructs the provider to return structured output.
 	// Currently only "json_object" is defined. Providers that do not support
 	// structured output silently ignore this field.

@@ -122,13 +122,13 @@ func (p *Pipeline) fetchBodies(ctx context.Context, analysis *domain.SourceAnaly
 	}
 
 	// Project-derived facts, constant across all members in this file.
-	extra["module_path"]   = analysis.ModulePath
-	extra["module_name"]   = analysis.ModuleName()
-	extra["language"]      = analysis.Project.Language
+	extra["module_path"] = analysis.ModulePath
+	extra["module_name"] = analysis.ModuleName()
+	extra["language"] = analysis.Project.Language
 	extra["external_deps"] = externalDepList(analysis.Imports.External)
 
-	rawDeps     := buildDepsSignatures(analysis, p.depIndex)
-	rawSnippet  := mineConventions(analysis.SourcePath, fwCfg)
+	rawDeps := buildDepsSignatures(analysis, p.depIndex)
+	rawSnippet := mineConventions(analysis.SourcePath, fwCfg)
 	projectKnow := projectknowledge.LoadForFile(analysis.SourcePath, analysis.Project.Root)
 	if projectKnow == "" {
 		projectKnow = analysis.Project.ProjectKnowledge
@@ -137,13 +137,13 @@ func (p *Pipeline) fetchBodies(ctx context.Context, analysis *domain.SourceAnaly
 	// Apply token budget: trim lower-priority tiers when the combined prompt
 	// would exceed p.promptTokenBudget. Priority 1 = must-keep.
 	tiers := []projectknowledge.Tier{
-		{Name: "source",  Content: analysis.RawSource, Priority: 1},
-		{Name: "deps",    Content: rawDeps,             Priority: 2},
-		{Name: "snippet", Content: rawSnippet,          Priority: 3},
+		{Name: "source", Content: analysis.RawSource, Priority: 1},
+		{Name: "deps", Content: rawDeps, Priority: 2},
+		{Name: "snippet", Content: rawSnippet, Priority: 3},
 	}
-	trimmed      := projectknowledge.TrimToBudget(tiers, p.promptTokenBudget)
-	depsSignatures  := trimmed[1]
-	styleSnippet    := trimmed[2]
+	trimmed := projectknowledge.TrimToBudget(tiers, p.promptTokenBudget)
+	depsSignatures := trimmed[1]
+	styleSnippet := trimmed[2]
 
 	// Build one request per public member — shared fields are identical across all.
 	reqs := make([]domain.BodyGenRequest, len(analysis.PublicAPI))
@@ -208,8 +208,7 @@ func mineConventions(sourcePath string, fwCfg domain.TestFrameworkConfig) string
 		maxTotalLines      = 80
 	)
 
-	dir := strings.TrimSuffix(sourcePath, "/"+strings.TrimPrefix(sourcePath, sourcePath))
-	// filepath.Dir is not imported here; reconstruct via strings.
+	var dir string
 	if idx := strings.LastIndexAny(sourcePath, "/\\"); idx >= 0 {
 		dir = sourcePath[:idx]
 	} else {

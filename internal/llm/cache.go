@@ -16,9 +16,9 @@ import (
 // The cache is intentionally in-memory and per-run. Cross-run persistence would
 // require a file-backed store and is a future enhancement.
 type ResultCache struct {
-	mu    sync.RWMutex
-	store map[string][]domain.BodyGenResult
-	hits  int
+	mu     sync.RWMutex
+	store  map[string][]domain.BodyGenResult
+	hits   int
 	misses int
 }
 

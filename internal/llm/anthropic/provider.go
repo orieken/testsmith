@@ -50,13 +50,13 @@ func (p *Provider) Complete(ctx context.Context, req llm.CompletionRequest) (llm
 	// The system prompt and user prompt are both marked ephemeral — Anthropic
 	// caches these for up to 5 minutes, cutting repeat token costs by ~90%.
 	systemBlock := map[string]any{
-		"type": "text",
-		"text": req.SystemPrompt,
+		"type":          "text",
+		"text":          req.SystemPrompt,
 		"cache_control": map[string]string{"type": "ephemeral"},
 	}
 	userBlock := map[string]any{
-		"type": "text",
-		"text": req.UserPrompt,
+		"type":          "text",
+		"text":          req.UserPrompt,
 		"cache_control": map[string]string{"type": "ephemeral"},
 	}
 	body := map[string]any{

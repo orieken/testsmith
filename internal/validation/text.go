@@ -45,15 +45,15 @@ func (v *TextValidator) Require(id, pattern, message string, sev domain.Severity
 // Forbid adds a rule that fires when pattern IS present.
 func (v *TextValidator) Forbid(id, pattern, message string, sev domain.Severity) *TextValidator {
 	v.rules = append(v.rules, rule{
-		id:       id,
-		severity: sev,
-		message:  message,
+		id:        id,
+		severity:  sev,
+		message:   message,
 		forbidden: regexp.MustCompile(pattern),
 	})
 	return v
 }
 
-func (v *TextValidator) Framework() string  { return v.framework }
+func (v *TextValidator) Framework() string   { return v.framework }
 func (v *TextValidator) MockLibrary() string { return v.mockLib }
 
 // Validate runs all rules against content and returns any issues found.

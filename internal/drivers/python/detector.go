@@ -175,10 +175,7 @@ func deriveTestPath(sourcePath string, ctx *domain.ProjectContext) (string, erro
 
 	// Normalise to forward slashes for the prefix check so this works on
 	// Windows (where filepath.Rel returns backslash-separated paths).
-	slashed := filepath.ToSlash(rel)
-	if strings.HasPrefix(slashed, "src/") {
-		slashed = slashed[4:]
-	}
+	slashed := strings.TrimPrefix(filepath.ToSlash(rel), "src/")
 	rel = filepath.FromSlash(slashed)
 
 	dir := filepath.Dir(rel)

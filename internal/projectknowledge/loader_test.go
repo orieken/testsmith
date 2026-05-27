@@ -4,7 +4,6 @@ import (
 	"testing"
 )
 
-
 func TestLoad(t *testing.T) {
 
 	tests := []struct {
@@ -19,7 +18,6 @@ func TestLoad(t *testing.T) {
 		})
 	}
 }
-
 
 func TestLoadForFile(t *testing.T) {
 
@@ -36,7 +34,6 @@ func TestLoadForFile(t *testing.T) {
 	}
 }
 
-
 func TestLoadForDir(t *testing.T) {
 
 	tests := []struct {
@@ -52,7 +49,6 @@ func TestLoadForDir(t *testing.T) {
 	}
 }
 
-
 func TestTemplate(t *testing.T) {
 
 	tests := []struct {
@@ -67,4 +63,3 @@ func TestTemplate(t *testing.T) {
 		})
 	}
 }
-

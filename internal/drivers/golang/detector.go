@@ -98,8 +98,8 @@ func parseModuleName(data []byte) string {
 // directory under root that contains at least one .go file.
 func scanPackages(root, modName string) map[string]string {
 	pkgMap := make(map[string]string)
-	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err != nil || !d.IsDir() {
+	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil || !d.IsDir() {
 			return nil
 		}
 		name := d.Name()

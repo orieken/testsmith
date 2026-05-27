@@ -8,8 +8,8 @@ import (
 	"github.com/orieken/testsmith/internal/domain"
 )
 
-var rootMarkers     = []string{"package.json", "tsconfig.json", "tsconfig.base.json"}
-var stopMarkers     = []string{".git", ".hg", ".svn"}
+var rootMarkers = []string{"package.json", "tsconfig.json", "tsconfig.base.json"}
+var stopMarkers = []string{".git", ".hg", ".svn"}
 
 type packageJSON struct {
 	Dependencies    map[string]string `json:"dependencies"`

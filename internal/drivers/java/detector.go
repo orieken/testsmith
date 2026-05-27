@@ -115,8 +115,8 @@ func readGroupIDFromPom(pomPath string) string {
 
 func scanBasePackageFromSources(root string) string {
 	var pkg string
-	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".java") {
+	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".java") {
 			return nil
 		}
 		if p := readPackageDecl(path); p != "" {

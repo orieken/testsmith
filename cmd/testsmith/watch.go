@@ -82,8 +82,8 @@ func runWatch(llmFlag bool, debounceMs int, wsFilter string) error {
 // until the context is cancelled or all watchers exit.
 func runWatchWorkspaces(sigCtx context.Context, cfg *config.Config, cwd string, llmFlag bool, debounceMs int, wsFilter string) error {
 	type watchEntry struct {
-		label     string
-		watcher   *watch.Watcher
+		label   string
+		watcher *watch.Watcher
 	}
 
 	var entries []watchEntry
@@ -139,4 +139,3 @@ func runWatchWorkspaces(sigCtx context.Context, cfg *config.Config, cwd string, 
 	}
 	return first
 }
-

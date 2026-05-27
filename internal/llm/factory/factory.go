@@ -36,7 +36,7 @@ func Build(cfg config.LLMConfig, driver domain.LanguageDriver) (domain.BodyGener
 	// Layer middleware: semaphore caps concurrency, retry handles transient errors.
 	// Order: retry wraps semaphore wraps raw provider — so each retry attempt
 	// waits for a semaphore slot independently, preventing slot starvation.
-	limited  := llm.WithSemaphore(rawProvider, cfg.MaxConcurrentCalls)
+	limited := llm.WithSemaphore(rawProvider, cfg.MaxConcurrentCalls)
 	provider := llm.WithRetry(limited, llm.RetryStrategy{
 		MaxAttempts: cfg.MaxRetryAttempts,
 		BaseDelay:   500 * time.Millisecond,

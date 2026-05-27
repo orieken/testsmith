@@ -156,7 +156,9 @@ func (a *pytestUnittestMockAdapter) MockLibrary() string { return "unittest.mock
 func (a *pytestUnittestMockAdapter) FrameworkConfig() domain.TestFrameworkConfig {
 	return a.toBase().FrameworkConfig()
 }
-func (a *pytestUnittestMockAdapter) toBase() *pytestPytestMockAdapter { return &pytestPytestMockAdapter{} }
+func (a *pytestUnittestMockAdapter) toBase() *pytestPytestMockAdapter {
+	return &pytestPytestMockAdapter{}
+}
 
 func (a *pytestUnittestMockAdapter) GenerateTestFile(analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (string, error) {
 	return render(pytestUnittestMockTmpl, newRenderData(analysis, opts))

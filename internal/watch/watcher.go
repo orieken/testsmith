@@ -161,14 +161,16 @@ func (w *Watcher) process(path string) {
 			fmt.Printf("  ✓ %s changed — created  %s\n", filepath.Base(path), rel)
 		case domain.ActionUpdate:
 			fmt.Printf("  ✓ %s changed — updated  %s\n", filepath.Base(path), rel)
+		case domain.ActionSkip:
+			// already up-to-date; nothing to report
 		}
 	}
 }
 
 // addDirs recursively adds all non-excluded directories to the watcher.
 func (w *Watcher) addDirs(watcher *fsnotify.Watcher, root string) error {
-	return filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
+	return filepath.WalkDir(root, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
 			return nil
 		}
 		if !d.IsDir() {

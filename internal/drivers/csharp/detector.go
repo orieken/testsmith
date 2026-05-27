@@ -33,8 +33,8 @@ func detectCSharpFramework(root string) (framework, mockLib string) {
 	framework, mockLib = "xunit", "moq"
 
 	var content strings.Builder
-	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".csproj") {
+	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".csproj") {
 			return nil
 		}
 		data, err := os.ReadFile(path)
@@ -122,8 +122,8 @@ func readCsprojNamespace(csprojPath string) string {
 
 func scanNamespaceFromSources(root string) string {
 	var ns string
-	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".cs") {
+	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".cs") {
 			return nil
 		}
 		if n := readNamespaceDecl(path); n != "" {
