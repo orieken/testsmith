@@ -4,7 +4,9 @@ import (
 	"github.com/orieken/testsmith/internal/drivers/csharp"
 	"github.com/orieken/testsmith/internal/drivers/golang"
 	"github.com/orieken/testsmith/internal/drivers/java"
+	"github.com/orieken/testsmith/internal/drivers/kotlin"
 	"github.com/orieken/testsmith/internal/drivers/python"
+	"github.com/orieken/testsmith/internal/drivers/rust"
 	"github.com/orieken/testsmith/internal/drivers/typescript"
 	"github.com/orieken/testsmith/internal/registry"
 )
@@ -27,4 +29,6 @@ func initRegistry() {
 	reg.Register(golang.New())
 	reg.Register(java.New())
 	reg.Register(csharp.New())
+	reg.Register(rust.New())
+	reg.Register(kotlin.New())
 }
