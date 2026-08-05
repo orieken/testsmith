@@ -125,7 +125,7 @@ func scanPackages(root string) (map[string]string, error) {
 
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil || !d.IsDir() {
-			return nil
+			return nil //nolint:nilerr
 		}
 		name := d.Name()
 		// Skip common non-package directories.
@@ -194,9 +194,7 @@ func deriveModulePath(sourcePath string, ctx *domain.ProjectContext) (string, er
 
 	// Normalise to forward slashes for the prefix check (Windows compatibility).
 	slashed := filepath.ToSlash(rel)
-	if strings.HasPrefix(slashed, "src/") {
-		slashed = slashed[4:]
-	}
+	slashed = strings.TrimPrefix(slashed, "src/")
 	rel = filepath.FromSlash(slashed)
 
 	// Remove .py suffix and replace separators with dots.

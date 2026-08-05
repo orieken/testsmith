@@ -1,6 +1,8 @@
 package python
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"strings"
 
@@ -19,13 +21,11 @@ func analyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysi
 
 	parser := sitter.NewParser()
 	parser.SetLanguage(python.GetLanguage())
-	tree := parser.Parse(nil, src)
-	root := tree.RootNode()
-
-	if root.HasError() {
-		// Non-fatal: log the error but continue with partial results.
-		// A syntax error in one node shouldn't abort the whole analysis.
+	tree, err := parser.ParseCtx(context.Background(), nil, src)
+	if err != nil {
+		return nil, fmt.Errorf("parse %s: %w", path, err)
 	}
+	root := tree.RootNode()
 
 	imports := extractImports(root, src)
 	publicAPI := extractPublicAPI(root, src)
@@ -333,19 +333,20 @@ func extractDocstring(block *sitter.Node, src []byte) string {
 	if block == nil {
 		return ""
 	}
-	// First statement in a block that is a string literal is the docstring.
-	for i := 0; i < int(block.ChildCount()); i++ {
-		child := block.Child(i)
-		if child.Type() == "expression_statement" {
-			for j := 0; j < int(child.ChildCount()); j++ {
-				gc := child.Child(j)
-				if gc.Type() == "string" {
-					raw := gc.Content(src)
-					return strings.Trim(raw, `"'`)
-				}
-			}
+	// Only the first statement in a block can be a docstring.
+	if block.ChildCount() == 0 {
+		return ""
+	}
+	child := block.Child(0)
+	if child.Type() != "expression_statement" {
+		return ""
+	}
+	for j := 0; j < int(child.ChildCount()); j++ {
+		gc := child.Child(j)
+		if gc.Type() == "string" {
+			raw := gc.Content(src)
+			return strings.Trim(raw, `"'`)
 		}
-		break // only check first statement
 	}
 	return ""
 }

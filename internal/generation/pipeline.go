@@ -61,11 +61,7 @@ func (p *Pipeline) Plan(
 	plan := &domain.GenerationPlan{DryRun: opts.DryRun}
 
 	if p.llm != nil && !opts.DryRun {
-		bodies, err := p.fetchBodies(ctx, analysis)
-		if err == nil {
-			opts.LLMBodies = bodies
-		}
-		// Non-fatal: LLM failure falls back to stubs.
+		opts.LLMBodies = p.fetchBodies(ctx, analysis)
 	}
 
 	extModules := uniqueRootModules(analysis.Imports.External)
@@ -112,7 +108,7 @@ func (p *Pipeline) Plan(
 	return plan, nil
 }
 
-func (p *Pipeline) fetchBodies(ctx context.Context, analysis *domain.SourceAnalysis) (map[string][]string, error) {
+func (p *Pipeline) fetchBodies(ctx context.Context, analysis *domain.SourceAnalysis) map[string][]string {
 	fwCfg := p.driver.GetTestFrameworkConfig()
 
 	// Adapter-aware vocabulary for the specific project's chosen framework.
@@ -190,7 +186,7 @@ func (p *Pipeline) fetchBodies(ctx context.Context, analysis *domain.SourceAnaly
 	for _, r := range results {
 		bodies[r.MemberName] = r.CodeLines
 	}
-	return bodies, nil
+	return bodies
 }
 
 // mineConventions scans up to maxConventionFiles test files in the same

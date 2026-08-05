@@ -6,10 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/orieken/testsmith/internal/config"
-	"github.com/orieken/testsmith/internal/projectknowledge"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+
+	"github.com/orieken/testsmith/internal/config"
+	"github.com/orieken/testsmith/internal/projectknowledge"
 )
 
 func newInitCmd() *cobra.Command {

@@ -8,13 +8,14 @@ import (
 	"runtime"
 	"sync"
 
+	"github.com/spf13/cobra"
+
 	"github.com/orieken/testsmith/internal/analysis"
 	"github.com/orieken/testsmith/internal/config"
 	"github.com/orieken/testsmith/internal/domain"
 	"github.com/orieken/testsmith/internal/generation"
 	"github.com/orieken/testsmith/internal/llm/factory"
 	"github.com/orieken/testsmith/internal/projectknowledge"
-	"github.com/spf13/cobra"
 )
 
 func newGenerateCmd() *cobra.Command {

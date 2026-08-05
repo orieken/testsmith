@@ -6,10 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/orieken/testsmith/internal/analysis"
 	"github.com/orieken/testsmith/internal/config"
 	"github.com/orieken/testsmith/internal/domain"
-	"github.com/spf13/cobra"
 )
 
 func newGraphCmd() *cobra.Command {

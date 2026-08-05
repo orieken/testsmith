@@ -35,11 +35,11 @@ func detectCSharpFramework(root string) (framework, mockLib string) {
 	var content strings.Builder
 	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".csproj") {
-			return nil
+			return nil //nolint:nilerr
 		}
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return nil
+			return nil //nolint:nilerr
 		}
 		content.Write(data)
 		return nil
@@ -124,7 +124,7 @@ func scanNamespaceFromSources(root string) string {
 	var ns string
 	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".cs") {
-			return nil
+			return nil //nolint:nilerr
 		}
 		if n := readNamespaceDecl(path); n != "" {
 			ns = n

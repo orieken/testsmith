@@ -20,7 +20,7 @@ func analyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysi
 	file, err := parser.ParseFile(fset, path, src, parser.ParseComments)
 	if err != nil {
 		// Non-fatal: return partial analysis on syntax errors.
-		return partialAnalysis(path, ctx, string(src)), nil
+		return partialAnalysis(path, ctx, string(src)), nil //nolint:nilerr
 	}
 
 	imports := extractImports(file)

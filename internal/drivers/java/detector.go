@@ -117,7 +117,7 @@ func scanBasePackageFromSources(root string) string {
 	var pkg string
 	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".java") {
-			return nil
+			return nil //nolint:nilerr
 		}
 		if p := readPackageDecl(path); p != "" {
 			pkg = p

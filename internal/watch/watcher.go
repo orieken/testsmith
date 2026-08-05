@@ -171,7 +171,7 @@ func (w *Watcher) process(path string) {
 func (w *Watcher) addDirs(watcher *fsnotify.Watcher, root string) error {
 	return filepath.WalkDir(root, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
-			return nil
+			return nil //nolint:nilerr
 		}
 		if !d.IsDir() {
 			return nil

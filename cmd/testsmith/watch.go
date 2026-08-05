@@ -8,10 +8,11 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"github.com/spf13/cobra"
+
 	"github.com/orieken/testsmith/internal/config"
 	"github.com/orieken/testsmith/internal/generation"
 	"github.com/orieken/testsmith/internal/watch"
-	"github.com/spf13/cobra"
 )
 
 func newWatchCmd() *cobra.Command {

@@ -97,7 +97,7 @@ func readPackageJSON(root string) (pkgMap map[string]string, framework, mockLib 
 
 // deriveTestPath co-locates the test file alongside the source file.
 // src/services/payment.ts → src/services/payment.test.ts
-func deriveTestPath(sourcePath string, ctx *domain.ProjectContext) (string, error) {
+func deriveTestPath(sourcePath string, _ *domain.ProjectContext) (string, error) {
 	ext := filepath.Ext(sourcePath)
 	base := sourcePath[:len(sourcePath)-len(ext)]
 	return base + ".test" + ext, nil

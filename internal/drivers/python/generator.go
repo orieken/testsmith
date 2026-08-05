@@ -32,7 +32,7 @@ func generateTestFile(analysis *domain.SourceAnalysis, opts domain.GenerateOpts)
 }
 
 // generateFixture produces or updates tests/fixtures/<dep>_fixture.py.
-func generateFixture(dep string, analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {
+func generateFixture(dep string, analysis *domain.SourceAnalysis, _ domain.GenerateOpts) (*domain.GeneratedFile, error) {
 	cfg := analysis.Project.LanguageConfig()
 	fixtureDir := filepath.Join(analysis.Project.Root, cfg["fixture_dir"])
 	fixturePath := filepath.Join(fixtureDir, dep+"_fixture.py")
@@ -42,10 +42,7 @@ func generateFixture(dep string, analysis *domain.SourceAnalysis, opts domain.Ge
 
 	// If the fixture already exists, merge rather than overwrite.
 	if existing, err := os.ReadFile(fixturePath); err == nil {
-		merged, err := mergeFixture(string(existing), dep, subModules)
-		if err != nil {
-			return nil, err
-		}
+		merged := mergeFixture(string(existing), dep, subModules)
 		return &domain.GeneratedFile{
 			AbsPath: fixturePath,
 			Content: merged,
@@ -103,7 +100,7 @@ func renderFixtureFile(dep string, subModules []string) (string, error) {
 }
 
 // mergeFixture appends any sub-modules not already present in the existing fixture content.
-func mergeFixture(existing, dep string, subModules []string) (string, error) {
+func mergeFixture(existing, dep string, subModules []string) string {
 	var newModules []string
 	for _, mod := range subModules {
 		if !strings.Contains(existing, `"`+mod+`"`) {
@@ -111,7 +108,7 @@ func mergeFixture(existing, dep string, subModules []string) (string, error) {
 		}
 	}
 	if len(newModules) == 0 {
-		return existing, nil
+		return existing
 	}
 
 	// Inject new mock attributes before the closing mocker.patch.dict call.
@@ -132,7 +129,7 @@ func mergeFixture(existing, dep string, subModules []string) (string, error) {
 	if idx := strings.LastIndex(out, "    })"); idx != -1 {
 		out = out[:idx] + dictLines.String() + out[idx:]
 	}
-	return out, nil
+	return out
 }
 
 // ---- helpers ----------------------------------------------------------------

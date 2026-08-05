@@ -16,13 +16,15 @@ var Version = "v2.0.0-dev"
 var reg *registry.Registry
 
 func main() {
-	// Composition root: register all language drivers.
+	initRegistry()
+	execute()
+}
+
+func initRegistry() {
 	reg = registry.New()
 	reg.Register(python.New())
 	reg.Register(typescript.New())
 	reg.Register(golang.New())
 	reg.Register(java.New())
 	reg.Register(csharp.New())
-
-	execute()
 }

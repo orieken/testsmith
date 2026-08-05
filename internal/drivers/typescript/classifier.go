@@ -6,7 +6,7 @@ import (
 	"github.com/orieken/testsmith/internal/domain"
 )
 
-func classifyDependency(imp domain.ImportInfo, ctx *domain.ProjectContext) domain.DependencyCategory {
+func classifyDependency(imp domain.ImportInfo, _ *domain.ProjectContext) domain.DependencyCategory {
 	module := imp.Module
 
 	// Relative/path-alias imports are internal.

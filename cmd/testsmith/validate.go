@@ -5,9 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
+
 	"github.com/orieken/testsmith/internal/config"
 	"github.com/orieken/testsmith/internal/domain"
-	"github.com/spf13/cobra"
 )
 
 func newValidateCmd() *cobra.Command {
@@ -80,7 +81,7 @@ func runValidate(langFlag, pathFlag, wsFilter string) error {
 		searchRoot = abs
 	}
 
-	errors, _, _ := validateRoot(driver, ctx, searchRoot)
+	errors := validateRoot(driver, ctx, searchRoot)
 	if errors > 0 {
 		return fmt.Errorf("validation failed: %d error(s) found", errors)
 	}
@@ -108,7 +109,7 @@ func runValidateWorkspaces(cfg *config.Config, cwd, wsFilter string) error {
 		}
 		config.ApplyToContext(cfg, ctx)
 
-		errs, _, _ := validateRoot(driver, ctx, wsRoot)
+		errs := validateRoot(driver, ctx, wsRoot)
 		grandErrors += errs
 	}
 
@@ -119,12 +120,12 @@ func runValidateWorkspaces(cfg *config.Config, cwd, wsFilter string) error {
 }
 
 // validateRoot runs the validation loop for one driver+root and prints results.
-// Returns (errors, warnings, filesWithIssues).
-func validateRoot(driver domain.LanguageDriver, ctx *domain.ProjectContext, searchRoot string) (int, int, int) {
+// Returns the error count.
+func validateRoot(driver domain.LanguageDriver, ctx *domain.ProjectContext, searchRoot string) int {
 	_, selected := driver.ListAdapters(ctx)
 	if selected == nil {
 		fmt.Fprintf(os.Stderr, "  no adapter selected for %s project\n", ctx.Language)
-		return 0, 0, 0
+		return 0
 	}
 
 	framework := selected.Framework()
@@ -137,12 +138,12 @@ func validateRoot(driver domain.LanguageDriver, ctx *domain.ProjectContext, sear
 	files, err := discoverValidationFiles(searchRoot, driver)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "  discover error: %v\n", err)
-		return 0, 0, 0
+		return 0
 	}
 
 	if len(files) == 0 {
 		fmt.Println("  No test files found.")
-		return 0, 0, 0
+		return 0
 	}
 
 	var totalErrors, totalWarnings, filesWithIssues int
@@ -175,7 +176,7 @@ func validateRoot(driver domain.LanguageDriver, ctx *domain.ProjectContext, sear
 	fmt.Printf("\nChecked %d file(s): %d error(s), %d warning(s) across %d file(s)\n",
 		len(files), totalErrors, totalWarnings, filesWithIssues)
 
-	return totalErrors, totalWarnings, filesWithIssues
+	return totalErrors
 }
 
 func issueIndicator(errors, warnings int) string {

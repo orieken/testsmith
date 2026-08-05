@@ -1,6 +1,8 @@
 package java
 
 import (
+	"context"
+	"fmt"
 	"os"
 
 	sitter "github.com/smacker/go-tree-sitter"
@@ -17,7 +19,10 @@ func analyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysi
 
 	parser := sitter.NewParser()
 	parser.SetLanguage(sitterjava.GetLanguage())
-	tree := parser.Parse(nil, src)
+	tree, err := parser.ParseCtx(context.Background(), nil, src)
+	if err != nil {
+		return nil, fmt.Errorf("parse %s: %w", path, err)
+	}
 	root := tree.RootNode()
 
 	imports := extractImports(root, src)

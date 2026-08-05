@@ -5,11 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
+
 	"github.com/orieken/testsmith/internal/analysis"
 	"github.com/orieken/testsmith/internal/config"
 	"github.com/orieken/testsmith/internal/domain"
 	"github.com/orieken/testsmith/internal/generation"
-	"github.com/spf13/cobra"
 )
 
 func newGapsCmd() *cobra.Command {

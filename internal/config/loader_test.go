@@ -4,8 +4,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/config"
 	"gopkg.in/yaml.v3"
+
+	"github.com/orieken/testsmith/internal/config"
 )
 
 // TestLoadFromFile_SnakeCaseFields verifies that snake_case YAML keys produced

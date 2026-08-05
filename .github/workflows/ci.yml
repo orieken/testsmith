@@ -41,6 +41,40 @@ jobs:
         env:
           CGO_ENABLED: "1"
 
+  coverage:
+    name: Coverage gate (≥65%)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install GCC
+        run: sudo apt-get update && sudo apt-get install -y gcc
+
+      - name: Collect coverage
+        run: go test -coverprofile=coverage.out -covermode=atomic ./... -timeout 120s
+        env:
+          CGO_ENABLED: "1"
+
+      - name: Enforce coverage threshold
+        run: |
+          threshold=65
+          actual=$(go tool cover -func=coverage.out | awk '/^total:/{gsub(/%/,""); print $3}')
+          echo "Coverage: ${actual}%  (threshold: ${threshold}%)"
+          awk -v a="$actual" -v t="$threshold" \
+            'BEGIN { if (a+0 < t+0) { print "FAIL: " a "% < " t "%"; exit 1 } print "PASS: " a "%" }'
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.out
+          retention-days: 7
+
   lint:
     name: Lint
     runs-on: ubuntu-latest

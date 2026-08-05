@@ -73,3 +73,8 @@ testsmith_graph.md
 
 # Local notes (drafts, emails, scratch)
 /notes/
+
+# Local environment — never commit real secrets
+.env
+.env.local
+.env.*.local

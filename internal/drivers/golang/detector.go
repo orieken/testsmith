@@ -100,7 +100,7 @@ func scanPackages(root, modName string) map[string]string {
 	pkgMap := make(map[string]string)
 	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil || !d.IsDir() {
-			return nil
+			return nil //nolint:nilerr
 		}
 		name := d.Name()
 		switch name {

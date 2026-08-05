@@ -26,7 +26,7 @@ func generateTestFile(analysis *domain.SourceAnalysis, opts domain.GenerateOpts)
 	}, nil
 }
 
-func generateMock(dep string, analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {
+func generateMock(dep string, analysis *domain.SourceAnalysis, _ domain.GenerateOpts) (*domain.GeneratedFile, error) {
 	cfg := analysis.Project.LanguageConfig()
 	mockDir := filepath.Join(analysis.Project.Root, cfg["fixture_dir"])
 	if mockDir == "" {

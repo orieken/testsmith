@@ -1,6 +1,8 @@
 package typescript
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,7 +23,10 @@ func analyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysi
 	lang := tsLanguage(path)
 	parser := sitter.NewParser()
 	parser.SetLanguage(lang)
-	tree := parser.Parse(nil, src)
+	tree, err := parser.ParseCtx(context.Background(), nil, src)
+	if err != nil {
+		return nil, fmt.Errorf("parse %s: %w", path, err)
+	}
 	root := tree.RootNode()
 
 	imports := extractImports(root, src)

@@ -102,7 +102,7 @@ func (p *Pipeline) discoverSources(root string, excludeDirs []string) ([]string,
 	var sources []string
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
-			return nil // skip unreadable entries; continue the walk
+			return nil //nolint:nilerr // skip unreadable entries; continue the walk
 		}
 		if d.IsDir() {
 			if excludeSet[d.Name()] {

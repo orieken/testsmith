@@ -1,11 +1,11 @@
-// Package main_test contains black-box CLI integration tests.
-// TestMain compiles the binary once to a temp directory; every test
-// invokes it as a subprocess so the full cobra command tree is exercised.
+// Package main_test contains CLI integration tests.
+// TestMain uses the TestHelperProcess pattern: the test binary re-invokes
+// itself via TestSubprocessMain so coverage counters stay in the same
+// instrumented binary and can be collected via GOCOVERDIR.
 package main_test
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -21,34 +21,37 @@ var binaryPath string
 var testdataDir string
 
 func TestMain(m *testing.M) {
+	// Short-circuit: when we are the subprocess, just run the requested test.
+	if os.Getenv("GO_TESTSMITH_SUBPROCESS") == "1" {
+		os.Exit(m.Run())
+	}
+
 	// Locate the module root from this file's path.
 	_, file, _, _ := runtime.Caller(0)
 	moduleRoot := filepath.Join(filepath.Dir(file), "..", "..")
 	testdataDir = filepath.Join(moduleRoot, "testdata")
 
-	// Build the binary once.
-	bin := filepath.Join(os.TempDir(), "testsmith-cli-test")
-	if runtime.GOOS == "windows" {
-		bin += ".exe"
-	}
-	out, err := exec.Command("go", "build", "-o", bin, moduleRoot+"/cmd/testsmith").CombinedOutput()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "build failed: %v\n%s\n", err, out)
-		os.Exit(1)
-	}
-	binaryPath = bin
+	// Use the test binary itself as the CLI subprocess so that coverage
+	// counters live in the same instrumented binary (collected via GOCOVERDIR).
+	binaryPath = os.Args[0]
 
-	code := m.Run()
-	os.Remove(bin)
-	os.Exit(code)
+	os.Exit(m.Run())
 }
 
-// run executes the compiled binary with the given arguments and working directory.
+// run executes the test binary as a subprocess via the TestHelperProcess pattern.
 // It returns stdout+stderr combined, and the exit code.
 func run(t *testing.T, dir string, args ...string) (string, int) {
 	t.Helper()
-	cmd := exec.Command(binaryPath, args...)
+	cmd := exec.Command(binaryPath,
+		"-test.run=TestSubprocessMain",
+		"-test.v=false",
+		"-test.count=1",
+	)
 	cmd.Dir = dir
+	cmd.Env = append(os.Environ(),
+		"GO_TESTSMITH_SUBPROCESS=1",
+		"GO_TESTSMITH_ARGS="+strings.Join(args, "\x1e"),
+	)
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
