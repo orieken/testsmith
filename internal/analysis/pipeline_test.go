@@ -1,6 +1,7 @@
 package analysis_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -53,6 +54,17 @@ func (f *fakeDriver) ListAdapters(_ *domain.ProjectContext) ([]domain.TestAdapte
 }
 func (f *fakeDriver) ListMigrators() []domain.Migrator                     { return nil }
 func (f *fakeDriver) ValidateFile(_, _, _ string) []domain.ValidationIssue { return nil }
+
+// errDriver is a fakeDriver variant that returns errors for DeriveTestPath and AnalyzeFile.
+type errDriver struct{ fakeDriver }
+
+func (e *errDriver) DeriveTestPath(_ string, _ *domain.ProjectContext) (string, error) {
+	return "", fmt.Errorf("derive test path: unsupported")
+}
+
+func (e *errDriver) AnalyzeFile(_ string, _ *domain.ProjectContext) (*domain.SourceAnalysis, error) {
+	return nil, fmt.Errorf("analyze file: parse error")
+}
 
 // ---- helpers ----------------------------------------------------------------
 
@@ -179,6 +191,45 @@ func TestDiscoverAndAnalyzeAll_NoSources(t *testing.T) {
 	}
 	if len(analyses) != 0 {
 		t.Errorf("expected 0 analyses in empty dir, got %d", len(analyses))
+	}
+}
+
+// ---- error-path coverage ----------------------------------------------------
+
+func TestDiscoverUntested_DeriveTestPathError_SkipsFile(t *testing.T) {
+	dir := t.TempDir()
+	d := &errDriver{fakeDriver{ext: ".fake", testSuffix: "_test.fake"}}
+	p := analysis.New(d)
+	ctx := &domain.ProjectContext{Root: dir}
+
+	writeFile(t, filepath.Join(dir, "payment.fake"), "// source")
+
+	files, err := p.DiscoverUntested(dir, ctx)
+	if err != nil {
+		t.Fatalf("DiscoverUntested: %v", err)
+	}
+	// errDriver.DeriveTestPath always errors, so every file is skipped.
+	if len(files) != 0 {
+		t.Errorf("expected 0 files (all skipped), got %d: %v", len(files), files)
+	}
+}
+
+func TestDiscoverAndAnalyzeAll_AnalyzeFileError_SkipsFile(t *testing.T) {
+	dir := t.TempDir()
+	d := &errDriver{fakeDriver{ext: ".fake", testSuffix: "_test.fake"}}
+	p := analysis.New(d)
+	ctx := &domain.ProjectContext{Root: dir}
+
+	writeFile(t, filepath.Join(dir, "a.fake"), "// a")
+	writeFile(t, filepath.Join(dir, "b.fake"), "// b")
+
+	analyses, err := p.DiscoverAndAnalyzeAll(dir, ctx)
+	if err != nil {
+		t.Fatalf("DiscoverAndAnalyzeAll: %v", err)
+	}
+	// errDriver.AnalyzeFile always errors, so both files are skipped.
+	if len(analyses) != 0 {
+		t.Errorf("expected 0 analyses (all skipped), got %d", len(analyses))
 	}
 }
 

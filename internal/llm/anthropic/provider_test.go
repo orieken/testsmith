@@ -57,3 +57,64 @@ func TestComplete_Non200_ReturnsError(t *testing.T) {
 		t.Error("expected error for 401 response")
 	}
 }
+
+func TestNew_DefaultBaseURL(t *testing.T) {
+	p := anthropic.New("key", "")
+	if p == nil {
+		t.Fatal("New returned nil")
+	}
+}
+
+func TestComplete_CacheTokensIncludedInTotal(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"content": []map[string]string{{"text": "result"}},
+			"usage": map[string]int{
+				"input_tokens":               10,
+				"output_tokens":              5,
+				"cache_read_input_tokens":    3,
+				"cache_creation_input_tokens": 2,
+			},
+		})
+	}))
+	defer srv.Close()
+
+	p := anthropic.New("key", srv.URL)
+	resp, err := p.Complete(context.Background(), llm.CompletionRequest{Model: "m", MaxTokens: 100})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// 10 + 5 + 3 + 2 = 20
+	if resp.TokensUsed != 20 {
+		t.Errorf("TokensUsed: got %d, want 20", resp.TokensUsed)
+	}
+}
+
+func TestComplete_EmptyContent_ReturnsEmptyString(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"content": []any{},
+			"usage":   map[string]int{"input_tokens": 1, "output_tokens": 0},
+		})
+	}))
+	defer srv.Close()
+
+	p := anthropic.New("key", srv.URL)
+	resp, err := p.Complete(context.Background(), llm.CompletionRequest{Model: "m", MaxTokens: 10})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Content != "" {
+		t.Errorf("expected empty content, got %q", resp.Content)
+	}
+}
+
+func TestComplete_NetworkError(t *testing.T) {
+	p := anthropic.New("key", "http://127.0.0.1:1")
+	_, err := p.Complete(context.Background(), llm.CompletionRequest{Model: "m", MaxTokens: 10})
+	if err == nil {
+		t.Error("expected error for unreachable host")
+	}
+}

@@ -96,6 +96,25 @@ languages:
 	}
 }
 
+func TestLoadFromFile_NonExistentPath_ReturnsError(t *testing.T) {
+	_, err := config.LoadFromFile("/nonexistent/path/that/will/never/exist.yaml")
+	if err == nil {
+		t.Error("expected error for non-existent file, got nil")
+	}
+}
+
+func TestLoadFromFile_InvalidYAML_ReturnsError(t *testing.T) {
+	tmp := t.TempDir() + "/bad.yaml"
+	if err := os.WriteFile(tmp, []byte(": this is not valid yaml: [\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := config.LoadFromFile(tmp)
+	if err == nil {
+		t.Error("expected error for invalid YAML, got nil")
+	}
+}
+
 // TestInitConfigRoundTrip verifies that yaml.Marshal on a Config struct
 // produces snake_case keys that LoadFromFile can read back.
 func TestInitConfigRoundTrip(t *testing.T) {

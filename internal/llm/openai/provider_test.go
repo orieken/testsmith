@@ -56,3 +56,69 @@ func TestComplete_Non200_ReturnsError(t *testing.T) {
 		t.Error("expected error for 429 response")
 	}
 }
+
+func TestNew_DefaultBaseURL(t *testing.T) {
+	// Passing "" should use the default endpoint without panicking.
+	p := openai.New("key", "")
+	if p == nil {
+		t.Fatal("New returned nil")
+	}
+}
+
+func TestComplete_WithResponseFormat(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body map[string]any
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		if _, ok := body["response_format"]; !ok {
+			t.Errorf("expected response_format in request body")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"choices": []map[string]any{
+				{"message": map[string]string{"content": "{}"}},
+			},
+			"usage": map[string]int{"total_tokens": 5},
+		})
+	}))
+	defer srv.Close()
+
+	p := openai.New("key", srv.URL)
+	resp, err := p.Complete(context.Background(), llm.CompletionRequest{
+		Model: "gpt-4o", MaxTokens: 10, ResponseFormat: "json_object",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Content == "" {
+		t.Error("expected non-empty content")
+	}
+}
+
+func TestComplete_EmptyChoices_ReturnsEmptyContent(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"choices": []any{},
+			"usage":   map[string]int{"total_tokens": 0},
+		})
+	}))
+	defer srv.Close()
+
+	p := openai.New("key", srv.URL)
+	resp, err := p.Complete(context.Background(), llm.CompletionRequest{Model: "m", MaxTokens: 10})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Content != "" {
+		t.Errorf("expected empty content for empty choices, got %q", resp.Content)
+	}
+}
+
+func TestComplete_NetworkError(t *testing.T) {
+	// Point at a port nothing is listening on.
+	p := openai.New("key", "http://127.0.0.1:1")
+	_, err := p.Complete(context.Background(), llm.CompletionRequest{Model: "m", MaxTokens: 10})
+	if err == nil {
+		t.Error("expected error for unreachable host")
+	}
+}

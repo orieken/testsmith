@@ -88,6 +88,18 @@ func TestGenerateBodies_NoCodeBlock_ReturnsNilLines(t *testing.T) {
 	}
 }
 
+func TestGenerateBodies_InvalidPromptTemplate_ReturnsError(t *testing.T) {
+	gen := llm.New(&stubProvider{content: "anything"},
+		map[string]string{"go": "{{.Unclosed"},
+		"model", 100, 0.0)
+
+	req := domain.BodyGenRequest{Language: "go", MemberName: "Foo", MemberKind: domain.KindFunction}
+	_, err := gen.GenerateBodies(context.Background(), req)
+	if err == nil {
+		t.Error("expected error for invalid template, got nil")
+	}
+}
+
 func TestGenerateBodies_ProviderError_Propagates(t *testing.T) {
 	gen := llm.New(&stubProvider{err: context.DeadlineExceeded},
 		nil, "model", 100, 0.0)
