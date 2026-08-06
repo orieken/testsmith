@@ -374,11 +374,17 @@ func TestRunInit_LangHint(t *testing.T) {
 	dir := t.TempDir()
 	testChdir(t, dir)
 	dryRun = false
-	if err := runInit("go"); err != nil {
+	if err := runInit("go", false); err != nil {
 		t.Fatalf("runInit(go): %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(dir, ".testsmith.yaml")); err != nil {
 		t.Error(".testsmith.yaml not created")
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".testsmith", "patterns")); err != nil {
+		t.Error(".testsmith/patterns/ not created")
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".testsmith", "patterns", "README.md")); err != nil {
+		t.Error(".testsmith/patterns/README.md not created")
 	}
 }
 
@@ -387,7 +393,7 @@ func TestRunInit_DryRun(t *testing.T) {
 	testChdir(t, dir)
 	dryRun = true
 	t.Cleanup(func() { dryRun = false })
-	if err := runInit("python"); err != nil {
+	if err := runInit("python", false); err != nil {
 		t.Fatalf("runInit dry-run: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(dir, ".testsmith.yaml")); !os.IsNotExist(err) {
@@ -401,7 +407,7 @@ func TestRunInit_AlreadyExists(t *testing.T) {
 	existing := "language: typescript\n"
 	os.WriteFile(filepath.Join(dir, ".testsmith.yaml"), []byte(existing), 0o644)
 	dryRun = false
-	if err := runInit("typescript"); err != nil {
+	if err := runInit("typescript", false); err != nil {
 		t.Fatalf("runInit when file exists: %v", err)
 	}
 	data, _ := os.ReadFile(filepath.Join(dir, ".testsmith.yaml"))
@@ -436,5 +442,98 @@ func TestRunConfigInit_DryRun(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(dir, ".testsmith.yaml")); !os.IsNotExist(err) {
 		t.Error("dry-run must not create .testsmith.yaml")
+	}
+}
+
+// ── parseLearnResponse ────────────────────────────────────────────────────────
+
+func TestParseLearnResponse(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    string
+		wantSlug string
+		wantBody string
+	}{
+		{
+			name:     "well-formed response with separator",
+			input:    "filename: mock-database-sqlmock\n\n---\n\nUse sqlmock for DB tests.",
+			wantSlug: "mock-database-sqlmock",
+			wantBody: "Use sqlmock for DB tests.",
+		},
+		{
+			name:     "filename line with trailing whitespace",
+			input:    "filename:  http-handler-httptest  \n\n---\n\nPattern body.",
+			wantSlug: "http-handler-httptest",
+			wantBody: "Pattern body.",
+		},
+		{
+			name:     "no separator between filename and body",
+			input:    "filename: table-driven-errors\n\nPattern body without separator.",
+			wantSlug: "table-driven-errors",
+			wantBody: "Pattern body without separator.",
+		},
+		{
+			name:     "no filename line returns empty slug and full raw body",
+			input:    "Some pattern content with no filename header.",
+			wantSlug: "",
+			wantBody: "Some pattern content with no filename header.",
+		},
+		{
+			name:     "empty input returns empty slug and empty body",
+			input:    "",
+			wantSlug: "",
+			wantBody: "",
+		},
+		{
+			name:     "multiline body preserved after separator",
+			input:    "filename: postgres-testcontainers\n\n---\n\nLine one.\n\nLine two.",
+			wantSlug: "postgres-testcontainers",
+			wantBody: "Line one.\n\nLine two.",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			gotSlug, gotBody := parseLearnResponse(tt.input)
+			if gotSlug != tt.wantSlug {
+				t.Errorf("slug = %q, want %q", gotSlug, tt.wantSlug)
+			}
+			if gotBody != tt.wantBody {
+				t.Errorf("body = %q, want %q", gotBody, tt.wantBody)
+			}
+		})
+	}
+}
+
+// ── slugFromPath ──────────────────────────────────────────────────────────────
+
+func TestSlugFromPath(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{name: "Go test file", input: "internal/payment/payment_test.go", want: "payment-pattern"},
+		{name: "TypeScript test file", input: "src/services/user.test.ts", want: "user-pattern"},
+		{name: "TypeScript spec file", input: "src/components/button.spec.ts", want: "button-pattern"},
+		{name: "JavaScript test file", input: "lib/utils.test.js", want: "utils-pattern"},
+		{name: "Java test file", input: "PaymentServiceTest.java", want: "paymentservice-pattern"},
+		{name: "Swift test file", input: "UserProfileViewModelTests.swift", want: "userprofileviewmodel-pattern"},
+		{name: "no known suffix keeps extension in slug", input: "internal/auth/handler.go", want: "handler-go-pattern"},
+		{name: "path with multiple directories uses basename only", input: "a/b/c/order_test.go", want: "order-pattern"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := slugFromPath(tt.input); got != tt.want {
+				t.Errorf("slugFromPath(%q) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
 	}
 }

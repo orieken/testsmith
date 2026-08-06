@@ -166,6 +166,88 @@ func TestLoadForDir(t *testing.T) {
 	}
 }
 
+func TestLoadPatterns(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		setup    func(root string)
+		contains []string
+		empty    bool
+	}{
+		{
+			name:  "returns empty when patterns directory is absent",
+			setup: func(_ string) {},
+			empty: true,
+		},
+		{
+			name: "returns empty when directory has no markdown files",
+			setup: func(root string) {
+				dir := filepath.Join(root, ".testsmith", "patterns")
+				if err := os.MkdirAll(dir, 0o755); err != nil {
+					t.Fatal(err)
+				}
+				writeTestFile(t, filepath.Join(dir, "notes.txt"), "not markdown")
+			},
+			empty: true,
+		},
+		{
+			name: "skips README.md",
+			setup: func(root string) {
+				dir := filepath.Join(root, ".testsmith", "patterns")
+				writeTestFile(t, filepath.Join(dir, "README.md"), "# README content")
+			},
+			empty: true,
+		},
+		{
+			name: "returns single pattern with header derived from filename",
+			setup: func(root string) {
+				dir := filepath.Join(root, ".testsmith", "patterns")
+				writeTestFile(t, filepath.Join(dir, "mock-database-sqlmock.md"), "Use sqlmock for DB tests.")
+			},
+			contains: []string{"### Pattern: mock-database-sqlmock", "Use sqlmock for DB tests."},
+		},
+		{
+			name: "merges multiple pattern files with separating newlines",
+			setup: func(root string) {
+				dir := filepath.Join(root, ".testsmith", "patterns")
+				writeTestFile(t, filepath.Join(dir, "pattern-a.md"), "Content A")
+				writeTestFile(t, filepath.Join(dir, "pattern-b.md"), "Content B")
+			},
+			contains: []string{"### Pattern: pattern-a", "Content A", "### Pattern: pattern-b", "Content B"},
+		},
+		{
+			name: "skips empty markdown files",
+			setup: func(root string) {
+				dir := filepath.Join(root, ".testsmith", "patterns")
+				writeTestFile(t, filepath.Join(dir, "empty.md"), "   ")
+				writeTestFile(t, filepath.Join(dir, "real.md"), "Has content")
+			},
+			contains: []string{"### Pattern: real", "Has content"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			root := t.TempDir()
+			tt.setup(root)
+			got := projectknowledge.LoadPatterns(root)
+			if tt.empty {
+				if got != "" {
+					t.Errorf("LoadPatterns() = %q, want empty string", got)
+				}
+				return
+			}
+			for _, want := range tt.contains {
+				if !strings.Contains(got, want) {
+					t.Errorf("LoadPatterns() does not contain %q\ngot:\n%s", want, got)
+				}
+			}
+		})
+	}
+}
+
 func TestTemplate(t *testing.T) {
 	t.Parallel()
 

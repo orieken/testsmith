@@ -41,6 +41,12 @@ go build -o testsmith ./cmd/testsmith
 ## Quick start
 
 ```sh
+# Initialise a project (creates .testsmith.yaml and .testsmith/patterns/)
+testsmith init
+
+# Also write Claude Code agents into .claude/agents/
+testsmith init --with-agents
+
 # Generate a test for one file
 testsmith generate src/services/payment.py
 
@@ -49,6 +55,9 @@ testsmith generate --all
 
 # Preview what would be generated without writing
 testsmith generate --all --dry-run
+
+# Capture a testing pattern from an existing test file (requires llm.enabled: true)
+testsmith learn src/services/payment_test.py
 
 # Start watching for changes (auto-regenerates on save)
 testsmith watch
@@ -213,19 +222,40 @@ testsmith watch --debounce 1000 --llm
 ---
 
 ### `init`
-Scaffold a `.testsmith.yaml` and create standard test directories.
+Scaffold a `.testsmith.yaml`, standard test directories, and a `.testsmith/patterns/` directory with a README.
 
 ```
 testsmith init [flags]
 
 Flags:
-  --lang <name>   Force a specific language instead of auto-detecting
-  --dry-run       Print what would be created without writing files
+  --lang <name>      Force a specific language instead of auto-detecting
+  --with-agents      Write bundled Claude Code agent files into .claude/agents/
+  --dry-run          Print what would be created without writing files
 ```
 
 ```sh
 testsmith init
 testsmith init --lang python
+testsmith init --with-agents   # also writes Claude Code agents into .claude/agents/
+```
+
+---
+
+### `learn`
+Read a test file, extract its non-obvious testing patterns using the configured LLM, and write the result to `.testsmith/patterns/<slug>.md` for future `generate` runs.
+
+Requires `llm.enabled: true` in `.testsmith.yaml`. Skips writing if the target pattern file already exists.
+
+```
+testsmith learn <file> [flags]
+
+Flags:
+  --dry-run   Print the extracted pattern without writing a file
+```
+
+```sh
+testsmith learn src/payment_test.py
+testsmith learn internal/db/store_test.go --dry-run
 ```
 
 ---

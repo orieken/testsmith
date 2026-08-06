@@ -40,6 +40,7 @@ func init() {
 		newGapsCmd(),
 		newWatchCmd(),
 		newInitCmd(),
+		newLearnCmd(),
 		newVersionCmd(),
 		newCompletionCmd(),
 	)

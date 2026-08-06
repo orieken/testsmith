@@ -129,6 +129,13 @@ func (p *Pipeline) fetchBodies(ctx context.Context, analysis *domain.SourceAnaly
 	if projectKnow == "" {
 		projectKnow = analysis.Project.ProjectKnowledge
 	}
+	if patterns := projectknowledge.LoadPatterns(analysis.Project.Root); patterns != "" {
+		if projectKnow != "" {
+			projectKnow += "\n\n---\n\n## Captured patterns\n\n" + patterns
+		} else {
+			projectKnow = "## Captured patterns\n\n" + patterns
+		}
+	}
 
 	// Apply token budget: trim lower-priority tiers when the combined prompt
 	// would exceed p.promptTokenBudget. Priority 1 = must-keep.

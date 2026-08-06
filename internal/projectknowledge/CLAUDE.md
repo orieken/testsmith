@@ -10,20 +10,26 @@ no domain imports — it depends only on the standard library.
 |---|---|
 | `loader.go` | `Load`, `LoadForFile`, `LoadForDir`, `Template` |
 | `budget.go` | `Tier`, `EstimateTokens`, `TrimToBudget`, `JoinTiers` |
+| `patterns.go` | `LoadPatterns`, `PatternsDir` |
 
 ## TESTSMITH.md hierarchy
 
 ```
 <project-root>/TESTSMITH.md       ← always loaded; project-wide conventions
 <source-dir>/TESTSMITH.md         ← merged below root when present (package overrides)
+<project-root>/.testsmith/patterns/*.md  ← appended by pipeline.go as ## Captured patterns
 ```
 
 - `Load(root)` — reads root-level file only
 - `LoadForFile(sourcePath, root)` — merges root + source directory
 - `LoadForDir(dir, root)` — same but takes a directory path directly (used for workspaces)
+- `LoadPatterns(root)` — reads all `*.md` files from `<root>/.testsmith/patterns/`, skips `README.md`, and returns them joined with `### Pattern: <filename>` section headers; returns empty string when the directory is absent
+- `PatternsDir(root)` — returns the absolute path to `<root>/.testsmith/patterns/`
 
-When both files exist, directory content is appended under `## Package-level conventions`.
+When both TESTSMITH.md files exist, directory content is appended under `## Package-level conventions`.
 When neither exists, returns empty string — callers must handle this gracefully.
+
+Pattern files are **not** appended by the loaders in this package. `generation/pipeline.go` calls `LoadPatterns` separately and appends the result to `projectKnow` (the budget-exempt system-prompt field) as a `## Captured patterns` section.
 
 ## Token budget
 

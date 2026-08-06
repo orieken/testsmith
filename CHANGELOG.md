@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+#### Pattern knowledge system
+- `.testsmith/patterns/` directory — consumer projects drop per-pattern markdown files (e.g. `mock-database-sqlmock.md`, `http-handler-test-setup.md`); merged into every LLM prompt as a `## Captured patterns` section alongside `TESTSMITH.md` (system-prompt, budget-exempt)
+- `learn <file>` subcommand — reads a corrected or hand-written test file, extracts the non-obvious testing pattern via LLM, and writes a new file into `.testsmith/patterns/` for human review and commit
+- `init` extended — scaffolds `.testsmith/patterns/` with a README alongside `.testsmith.yaml`; `init --with-agents` writes bundled Claude Code agent files into `.claude/agents/`
+
+#### Agent integration
+- Three bundled Claude Code agents shipped in `internal/agents/files/`: `testsmith-test-author`, `testsmith-pattern-curator`, `testsmith-migration-guide`
+- `init --with-agents` writes them into `.claude/agents/` — no network call, embedded via `go:embed`
+
 ---
 
 ## [2.0.0] — 2026-04-30
