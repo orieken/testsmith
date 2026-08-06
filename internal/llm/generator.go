@@ -33,8 +33,10 @@ type CompletionRequest struct {
 
 // CompletionResponse is the provider-agnostic response.
 type CompletionResponse struct {
-	Content    string
-	TokensUsed int
+	Content      string
+	InputTokens  int // prompt / input tokens; 0 when the provider doesn't report separately
+	OutputTokens int // completion / output tokens; 0 when the provider doesn't report separately
+	TokensUsed   int // total tokens = InputTokens + OutputTokens (+ cache tokens for Anthropic)
 }
 
 // LLMBodyGenerator implements domain.BodyGenerator.
@@ -45,12 +47,24 @@ type LLMBodyGenerator struct {
 	maxTokens   int
 	temperature float64
 	cache       *ResultCache
+	usage       TokenReport
 }
 
 // CacheStats returns the (hits, misses, size) triple from the in-process
 // result cache. Used by the CLI to print a summary under --verbose.
 func (g *LLMBodyGenerator) CacheStats() (hits, misses, size int) {
 	return g.cache.Stats()
+}
+
+// Usage returns accumulated token usage across all calls made through this generator.
+func (g *LLMBodyGenerator) Usage() *TokenReport {
+	return &g.usage
+}
+
+// UsageSummary returns a one-line token + cost report for the given model name.
+// Satisfies the usageSummaryReporter interface in cmd/testsmith/generate.go.
+func (g *LLMBodyGenerator) UsageSummary(model string) string {
+	return g.usage.Summary(model)
 }
 
 // New returns an LLMBodyGenerator.
@@ -116,6 +130,8 @@ func (g *LLMBodyGenerator) GenerateBodies(ctx context.Context, req domain.BodyGe
 	if err != nil {
 		return nil, err
 	}
+
+	g.usage.add(resp)
 
 	lines := parseCodeBlock(resp.Content)
 	results := []domain.BodyGenResult{{
@@ -189,6 +205,8 @@ func (g *LLMBodyGenerator) GenerateBatchBodies(ctx context.Context, reqs []domai
 	if err != nil {
 		return nil, err
 	}
+
+	g.usage.add(resp)
 
 	// Try JSON first (structured output path); fall back to delimiter regex when
 	// the provider doesn't support response_format or the JSON is malformed.

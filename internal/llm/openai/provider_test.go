@@ -21,7 +21,11 @@ func TestComplete_Success(t *testing.T) {
 			"choices": []map[string]any{
 				{"message": map[string]string{"content": "```go\nfunc TestFoo(t *testing.T) {}\n```"}},
 			},
-			"usage": map[string]int{"total_tokens": 20},
+			"usage": map[string]int{
+				"prompt_tokens":     14,
+				"completion_tokens": 6,
+				"total_tokens":      20,
+			},
 		})
 	}))
 	defer srv.Close()
@@ -36,8 +40,14 @@ func TestComplete_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+	if resp.InputTokens != 14 {
+		t.Errorf("InputTokens: got %d, want 14", resp.InputTokens)
+	}
+	if resp.OutputTokens != 6 {
+		t.Errorf("OutputTokens: got %d, want 6", resp.OutputTokens)
+	}
 	if resp.TokensUsed != 20 {
-		t.Errorf("tokens: got %d, want 20", resp.TokensUsed)
+		t.Errorf("TokensUsed: got %d, want 20", resp.TokensUsed)
 	}
 	if resp.Content == "" {
 		t.Error("expected non-empty content")

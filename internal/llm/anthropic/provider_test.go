@@ -71,9 +71,9 @@ func TestComplete_CacheTokensIncludedInTotal(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"content": []map[string]string{{"text": "result"}},
 			"usage": map[string]int{
-				"input_tokens":               10,
-				"output_tokens":              5,
-				"cache_read_input_tokens":    3,
+				"input_tokens":                10,
+				"output_tokens":               5,
+				"cache_read_input_tokens":     3,
 				"cache_creation_input_tokens": 2,
 			},
 		})
@@ -85,7 +85,13 @@ func TestComplete_CacheTokensIncludedInTotal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	// 10 + 5 + 3 + 2 = 20
+	// InputTokens = 10 + 3 + 2 = 15; OutputTokens = 5; Total = 20
+	if resp.InputTokens != 15 {
+		t.Errorf("InputTokens: got %d, want 15", resp.InputTokens)
+	}
+	if resp.OutputTokens != 5 {
+		t.Errorf("OutputTokens: got %d, want 5", resp.OutputTokens)
+	}
 	if resp.TokensUsed != 20 {
 		t.Errorf("TokensUsed: got %d, want 20", resp.TokensUsed)
 	}

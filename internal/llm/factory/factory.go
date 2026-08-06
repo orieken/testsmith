@@ -51,6 +51,31 @@ func Build(cfg config.LLMConfig, driver domain.LanguageDriver) (domain.BodyGener
 	return llm.New(provider, prompts, cfg.Model, cfg.MaxTokensPerFunction, cfg.Temperature), nil
 }
 
+// BuildProvider constructs a middleware-wrapped Provider without the BodyGenerator
+// abstraction. Use this when you need direct LLM access with a custom prompt
+// (e.g. the learn subcommand's pattern-extraction call).
+// Returns an error when LLM is disabled or the API key is missing.
+func BuildProvider(cfg config.LLMConfig) (llm.Provider, error) {
+	if !cfg.Enabled {
+		return nil, fmt.Errorf("LLM is disabled — set llm.enabled: true in .testsmith.yaml")
+	}
+	apiKey := os.Getenv(cfg.APIKeyEnvVar)
+	if apiKey == "" && cfg.Provider != "ollama" {
+		return nil, fmt.Errorf("LLM provider %q requires env var %s to be set", cfg.Provider, cfg.APIKeyEnvVar)
+	}
+	raw, err := buildProvider(cfg, apiKey)
+	if err != nil {
+		return nil, err
+	}
+	limited := llm.WithSemaphore(raw, 1)
+	return llm.WithRetry(limited, llm.RetryStrategy{
+		MaxAttempts: cfg.MaxRetryAttempts,
+		BaseDelay:   500 * time.Millisecond,
+		MaxDelay:    30 * time.Second,
+		Multiplier:  2.0,
+	}), nil
+}
+
 func buildProvider(cfg config.LLMConfig, apiKey string) (llm.Provider, error) {
 	switch cfg.Provider {
 	case "anthropic", "":

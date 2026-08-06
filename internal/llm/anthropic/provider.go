@@ -117,12 +117,14 @@ func (p *Provider) Complete(ctx context.Context, req llm.CompletionRequest) (llm
 		text = result.Content[0].Text
 	}
 
-	// Total tokens: include cache-related tokens so callers see accurate usage.
-	tokensUsed := result.Usage.InputTokens + result.Usage.OutputTokens +
+	// Input tokens: include cache-related tokens so the reported total is accurate.
+	inputTokens := result.Usage.InputTokens +
 		result.Usage.CacheReadInputTokens + result.Usage.CacheCreationInputTokens
 
 	return llm.CompletionResponse{
-		Content:    text,
-		TokensUsed: tokensUsed,
+		Content:      text,
+		InputTokens:  inputTokens,
+		OutputTokens: result.Usage.OutputTokens,
+		TokensUsed:   inputTokens + result.Usage.OutputTokens,
 	}, nil
 }

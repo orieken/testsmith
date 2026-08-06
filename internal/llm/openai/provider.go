@@ -92,7 +92,9 @@ func (p *Provider) Complete(ctx context.Context, req llm.CompletionRequest) (llm
 			} `json:"message"`
 		} `json:"choices"`
 		Usage struct {
-			TotalTokens int `json:"total_tokens"`
+			PromptTokens     int `json:"prompt_tokens"`
+			CompletionTokens int `json:"completion_tokens"`
+			TotalTokens      int `json:"total_tokens"`
 		} `json:"usage"`
 	}
 	if err := json.Unmarshal(raw, &result); err != nil {
@@ -105,7 +107,9 @@ func (p *Provider) Complete(ctx context.Context, req llm.CompletionRequest) (llm
 	}
 
 	return llm.CompletionResponse{
-		Content:    text,
-		TokensUsed: result.Usage.TotalTokens,
+		Content:      text,
+		InputTokens:  result.Usage.PromptTokens,
+		OutputTokens: result.Usage.CompletionTokens,
+		TokensUsed:   result.Usage.TotalTokens,
 	}, nil
 }

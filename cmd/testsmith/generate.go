@@ -151,6 +151,7 @@ func runGenerate(args []string, all bool, pathFlag string, llmFlag bool, overwri
 	fmt.Printf("\nProcessed %d file(s): %d created/updated, %d skipped, %d failed\n",
 		len(files), created, skipped, failed)
 	printCacheStats(bodyGen)
+	printUsageReport(bodyGen, cfg.LLM.Model)
 
 	if failed > 0 {
 		return fmt.Errorf("%d file(s) failed", failed)
@@ -219,6 +220,7 @@ func runGenerateWorkspaces(cfg *config.Config, cwd, wsFilter string, llmFlag, ov
 			pipeline, genPipeline, executor, ctx, opts,
 		)
 		printCacheStats(bodyGen)
+		printUsageReport(bodyGen, llmCfg.Model)
 		totalFiles += len(files)
 		totalCreated += created
 		totalSkipped += skipped
@@ -260,6 +262,11 @@ type cacheStatsReporter interface {
 	CacheStats() (hits, misses, size int)
 }
 
+// usageSummaryReporter is satisfied by *llm.LLMBodyGenerator.
+type usageSummaryReporter interface {
+	UsageSummary(model string) string
+}
+
 // printCacheStats emits LLM result-cache statistics when verbose mode is active
 // and the body generator supports reporting (i.e. it wraps an LLMBodyGenerator).
 func printCacheStats(bg domain.BodyGenerator) {
@@ -269,6 +276,19 @@ func printCacheStats(bg domain.BodyGenerator) {
 	if r, ok := bg.(cacheStatsReporter); ok {
 		hits, misses, size := r.CacheStats()
 		fmt.Printf("LLM cache — hits: %d  misses: %d  entries: %d\n", hits, misses, size)
+	}
+}
+
+// printUsageReport emits token usage and cost estimate after an LLM-assisted run.
+// Always printed when LLM was used and at least one API call was made.
+func printUsageReport(bg domain.BodyGenerator, model string) {
+	if bg == nil {
+		return
+	}
+	if r, ok := bg.(usageSummaryReporter); ok {
+		if s := r.UsageSummary(model); s != "" {
+			fmt.Println(s)
+		}
 	}
 }
 
