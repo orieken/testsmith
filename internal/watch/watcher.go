@@ -148,11 +148,7 @@ func (w *Watcher) process(path string) {
 		return
 	}
 
-	results, err := w.executor.Execute(plan)
-	if err != nil {
-		fmt.Printf("  ✗ %s: %v\n", filepath.Base(path), err)
-		return
-	}
+	results, _ := w.executor.Execute(plan)
 
 	for _, r := range results {
 		rel, _ := filepath.Rel(w.ctx.Root, r.AbsPath)

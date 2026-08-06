@@ -68,6 +68,88 @@ func TestBuild_AnthropicWithKey_ReturnsGenerator(t *testing.T) {
 	}
 }
 
+// ---- BuildProvider tests -------------------------------------------------------
+
+// backfill / AC: BuildProvider returns a distinct error when LLM is disabled,
+// unlike Build which returns nil,nil — callers of BuildProvider always need a live LLM.
+func TestBuildProvider_DisabledReturnsError(t *testing.T) {
+	t.Parallel()
+	_, err := factory.BuildProvider(config.LLMConfig{Enabled: false})
+	if err == nil {
+		t.Error("expected error when LLM is disabled; got nil")
+	}
+}
+
+// backfill / AC: BuildProvider returns error when non-ollama provider has no API key env var set.
+// Uses a unique env var name (TESTSMITH_NO_SUCH_KEY_XYZ) that is guaranteed absent in any
+// normal environment, so no explicit unset is required and the test is safe to run in parallel.
+func TestBuildProvider_MissingAPIKey_ReturnsError(t *testing.T) {
+	t.Parallel()
+	cfg := config.LLMConfig{
+		Enabled:      true,
+		Provider:     "anthropic",
+		APIKeyEnvVar: "TESTSMITH_NO_SUCH_KEY_XYZ",
+	}
+	_, err := factory.BuildProvider(cfg)
+	if err == nil {
+		t.Error("expected error when API key env var is unset; got nil")
+	}
+}
+
+// backfill / AC: BuildProvider returns a non-nil provider for ollama, which needs no API key.
+func TestBuildProvider_OllamaRequiresNoKey(t *testing.T) {
+	t.Parallel()
+	cfg := config.LLMConfig{
+		Enabled:          true,
+		Provider:         "ollama",
+		MaxRetryAttempts: 1,
+	}
+	p, err := factory.BuildProvider(cfg)
+	if err != nil {
+		t.Fatalf("ollama should not require an API key: %v", err)
+	}
+	if p == nil {
+		t.Error("expected non-nil provider for ollama")
+	}
+}
+
+// backfill / AC: BuildProvider returns a non-nil provider when the API key env var is set.
+// t.Setenv restores the env automatically after the test; no t.Parallel() per project rules.
+func TestBuildProvider_AnthropicWithKey_ReturnsProvider(t *testing.T) {
+	t.Setenv("TESTSMITH_ANTHROPIC_PROVIDER_KEY", "test-key")
+	cfg := config.LLMConfig{
+		Enabled:          true,
+		Provider:         "anthropic",
+		APIKeyEnvVar:     "TESTSMITH_ANTHROPIC_PROVIDER_KEY",
+		MaxRetryAttempts: 1,
+	}
+	p, err := factory.BuildProvider(cfg)
+	if err != nil {
+		t.Fatalf("unexpected error building anthropic provider: %v", err)
+	}
+	if p == nil {
+		t.Error("expected non-nil provider")
+	}
+}
+
+// backfill / AC: BuildProvider returns error for an unknown provider name,
+// even when an API key env var is present (key presence check passes; switch hits default).
+// t.Setenv restores the env automatically after the test; no t.Parallel() per project rules.
+func TestBuildProvider_UnknownProvider_ReturnsError(t *testing.T) {
+	t.Setenv("TESTSMITH_UNKNOWN_PROVIDER_KEY", "value")
+	cfg := config.LLMConfig{
+		Enabled:      true,
+		Provider:     "unknown-llm",
+		APIKeyEnvVar: "TESTSMITH_UNKNOWN_PROVIDER_KEY",
+	}
+	_, err := factory.BuildProvider(cfg)
+	if err == nil {
+		t.Error("expected error for unknown provider; got nil")
+	}
+}
+
+// ---- stubDriver ---------------------------------------------------------------
+
 // stubDriver satisfies domain.LanguageDriver minimally for factory tests.
 type stubDriver struct{}
 

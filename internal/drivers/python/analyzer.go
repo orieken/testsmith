@@ -116,22 +116,40 @@ func parseImportStatement(n *sitter.Node, src []byte) []domain.ImportInfo {
 }
 
 // parseImportFromStatement handles: from os import path  /  from . import foo  /  from os import *
+//
+// The smacker/go-tree-sitter Python grammar flattens imported names as dotted_name children
+// directly on the import_from_statement node (no import_from_names wrapper). The "import"
+// keyword child acts as the boundary: dotted_name before it is the module, dotted_name
+// after it are individual imported names.
 func parseImportFromStatement(n *sitter.Node, src []byte) *domain.ImportInfo {
 	imp := &domain.ImportInfo{
 		IsFrom:     true,
 		LineNumber: int(n.StartPoint().Row) + 1,
 	}
 
+	seenImport := false
 	for i := 0; i < int(n.ChildCount()); i++ {
 		child := n.Child(i)
 		switch child.Type() {
+		case "import":
+			seenImport = true
 		case "dotted_name":
-			imp.Module = child.Content(src)
+			if !seenImport {
+				imp.Module = child.Content(src)
+			} else {
+				imp.Names = append(imp.Names, child.Content(src))
+			}
 		case "relative_import":
-			// e.g. ".utils" or "..models"
 			imp.Module = child.Content(src)
-		case "import_from_names":
-			imp.Names = extractImportNames(child, src)
+		case "aliased_import":
+			// from x import y as z — capture original name "y"
+			for j := 0; j < int(child.ChildCount()); j++ {
+				gc := child.Child(j)
+				if gc.Type() == "dotted_name" || gc.Type() == "identifier" {
+					imp.Names = append(imp.Names, gc.Content(src))
+					break
+				}
+			}
 		case "wildcard_import":
 			imp.Names = []string{"*"}
 		}
@@ -141,27 +159,6 @@ func parseImportFromStatement(n *sitter.Node, src []byte) *domain.ImportInfo {
 		return nil
 	}
 	return imp
-}
-
-func extractImportNames(n *sitter.Node, src []byte) []string {
-	var names []string
-	for i := 0; i < int(n.ChildCount()); i++ {
-		child := n.Child(i)
-		switch child.Type() {
-		case "identifier":
-			names = append(names, child.Content(src))
-		case "aliased_import":
-			// from x import y as z — capture "y"
-			for j := 0; j < int(child.ChildCount()); j++ {
-				gc := child.Child(j)
-				if gc.Type() == "identifier" {
-					names = append(names, gc.Content(src))
-					break
-				}
-			}
-		}
-	}
-	return names
 }
 
 // extractPublicAPI walks the AST for top-level public functions and classes.

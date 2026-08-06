@@ -28,10 +28,11 @@ func generateTestFile(analysis *domain.SourceAnalysis, opts domain.GenerateOpts)
 
 func generateMock(dep string, analysis *domain.SourceAnalysis, _ domain.GenerateOpts) (*domain.GeneratedFile, error) {
 	cfg := analysis.Project.LanguageConfig()
-	mockDir := filepath.Join(analysis.Project.Root, cfg["fixture_dir"])
-	if mockDir == "" {
-		mockDir = filepath.Join(analysis.Project.Root, "__mocks__")
+	fixtureDir := cfg["fixture_dir"]
+	if fixtureDir == "" {
+		fixtureDir = "__mocks__"
 	}
+	mockDir := filepath.Join(analysis.Project.Root, fixtureDir)
 	mockPath := filepath.Join(mockDir, dep+".ts")
 
 	content := renderMockFile(dep)

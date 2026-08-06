@@ -136,6 +136,7 @@ generate-example-python-llm: build
 .PHONY: clean-example-python
 clean-example-python:
 	@find examples/python-service -name 'test_*.py' -print -delete
+	@find examples/python-service -name '*_fixture.py' -print -delete
 	@find examples/python-service -maxdepth 1 -name 'conftest.py' -print -delete
 	@find examples/python-service -name '__init__.py' -print -delete
 	@echo "python-service cleaned"
