@@ -1,7 +1,21 @@
-"""TestSmith - A project-agnostic Python test scaffold generator.
+"""testsmith — renamed to assay-cli.
 
-Copyright (c) 2026 Oscar Rieken <oriekenjr@gmail.com>
-Licensed under the MIT License. See LICENSE file for details.
+This package has been renamed. Please migrate:
+
+    pip uninstall testsmith
+    pip install assay-cli
+
+See https://github.com/orieken/assay for details.
 """
 
-__version__ = "1.1.7"
+import warnings
+
+warnings.warn(
+    "The 'testsmith' package has been renamed to 'assay-cli'. "
+    "Please run: pip uninstall testsmith && pip install assay-cli. "
+    "This package will receive no further updates.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+__version__ = "1.2.0"
