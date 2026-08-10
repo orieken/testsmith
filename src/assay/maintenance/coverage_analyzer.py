@@ -5,9 +5,9 @@ Coverage gap analysis for TestSmith.
 from pathlib import Path
 import re
 
-from testsmith.support.config import TestSmithConfig
-from testsmith.support.models import CoverageGap, ModuleMetrics
-from testsmith.generation.test_generator import derive_test_path
+from assay.support.config import TestSmithConfig
+from assay.support.models import CoverageGap, ModuleMetrics
+from assay.generation.test_generator import derive_test_path
 
 
 def detect_test_coverage(
@@ -137,9 +137,9 @@ def prioritize_gaps(
 
         # Suggested command
         if status == "no_test":
-            suggested_command = f"testsmith {source_path}"
+            suggested_command = f"assay {source_path}"
         else:
-            suggested_command = f"testsmith --generate-bodies {source_path}"
+            suggested_command = f"assay --generate-bodies {source_path}"
 
         gap = CoverageGap(
             source_path=source_path,

@@ -5,7 +5,7 @@ Configuration management for TestSmith.
 from dataclasses import dataclass, field
 from pathlib import Path
 import sys
-from testsmith.support.models import LLMConfig
+from assay.support.models import LLMConfig
 
 # Compat for Python < 3.11
 if sys.version_info >= (3, 11):
@@ -64,7 +64,7 @@ def load_config(path: Path | None = None) -> TestSmithConfig:
         with open(config_path, "rb") as f:
             data = tomllib.load(f)
 
-        config_data = data.get("tool", {}).get("testsmith", {})
+        config_data = data.get("tool", {}).get("assay", {})
 
         # Handle LLM config
         llm_data = config_data.pop("llm", {})

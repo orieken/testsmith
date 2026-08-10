@@ -4,7 +4,7 @@ Classification of imports into stdlib, internal, or external.
 
 import sys
 from pathlib import Path
-from testsmith.support.models import ImportInfo, ClassifiedImports
+from assay.support.models import ImportInfo, ClassifiedImports
 
 
 def get_stdlib_modules() -> frozenset[str]:

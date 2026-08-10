@@ -3,8 +3,8 @@ Inspects Python modules to extract their public API.
 """
 
 import ast
-from testsmith.support.models import PublicMember
-from testsmith.support.exceptions import SourceParseError
+from assay.support.models import PublicMember
+from assay.support.exceptions import SourceParseError
 
 
 def extract_public_functions(tree: ast.Module) -> list[PublicMember]:

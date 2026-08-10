@@ -3,11 +3,11 @@ Generates test skeleton files.
 """
 
 from pathlib import Path
-from testsmith.support.config import TestSmithConfig
-from testsmith.support.models import AnalysisResult, PublicMember, ImportInfo
-from testsmith.support.templates import render_test_file
-from testsmith.support.file_operations import safe_write, ensure_init_files
-from testsmith.generation.fixture_generator import derive_fixture_name
+from assay.support.config import TestSmithConfig
+from assay.support.models import AnalysisResult, PublicMember, ImportInfo
+from assay.support.templates import render_test_file
+from assay.support.file_operations import safe_write, ensure_init_files
+from assay.generation.fixture_generator import derive_fixture_name
 
 
 def derive_test_path(
@@ -60,7 +60,7 @@ def determine_fixture_params(
 
     for imp in external_imports:
         # We need the root package name to match the fixture generator logic.
-        # ImportInfo has `module`. `testsmith.core.import_classifier.extract_root_package` logic?
+        # ImportInfo has `module`. `assay.core.import_classifier.extract_root_package` logic?
         # We don't have that function exposed here easily unless we import it or assume ImportInfo
         # matches. ImportInfo.module is "stripe.checkout". Root is "stripe".
         # We should use the same logic or helper.
@@ -102,7 +102,7 @@ def generate_test_file(
     #
     # Let's try to derive dotted path from `analysis.source_path` relative to `project.root`.
     # And handle `src` stripping if common convention.
-    # `src/testsmith/core/source_analyzer.py` -> `testsmith.core.source_analyzer`
+    # `src/assay/core/source_analyzer.py` -> `assay.core.source_analyzer`
 
     # If source_path is absolute, make relative to root. If relative, use as is.
     if analysis.source_path.is_absolute():
@@ -117,7 +117,7 @@ def generate_test_file(
     parts[-1] = rel.stem
 
     # Heuristic: if first part is "src", remove it?
-    # Poetry projects: `packages = [{include = "testsmith", from = "src"}]`
+    # Poetry projects: `packages = [{include = "assay", from = "src"}]`
     # So `src` is NOT part of the module name.
     if parts[0] == "src":
         parts = parts[1:]
@@ -156,7 +156,7 @@ def generate_test_file(
 
         if member.kind == "class" and "body" not in m_dict:
             # For class, we have methods.
-            # PublicMember model (src/testsmith/support/models.py):
+            # PublicMember model (src/assay/support/models.py):
             # name, kind, line_number, docstring, parameters, methods (list[str] or list of object?)
             # Checking `models.py`: `methods: list[str] = field(default_factory=list)`
             # It stores method NAMES only.

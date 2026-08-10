@@ -4,9 +4,9 @@ Updates conftest.py to include necessary paths for test discovery.
 
 from pathlib import Path
 import ast
-from testsmith.support.config import TestSmithConfig
-from testsmith.support.templates import render_conftest_pytest_configure
-from testsmith.support.file_operations import safe_write
+from assay.support.config import TestSmithConfig
+from assay.support.templates import render_conftest_pytest_configure
+from assay.support.file_operations import safe_write
 
 
 def parse_paths_to_add(

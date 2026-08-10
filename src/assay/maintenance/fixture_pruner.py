@@ -5,9 +5,9 @@ Fixture pruning utilities for TestSmith.
 from pathlib import Path
 import re
 
-from testsmith.support.config import TestSmithConfig
-from testsmith.core.source_analyzer import analyze_file
-from testsmith.core.project_detector import build_project_context
+from assay.support.config import TestSmithConfig
+from assay.core.source_analyzer import analyze_file
+from assay.core.project_detector import build_project_context
 
 
 def scan_used_dependencies(project_root: Path, config: TestSmithConfig) -> set[str]:

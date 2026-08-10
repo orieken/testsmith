@@ -2,7 +2,7 @@
 Mermaid diagram renderer for dependency graphs.
 """
 
-from testsmith.support.models import DependencyGraph, ModuleMetrics
+from assay.support.models import DependencyGraph, ModuleMetrics
 
 
 def render_mermaid(graph: DependencyGraph, metrics: dict[str, ModuleMetrics]) -> str:

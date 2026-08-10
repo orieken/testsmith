@@ -4,10 +4,10 @@ Orchestrator for analyzing Python source files.
 
 import ast
 from pathlib import Path
-from testsmith.support.models import ImportInfo, AnalysisResult, ProjectContext
-from testsmith.support.exceptions import SourceParseError
-from testsmith.core.import_classifier import classify_all
-from testsmith.core.module_inspector import inspect_module
+from assay.support.models import ImportInfo, AnalysisResult, ProjectContext
+from assay.support.exceptions import SourceParseError
+from assay.core.import_classifier import classify_all
+from assay.core.module_inspector import inspect_module
 
 
 def extract_imports(tree: ast.Module) -> list[ImportInfo]:
@@ -112,7 +112,7 @@ def analyze_file(source_path: Path, project_context: ProjectContext) -> Analysis
     public_api = inspect_module(source_code, str(source_path))
 
     # Derive module name
-    # e.g. src/testsmith/core/source_analyzer.py -> testsmith.core.source_analyzer ?
+    # e.g. src/assay/core/source_analyzer.py -> assay.core.source_analyzer ?
     # Or just filename stem? Prompt says: "Derive module_name from the filename (e.g., payment_processor.py -> payment_processor)"
     # This implies just the stem.
     module_name = source_path.stem

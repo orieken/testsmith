@@ -6,40 +6,40 @@ import argparse
 import sys
 from pathlib import Path
 
-from testsmith.support.config import load_config
-from testsmith.support.exceptions import ProjectRootNotFoundError
-from testsmith.core.project_detector import build_project_context
-from testsmith.core.source_analyzer import analyze_file
-from testsmith.core.discovery import discover_untested_files, discover_files_in_path
-from testsmith.generation.conftest_updater import (
+from assay.support.config import load_config
+from assay.support.exceptions import ProjectRootNotFoundError
+from assay.core.project_detector import build_project_context
+from assay.core.source_analyzer import analyze_file
+from assay.core.discovery import discover_untested_files, discover_files_in_path
+from assay.generation.conftest_updater import (
     update_conftest,
     compute_required_paths,
 )
-from testsmith.generation.llm_generator import generate_test_bodies
-from testsmith.generation.test_generator import generate_test
-from testsmith.generation.fixture_generator import generate_or_update_fixture
-from testsmith.visualization.graph_builder import (
+from assay.generation.llm_generator import generate_test_bodies
+from assay.generation.test_generator import generate_test
+from assay.generation.fixture_generator import generate_or_update_fixture
+from assay.visualization.graph_builder import (
     build_dependency_graph,
     compute_metrics,
 )
-from testsmith.visualization.mermaid_renderer import (
+from assay.visualization.mermaid_renderer import (
     render_mermaid,
     render_metrics_table,
 )
-from testsmith.maintenance.fixture_pruner import (
+from assay.maintenance.fixture_pruner import (
     scan_used_dependencies,
     scan_existing_fixtures,
     identify_unused_fixtures,
     prune_fixtures,
     update_test_imports,
 )
-from testsmith.maintenance.coverage_analyzer import (
+from assay.maintenance.coverage_analyzer import (
     detect_test_coverage,
     prioritize_gaps,
     generate_report,
 )
-from testsmith.watch import watch_project
-from testsmith import __version__
+from assay.watch import watch_project
+from assay import __version__
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -63,7 +63,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--version", action="version", version=f"testsmith {__version__}"
+        "--version", action="version", version=f"assay {__version__}"
     )
 
     parser.add_argument(
@@ -96,8 +96,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
     parser.add_argument(
         "--graph-output",
-        default="testsmith_graph.md",
-        help="Output file for dependency graph (default: testsmith_graph.md).",
+        default="assay_graph.md",
+        help="Output file for dependency graph (default: assay_graph.md).",
     )
 
     parser.add_argument(
@@ -118,8 +118,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
     parser.add_argument(
         "--coverage-output",
-        default="testsmith_coverage_report.md",
-        help="Output file for coverage report (default: testsmith_coverage_report.md).",
+        default="assay_coverage_report.md",
+        help="Output file for coverage report (default: assay_coverage_report.md).",
     )
 
     parser.add_argument(
@@ -163,7 +163,7 @@ def process_file(source_path: Path, project_context, config, args) -> dict:
                 print("[DRY RUN] Analysis complete. Skipping file generation.")
             result["test"] = "dry-run"
             # Calculate path for summary
-            from testsmith.generation.test_generator import derive_test_path
+            from assay.generation.test_generator import derive_test_path
 
             result["test_path"] = derive_test_path(
                 source_path, project_context.root, config
@@ -484,7 +484,7 @@ def run(args: argparse.Namespace) -> int:
 
         if args.init:
             print(
-                "Initialization not fully implemented in V1. Use 'testsmith <file>' to generate."
+                "Initialization not fully implemented in V1. Use 'assay <file>' to generate."
             )
             return 0
 

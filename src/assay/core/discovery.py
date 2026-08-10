@@ -3,8 +3,8 @@ Discovery mechanisms for finding source files to test.
 """
 
 from pathlib import Path
-from testsmith.support.config import TestSmithConfig
-from testsmith.generation.test_generator import derive_test_path
+from assay.support.config import TestSmithConfig
+from assay.generation.test_generator import derive_test_path
 
 
 def is_source_file(path: Path, project_root: Path, config: TestSmithConfig) -> bool:

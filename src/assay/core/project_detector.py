@@ -4,9 +4,9 @@ Project structure detection.
 
 import ast
 from pathlib import Path
-from testsmith.support.exceptions import ProjectRootNotFoundError
-from testsmith.support.config import TestSmithConfig
-from testsmith.support.models import ProjectContext
+from assay.support.exceptions import ProjectRootNotFoundError
+from assay.support.config import TestSmithConfig
+from assay.support.models import ProjectContext
 
 
 def find_project_root(start_path: Path) -> Path:

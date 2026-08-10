@@ -5,9 +5,9 @@ Generates and updates shared pytest fixture files.
 import ast
 import re
 from pathlib import Path
-from testsmith.support.config import TestSmithConfig
-from testsmith.support.templates import render_fixture_file
-from testsmith.support.file_operations import safe_write
+from assay.support.config import TestSmithConfig
+from assay.support.templates import render_fixture_file
+from assay.support.file_operations import safe_write
 
 
 def derive_fixture_name(dependency_name: str) -> str:

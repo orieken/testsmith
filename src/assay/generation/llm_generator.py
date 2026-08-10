@@ -5,8 +5,8 @@ LLM-based test body generation using Anthropic API.
 import os
 import re
 
-from testsmith.support.models import AnalysisResult, LLMConfig
-from testsmith.support.exceptions import TestSmithError
+from assay.support.models import AnalysisResult, LLMConfig
+from assay.support.exceptions import TestSmithError
 
 try:
     import anthropic

@@ -5,15 +5,15 @@ Dependency graph builder for TestSmith.
 from pathlib import Path
 from collections import defaultdict
 
-from testsmith.support.config import TestSmithConfig
-from testsmith.support.models import (
+from assay.support.config import TestSmithConfig
+from assay.support.models import (
     DependencyGraph,
     GraphNode,
     GraphEdge,
     ModuleMetrics,
     ProjectContext,
 )
-from testsmith.core.source_analyzer import analyze_file
+from assay.core.source_analyzer import analyze_file
 
 
 def build_dependency_graph(

@@ -8,7 +8,7 @@ from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 
-from testsmith.support.config import TestSmithConfig
+from assay.support.config import TestSmithConfig
 
 
 class DebounceHandler(FileSystemEventHandler):

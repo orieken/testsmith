@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "testsmith"
-version = "1.2.0"
-description = "DEPRECATED — renamed to assay-cli. Run: pip uninstall testsmith && pip install assay-cli"
+name = "assay-cli"
+version = "2.0.0"
+description = "Language-agnostic test scaffold generator — point it at any source file and it writes the boilerplate so you can write the assertions"
 authors = ["Oscar Rieken <oriekenjr@gmail.com>"]
 readme = "README.md"
-packages = [{include = "testsmith", from = "src"}]
+packages = [{include = "assay", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.15"
@@ -26,7 +26,7 @@ python-semantic-release = "^9.0.0"
 pyinstaller = "^6.0"
 
 [tool.poetry.scripts]
-testsmith = "testsmith.cli:main"
+assay = "assay.cli:main"
 
 [build-system]
 requires = ["poetry-core"]
@@ -36,7 +36,7 @@ build-backend = "poetry.core.masonry.api"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_functions = "test_*"
-addopts = "--cov=src/testsmith --cov-report=term-missing"
+addopts = "--cov=src/assay --cov-report=term-missing"
 norecursedirs = [".git", ".tox", "dist", "build", "*.egg", "__pycache__"]
 
 [tool.black]
@@ -51,7 +51,7 @@ exclude = ["tests/fixtures/sample_sources/syntax_error_module.py"]
 
 [tool.poe.tasks]
 # Testing
-test = "pytest tests/ --cov=src/testsmith --cov-report=term-missing -v"
+test = "pytest tests/ --cov=src/assay --cov-report=term-missing -v"
 test-unit = "pytest tests/unit/ -v"
 test-integration = "pytest tests/integration/ -v"
 test-fast = "pytest tests/ -x --ff"  # Stop on first failure, run failed tests first
@@ -63,21 +63,21 @@ format-check = "black --check src/ tests/"
 check = ["lint", "format-check", "test"]  # Run all checks
 
 # Building
-build = "pyinstaller testsmith.spec --clean --noconfirm"
-build-test = { shell = "pyinstaller testsmith.spec --clean --noconfirm && ./dist/testsmith --version" }
+build = "pyinstaller assay.spec --clean --noconfirm"
+build-test = { shell = "pyinstaller assay.spec --clean --noconfirm && ./dist/assay --version" }
 
 # Cleaning
 clean = { shell = "rm -rf build/ dist/ .pytest_cache/ .coverage htmlcov/ .ruff_cache/ **/__pycache__" }
 
 # Development
 install = "poetry install --with dev,build"
-version = { shell = "python -c 'from testsmith import __version__; print(__version__)'" }
+version = { shell = "python -c 'from assay import __version__; print(__version__)'" }
 release = "semantic-release version --print"  # Preview next version
 release-publish = "semantic-release version"  # Bump version and create tag
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:tool.poetry.version"]
-version_variables = ["src/testsmith/__init__.py:__version__"]
+version_variables = ["src/assay/__init__.py:__version__"]
 branch = "main"
 upload_to_pypi = false
 upload_to_release = true
