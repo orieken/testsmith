@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+
 	"github.com/orieken/assay/internal/domain"
 	"github.com/orieken/assay/internal/generation"
 )

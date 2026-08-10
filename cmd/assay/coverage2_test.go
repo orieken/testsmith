@@ -96,7 +96,7 @@ func TestResolveWorkspaceDriver_AutoDetect_Go(t *testing.T) {
 
 // assay coverage backfill / AC: resolveWorkspaceDriver returns error when auto-detection fails (empty directory)
 func TestResolveWorkspaceDriver_AutoDetect_Error(t *testing.T) {
-	dir := t.TempDir() // empty — no project markers
+	dir := t.TempDir()                           // empty — no project markers
 	ws := &config.WorkspaceConfig{Name: "empty"} // no Language set
 	_, _, err := resolveWorkspaceDriver(ws, dir)
 	if err == nil {
@@ -355,13 +355,7 @@ func TestCollectGaps_ValidGoProject(t *testing.T) {
 	mkFile(t, filepath.Join(dir, "handler.go"), "package cgaps\n\nfunc Do() {}\n")
 
 	d := goDriver()
-	ctx := &domain.ProjectContext{
-		Language:    "go",
-		Root:        dir,
-		ExcludeDirs: []string{},
-		Metadata:    map[string]any{},
-	}
-	ctx, _ = d.DetectProject(dir)
+	ctx, _ := d.DetectProject(dir)
 	if ctx == nil {
 		ctx = &domain.ProjectContext{Language: "go", Root: dir, Metadata: map[string]any{}}
 	}

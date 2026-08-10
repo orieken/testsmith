@@ -216,12 +216,7 @@ func TestCollectValidationResults_UnreadableFile(t *testing.T) {
 	t.Cleanup(func() { os.Chmod(f, 0o644) }) // restore so temp cleanup works
 
 	d := goDriver()
-	ctx := &domain.ProjectContext{
-		Language: "go",
-		Root:     dir,
-		Metadata: map[string]any{"framework": "testing", "mock_library": "interfaces"},
-	}
-	ctx, _ = d.DetectProject(dir)
+	ctx, _ := d.DetectProject(dir)
 	if ctx == nil {
 		ctx = &domain.ProjectContext{Language: "go", Root: dir, Metadata: map[string]any{}}
 	}

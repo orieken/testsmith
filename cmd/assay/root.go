@@ -34,6 +34,7 @@ func init() {
 		newAdaptersCmd(),
 		newConfigCmd(),
 		newMigrateCmd(),
+		newMigrateConfigCmd(),
 		newValidateCmd(),
 		newGraphCmd(),
 		newPruneCmd(),
