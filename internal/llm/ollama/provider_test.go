@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/llm"
-	"github.com/orieken/testsmith/internal/llm/ollama"
+	"github.com/orieken/assay/internal/llm"
+	"github.com/orieken/assay/internal/llm/ollama"
 )
 
 func openAIResponse(content string, tokens int) map[string]any {

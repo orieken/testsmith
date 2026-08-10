@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 const conftestTemplate = `import sys
 from pathlib import Path
 
-# Paths managed by TestSmith — do not edit this list manually.
+# Paths managed by Assay — do not edit this list manually.
 paths_to_add = [
 ]
 

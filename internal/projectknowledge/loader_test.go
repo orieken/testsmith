@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/projectknowledge"
+	"github.com/orieken/assay/internal/projectknowledge"
 )
 
 func writeTestFile(t *testing.T, path, content string) {
@@ -28,8 +28,8 @@ func TestLoad(t *testing.T) {
 		want  string
 	}{
 		{
-			name:  "returns content when root TESTSMITH.md exists",
-			setup: func(root string) { writeTestFile(t, filepath.Join(root, "TESTSMITH.md"), "# conventions") },
+			name:  "returns content when root ASSAY.md exists",
+			setup: func(root string) { writeTestFile(t, filepath.Join(root, "ASSAY.md"), "# conventions") },
 			want:  "# conventions",
 		},
 		{
@@ -39,7 +39,7 @@ func TestLoad(t *testing.T) {
 		},
 		{
 			name:  "trims surrounding whitespace",
-			setup: func(root string) { writeTestFile(t, filepath.Join(root, "TESTSMITH.md"), "  content  \n") },
+			setup: func(root string) { writeTestFile(t, filepath.Join(root, "ASSAY.md"), "  content  \n") },
 			want:  "content",
 		},
 	}
@@ -67,15 +67,15 @@ func TestLoadForFile(t *testing.T) {
 		{
 			name: "returns root content when no subdir file",
 			setup: func(root, _ string) {
-				writeTestFile(t, filepath.Join(root, "TESTSMITH.md"), "root")
+				writeTestFile(t, filepath.Join(root, "ASSAY.md"), "root")
 			},
 			want: "root",
 		},
 		{
 			name: "merges root and subdir content",
 			setup: func(root, sub string) {
-				writeTestFile(t, filepath.Join(root, "TESTSMITH.md"), "root")
-				writeTestFile(t, filepath.Join(sub, "TESTSMITH.md"), "pkg")
+				writeTestFile(t, filepath.Join(root, "ASSAY.md"), "root")
+				writeTestFile(t, filepath.Join(sub, "ASSAY.md"), "pkg")
 			},
 			want: "root\n\n---\n\n## Package-level conventions\n\npkg",
 		},
@@ -87,7 +87,7 @@ func TestLoadForFile(t *testing.T) {
 		{
 			name: "returns subdir content when root is absent",
 			setup: func(_, sub string) {
-				writeTestFile(t, filepath.Join(sub, "TESTSMITH.md"), "pkg-only")
+				writeTestFile(t, filepath.Join(sub, "ASSAY.md"), "pkg-only")
 			},
 			want: "pkg-only",
 		},
@@ -122,7 +122,7 @@ func TestLoadForDir(t *testing.T) {
 		{
 			name: "returns root content when dir equals root",
 			setup: func(root, _ string) {
-				writeTestFile(t, filepath.Join(root, "TESTSMITH.md"), "root-only")
+				writeTestFile(t, filepath.Join(root, "ASSAY.md"), "root-only")
 			},
 			useSubDir: false,
 			want:      "root-only",
@@ -130,7 +130,7 @@ func TestLoadForDir(t *testing.T) {
 		{
 			name: "returns root content when subdir has no file",
 			setup: func(root, _ string) {
-				writeTestFile(t, filepath.Join(root, "TESTSMITH.md"), "root")
+				writeTestFile(t, filepath.Join(root, "ASSAY.md"), "root")
 			},
 			useSubDir: true,
 			want:      "root",
@@ -138,8 +138,8 @@ func TestLoadForDir(t *testing.T) {
 		{
 			name: "merges when both files exist",
 			setup: func(root, sub string) {
-				writeTestFile(t, filepath.Join(root, "TESTSMITH.md"), "root")
-				writeTestFile(t, filepath.Join(sub, "TESTSMITH.md"), "pkg")
+				writeTestFile(t, filepath.Join(root, "ASSAY.md"), "root")
+				writeTestFile(t, filepath.Join(sub, "ASSAY.md"), "pkg")
 			},
 			useSubDir: true,
 			want:      "root\n\n---\n\n## Package-level conventions\n\npkg",
@@ -183,7 +183,7 @@ func TestLoadPatterns(t *testing.T) {
 		{
 			name: "returns empty when directory has no markdown files",
 			setup: func(root string) {
-				dir := filepath.Join(root, ".testsmith", "patterns")
+				dir := filepath.Join(root, ".assay", "patterns")
 				if err := os.MkdirAll(dir, 0o755); err != nil {
 					t.Fatal(err)
 				}
@@ -194,7 +194,7 @@ func TestLoadPatterns(t *testing.T) {
 		{
 			name: "skips README.md",
 			setup: func(root string) {
-				dir := filepath.Join(root, ".testsmith", "patterns")
+				dir := filepath.Join(root, ".assay", "patterns")
 				writeTestFile(t, filepath.Join(dir, "README.md"), "# README content")
 			},
 			empty: true,
@@ -202,7 +202,7 @@ func TestLoadPatterns(t *testing.T) {
 		{
 			name: "returns single pattern with header derived from filename",
 			setup: func(root string) {
-				dir := filepath.Join(root, ".testsmith", "patterns")
+				dir := filepath.Join(root, ".assay", "patterns")
 				writeTestFile(t, filepath.Join(dir, "mock-database-sqlmock.md"), "Use sqlmock for DB tests.")
 			},
 			contains: []string{"### Pattern: mock-database-sqlmock", "Use sqlmock for DB tests."},
@@ -210,7 +210,7 @@ func TestLoadPatterns(t *testing.T) {
 		{
 			name: "merges multiple pattern files with separating newlines",
 			setup: func(root string) {
-				dir := filepath.Join(root, ".testsmith", "patterns")
+				dir := filepath.Join(root, ".assay", "patterns")
 				writeTestFile(t, filepath.Join(dir, "pattern-a.md"), "Content A")
 				writeTestFile(t, filepath.Join(dir, "pattern-b.md"), "Content B")
 			},
@@ -219,7 +219,7 @@ func TestLoadPatterns(t *testing.T) {
 		{
 			name: "skips empty markdown files",
 			setup: func(root string) {
-				dir := filepath.Join(root, ".testsmith", "patterns")
+				dir := filepath.Join(root, ".assay", "patterns")
 				writeTestFile(t, filepath.Join(dir, "empty.md"), "   ")
 				writeTestFile(t, filepath.Join(dir, "real.md"), "Has content")
 			},

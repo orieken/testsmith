@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/drivers/csharp"
+	"github.com/orieken/assay/internal/drivers/csharp"
 )
 
 func TestNunitToXunit_AttributesAndAssertions(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 func generateTestFile(analysis *domain.SourceAnalysis, opts domain.GenerateOpts) (*domain.GeneratedFile, error) {

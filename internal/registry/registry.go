@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // Registry holds all registered LanguageDrivers.

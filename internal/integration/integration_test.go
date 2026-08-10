@@ -11,14 +11,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/analysis"
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/drivers/csharp"
-	"github.com/orieken/testsmith/internal/drivers/golang"
-	"github.com/orieken/testsmith/internal/drivers/java"
-	"github.com/orieken/testsmith/internal/drivers/python"
-	"github.com/orieken/testsmith/internal/drivers/typescript"
-	"github.com/orieken/testsmith/internal/generation"
+	"github.com/orieken/assay/internal/analysis"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/drivers/csharp"
+	"github.com/orieken/assay/internal/drivers/golang"
+	"github.com/orieken/assay/internal/drivers/java"
+	"github.com/orieken/assay/internal/drivers/python"
+	"github.com/orieken/assay/internal/drivers/typescript"
+	"github.com/orieken/assay/internal/generation"
 )
 
 // testdataRoot returns the absolute path to the v2/testdata directory.

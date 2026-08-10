@@ -1,6 +1,6 @@
 package golang
 
-import "github.com/orieken/testsmith/internal/domain"
+import "github.com/orieken/assay/internal/domain"
 
 // Go test migration is not supported via regex — the AST-level rewrites
 // required (e.g. testify → stdlib assertion rewrites) are too structurally

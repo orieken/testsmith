@@ -3,7 +3,7 @@
 package kotlin
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // Driver implements domain.LanguageDriver for Kotlin + JUnit 5.

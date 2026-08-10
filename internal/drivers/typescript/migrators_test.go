@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/drivers/typescript"
+	"github.com/orieken/assay/internal/drivers/typescript"
 )
 
 func newDriver() *typescript.Driver {

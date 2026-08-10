@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // ── registry ─────────────────────────────────────────────────────────────────

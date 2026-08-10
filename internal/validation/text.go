@@ -5,7 +5,7 @@ package validation
 import (
 	"regexp"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 type rule struct {

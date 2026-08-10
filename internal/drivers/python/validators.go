@@ -1,8 +1,8 @@
 package python
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/validation"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/validation"
 )
 
 var pyValidators = []*validation.TextValidator{
@@ -22,7 +22,7 @@ func pytestMockValidator() *validation.TextValidator {
 func unittestMockValidator() *validation.TextValidator {
 	return validation.New("pytest", "unittest.mock").
 		Forbid("mocker-in-unittest-mock", `\bmocker\.`,
-			"file uses mocker (pytest-mock) but adapter is unittest.mock — run 'testsmith migrate --from pytest-mock --to unittest.mock'",
+			"file uses mocker (pytest-mock) but adapter is unittest.mock — run 'assay migrate --from pytest-mock --to unittest.mock'",
 			domain.SeverityError)
 }
 

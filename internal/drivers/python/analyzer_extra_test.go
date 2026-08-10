@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/drivers/python"
+	"github.com/orieken/assay/internal/drivers/python"
 )
 
 // backfill / AC: AnalyzeFile handles from-import with multiple names (exercises extractImportNames)

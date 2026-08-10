@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // ── JSON ──────────────────────────────────────────────────────────────────────
@@ -111,14 +111,14 @@ func GenerateReportJUnit(gaps []domain.CoverageGap, totalSources int) string {
 	}
 
 	suite := junitSuite{
-		Name:     "testsmith-gaps",
+		Name:     "assay-gaps",
 		Tests:    totalSources,
 		Failures: len(gaps),
 		Cases:    cases,
 	}
 
 	doc := junitTestSuites{
-		Name:       "testsmith",
+		Name:       "assay",
 		TestSuites: []junitSuite{suite},
 	}
 
@@ -228,14 +228,14 @@ func GenerateValidateJUnit(results []ValidateFileResult) string {
 	}
 
 	suite := junitSuite{
-		Name:     "testsmith-validate",
+		Name:     "assay-validate",
 		Tests:    len(results),
 		Failures: failures,
 		Cases:    cases,
 	}
 
 	doc := junitTestSuites{
-		Name:       "testsmith",
+		Name:       "assay",
 		TestSuites: []junitSuite{suite},
 	}
 

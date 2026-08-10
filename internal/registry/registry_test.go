@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/registry"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/registry"
 )
 
 // ---- fakes ------------------------------------------------------------------

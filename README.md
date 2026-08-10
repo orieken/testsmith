@@ -1,4 +1,6 @@
-# TestSmith v2
+# Assay
+
+> *assay (v.)* — to test the quality or composition of something; from Old French *assai*, "trial, test." In metallurgy, an assay determines the purity of a metal sample. Here, it determines the test coverage of your code.
 
 **Language-agnostic test scaffold generator.** Point it at any source file and it writes the boilerplate so you can write the assertions.
 
@@ -16,24 +18,24 @@
 
 ### Homebrew (macOS / Linux)
 ```sh
-brew install orieken/tap/testsmith
+brew install orieken/tap/assay
 ```
 
 ### Download binary
-Download the latest release from the [releases page](https://github.com/orieken/testsmith/releases), then make it executable:
+Download the latest release from the [releases page](https://github.com/orieken/assay/releases), then make it executable:
 
 ```sh
-chmod +x testsmith-darwin-arm64
-sudo mv testsmith-darwin-arm64 /usr/local/bin/testsmith
+chmod +x assay-darwin-arm64
+sudo mv assay-darwin-arm64 /usr/local/bin/assay
 ```
 
 ### Build from source
 Requires Go 1.22+.
 
 ```sh
-git clone https://github.com/orieken/testsmith.git
-cd testsmith
-go build -o testsmith ./cmd/testsmith
+git clone https://github.com/orieken/assay.git
+cd assay
+go build -o assay ./cmd/assay
 ```
 
 ---
@@ -41,26 +43,26 @@ go build -o testsmith ./cmd/testsmith
 ## Quick start
 
 ```sh
-# Initialise a project (creates .testsmith.yaml and .testsmith/patterns/)
-testsmith init
+# Initialise a project (creates .assay.yaml and .assay/patterns/)
+assay init
 
 # Also write Claude Code agents into .claude/agents/
-testsmith init --with-agents
+assay init --with-agents
 
 # Generate a test for one file
-testsmith generate src/services/payment.py
+assay generate src/services/payment.py
 
 # Generate tests for every untested file in the project
-testsmith generate --all
+assay generate --all
 
 # Preview what would be generated without writing
-testsmith generate --all --dry-run
+assay generate --all --dry-run
 
 # Capture a testing pattern from an existing test file (requires llm.enabled: true)
-testsmith learn src/services/payment_test.py
+assay learn src/services/payment_test.py
 
 # Start watching for changes (auto-regenerates on save)
-testsmith watch
+assay watch
 ```
 
 ---
@@ -71,7 +73,7 @@ testsmith watch
 Generate test scaffolds for one file, a directory, or the whole project.
 
 ```
-testsmith generate [file] [flags]
+assay generate [file] [flags]
 
 Flags:
   --all               Generate tests for every untested source file
@@ -86,11 +88,11 @@ Flags:
 ```
 
 ```sh
-testsmith generate src/payment.py
-testsmith generate --all
-testsmith generate --all --workers 8
-testsmith generate --path src/services/
-testsmith generate src/payment.py --llm --overwrite
+assay generate src/payment.py
+assay generate --all
+assay generate --all --workers 8
+assay generate --path src/services/
+assay generate src/payment.py --llm --overwrite
 ```
 
 ---
@@ -99,7 +101,7 @@ testsmith generate src/payment.py --llm --overwrite
 Scan existing test files and report mismatches against the configured adapter's conventions. Exits non-zero when errors are found (suitable for CI).
 
 ```
-testsmith validate [flags]
+assay validate [flags]
 
 Flags:
   --lang <name>       Override auto-detected language
@@ -109,9 +111,9 @@ Flags:
 ```
 
 ```sh
-testsmith validate
-testsmith validate --lang java
-testsmith validate --workspace api
+assay validate
+assay validate --lang java
+assay validate --workspace api
 ```
 
 ---
@@ -120,7 +122,7 @@ testsmith validate --workspace api
 Rewrite existing test files from one framework to another using ordered regex transformations.
 
 ```
-testsmith migrate [flags]
+assay migrate [flags]
 
 Required:
   --from <framework>  Source framework (e.g. jest, junit4, pytest-mock, nunit)
@@ -133,9 +135,9 @@ Optional:
 ```
 
 ```sh
-testsmith migrate --from jest --to vitest
-testsmith migrate --from junit4 --to junit5 --path src/test/
-testsmith migrate --from pytest-mock --to unittest-mock --dry-run
+assay migrate --from jest --to vitest
+assay migrate --from junit4 --to junit5 --path src/test/
+assay migrate --from pytest-mock --to unittest-mock --dry-run
 ```
 
 Available pairs: `jest↔vitest`, `junit4↔junit5`, `pytest-mock↔unittest-mock`, `nunit↔xunit`.
@@ -146,19 +148,19 @@ Available pairs: `jest↔vitest`, `junit4↔junit5`, `pytest-mock↔unittest-moc
 Analyse all source files and produce a prioritised Markdown coverage report.
 
 ```
-testsmith gaps [flags]
+assay gaps [flags]
 
 Flags:
-  --output <file>     Output file (default: testsmith_coverage_report.md)
+  --output <file>     Output file (default: assay_coverage_report.md)
   --top <n>           Show only the top N gaps
   --workspace <name>  Analyse only this workspace
   --dry-run           Print the report to stdout
 ```
 
 ```sh
-testsmith gaps
-testsmith gaps --top 10 --dry-run
-testsmith gaps --output coverage.md
+assay gaps
+assay gaps --top 10 --dry-run
+assay gaps --output coverage.md
 ```
 
 ---
@@ -167,18 +169,18 @@ testsmith gaps --output coverage.md
 Build a Mermaid dependency graph and coupling-score table for all source modules.
 
 ```
-testsmith graph [flags]
+assay graph [flags]
 
 Flags:
-  --output <file>     Output Markdown file (default: testsmith_graph.md)
+  --output <file>     Output Markdown file (default: assay_graph.md)
   --workspace <name>  Graph only this workspace
   --dry-run           Print the report to stdout
 ```
 
 ```sh
-testsmith graph
-testsmith graph --dry-run
-testsmith graph --output deps.md
+assay graph
+assay graph --dry-run
+assay graph --output deps.md
 ```
 
 ---
@@ -187,7 +189,7 @@ testsmith graph --output deps.md
 Find fixture files that no longer match any active external dependency.
 
 ```
-testsmith prune [flags]
+assay prune [flags]
 
 Flags:
   --confirm           Actually delete unused fixtures (default: dry-run)
@@ -195,8 +197,8 @@ Flags:
 ```
 
 ```sh
-testsmith prune             # preview what would be removed
-testsmith prune --confirm   # delete unused fixtures
+assay prune             # preview what would be removed
+assay prune --confirm   # delete unused fixtures
 ```
 
 ---
@@ -205,7 +207,7 @@ testsmith prune --confirm   # delete unused fixtures
 Monitor source files and automatically regenerate test scaffolds on save.
 
 ```
-testsmith watch [flags]
+assay watch [flags]
 
 Flags:
   --debounce <ms>     Debounce interval in milliseconds (default: 500)
@@ -215,17 +217,17 @@ Flags:
 ```
 
 ```sh
-testsmith watch
-testsmith watch --debounce 1000 --llm
+assay watch
+assay watch --debounce 1000 --llm
 ```
 
 ---
 
 ### `init`
-Scaffold a `.testsmith.yaml`, standard test directories, and a `.testsmith/patterns/` directory with a README.
+Scaffold a `.assay.yaml`, standard test directories, and a `.assay/patterns/` directory with a README.
 
 ```
-testsmith init [flags]
+assay init [flags]
 
 Flags:
   --lang <name>      Force a specific language instead of auto-detecting
@@ -234,28 +236,28 @@ Flags:
 ```
 
 ```sh
-testsmith init
-testsmith init --lang python
-testsmith init --with-agents   # also writes Claude Code agents into .claude/agents/
+assay init
+assay init --lang python
+assay init --with-agents   # also writes Claude Code agents into .claude/agents/
 ```
 
 ---
 
 ### `learn`
-Read a test file, extract its non-obvious testing patterns using the configured LLM, and write the result to `.testsmith/patterns/<slug>.md` for future `generate` runs.
+Read a test file, extract its non-obvious testing patterns using the configured LLM, and write the result to `.assay/patterns/<slug>.md` for future `generate` runs.
 
-Requires `llm.enabled: true` in `.testsmith.yaml`. Skips writing if the target pattern file already exists.
+Requires `llm.enabled: true` in `.assay.yaml`. Skips writing if the target pattern file already exists.
 
 ```
-testsmith learn <file> [flags]
+assay learn <file> [flags]
 
 Flags:
   --dry-run   Print the extracted pattern without writing a file
 ```
 
 ```sh
-testsmith learn src/payment_test.py
-testsmith learn internal/db/store_test.go --dry-run
+assay learn src/payment_test.py
+assay learn internal/db/store_test.go --dry-run
 ```
 
 ---
@@ -264,24 +266,24 @@ testsmith learn internal/db/store_test.go --dry-run
 List all available adapters for the detected (or specified) language.
 
 ```
-testsmith adapters list [flags]
+assay adapters list [flags]
 
 Flags:
   --lang <name>   Show adapters for this language
 ```
 
 ```sh
-testsmith adapters list
-testsmith adapters list --lang java
+assay adapters list
+assay adapters list --lang java
 ```
 
 ---
 
 ### `config show`
-Print the resolved configuration (defaults merged with any `.testsmith.yaml`).
+Print the resolved configuration (defaults merged with any `.assay.yaml`).
 
 ```sh
-testsmith config show
+assay config show
 ```
 
 ---
@@ -291,23 +293,23 @@ Generate shell completion scripts.
 
 ```sh
 # Bash (load for session)
-source <(testsmith completion bash)
+source <(assay completion bash)
 
 # Zsh
-testsmith completion zsh > "${fpath[1]}/_testsmith"
+assay completion zsh > "${fpath[1]}/_assay"
 
 # Fish
-testsmith completion fish | source
+assay completion fish | source
 
 # PowerShell
-testsmith completion powershell | Out-String | Invoke-Expression
+assay completion powershell | Out-String | Invoke-Expression
 ```
 
 ---
 
-## Configuration (`.testsmith.yaml`)
+## Configuration (`.assay.yaml`)
 
-Run `testsmith init` to generate a starter config. Full schema:
+Run `assay init` to generate a starter config. Full schema:
 
 ```yaml
 language: python          # override auto-detection
@@ -363,17 +365,17 @@ workspaces:
 
 ## LLM setup
 
-TestSmith works offline with TODO stubs. Pass `--llm` to have an LLM write the test bodies.
+Assay works offline with TODO stubs. Pass `--llm` to have an LLM write the test bodies.
 
 ### Anthropic (default)
 ```sh
 export ANTHROPIC_API_KEY=sk-ant-...
-testsmith generate src/payment.py --llm
+assay generate src/payment.py --llm
 ```
 
 ### OpenAI
 ```yaml
-# .testsmith.yaml
+# .assay.yaml
 llm:
   provider: openai
   model: gpt-4o
@@ -382,7 +384,7 @@ llm:
 
 ### Ollama (local, no API key)
 ```yaml
-# .testsmith.yaml
+# .assay.yaml
 llm:
   provider: ollama
   model: llama3
@@ -420,13 +422,13 @@ go test -race ./...
 go test ./internal/drivers/python/... -v
 
 # Run black-box CLI integration tests
-go test ./cmd/testsmith/... -v -timeout 120s
+go test ./cmd/assay/... -v -timeout 120s
 
 # Run end-to-end pipeline tests
 go test ./internal/integration/... -v
 
 # Build the binary
-go build -o testsmith ./cmd/testsmith
+go build -o assay ./cmd/assay
 
 # Lint
 golangci-lint run
@@ -434,7 +436,7 @@ golangci-lint run
 
 ### Project layout
 ```
-cmd/testsmith/       CLI commands (Cobra) + black-box integration tests
+cmd/assay/       CLI commands (Cobra) + black-box integration tests
 internal/
   analysis/          Source discovery and analysis pipeline
   config/            Config loading, defaults, yaml tags

@@ -1,3 +1,3 @@
-module github.com/orieken/testsmith-example-go
+module github.com/orieken/assay-example-go
 
 go 1.22

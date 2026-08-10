@@ -43,7 +43,7 @@ On cache miss: renders prompt template → calls provider → parses code block 
 
 System prompt construction:
 ```
-<ProjectKnowledge>          ← prepended when non-empty (from TESTSMITH.md)
+<ProjectKnowledge>          ← prepended when non-empty (from ASSAY.md)
 You are a strict code generation assistant. Output only valid code in a markdown code block.
 ```
 

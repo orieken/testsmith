@@ -1,8 +1,8 @@
 package typescript
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/migration"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/migration"
 )
 
 var tsMigrators = []domain.Migrator{

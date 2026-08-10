@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/drivers/rust"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/drivers/rust"
 )
 
 // ── Driver surface ────────────────────────────────────────────────────────────

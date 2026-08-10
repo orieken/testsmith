@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/drivers/python"
+	"github.com/orieken/assay/internal/drivers/python"
 )
 
 func TestPytestMockToUnittestMock_ReplacesAPIs(t *testing.T) {

@@ -1,8 +1,8 @@
 package golang
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/validation"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/validation"
 )
 
 var goValidators = []*validation.TextValidator{

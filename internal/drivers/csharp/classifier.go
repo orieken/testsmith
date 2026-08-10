@@ -3,7 +3,7 @@ package csharp
 import (
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // dotnetBclPrefixes are namespaces that ship with the .NET BCL.

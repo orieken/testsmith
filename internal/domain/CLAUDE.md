@@ -19,7 +19,7 @@ No other internal package is imported from here — only the standard library.
 | Type | Filled by | Consumed by |
 |---|---|---|
 | `ProjectContext` | `driver.DetectProject()` | everything downstream |
-| `ProjectContext.ProjectKnowledge` | `projectknowledge.Load()` in `cmd/testsmith/generate.go` | `generation.Pipeline.fetchBodies` → LLM system prompt |
+| `ProjectContext.ProjectKnowledge` | `projectknowledge.Load()` in `cmd/assay/generate.go` | `generation.Pipeline.fetchBodies` → LLM system prompt |
 | `SourceAnalysis` | `driver.AnalyzeFile()` | `generation.Pipeline.Plan()` |
 | `GenerationPlan` | `generation.Pipeline.Plan()` | `generation.Executor.Execute()` |
 | `GeneratedFile.Language` | `Plan()` — set on every `RoleTestFile` | `Executor.verifyFile()` → selects the right `Verifier` |

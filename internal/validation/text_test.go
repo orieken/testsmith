@@ -3,8 +3,8 @@ package validation_test
 import (
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/validation"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/validation"
 )
 
 func TestRequire_PassesWhenPatternPresent(t *testing.T) {

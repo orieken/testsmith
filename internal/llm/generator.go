@@ -10,7 +10,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // Provider is the low-level interface each LLM backend implements.
@@ -62,7 +62,7 @@ func (g *LLMBodyGenerator) Usage() *TokenReport {
 }
 
 // UsageSummary returns a one-line token + cost report for the given model name.
-// Satisfies the usageSummaryReporter interface in cmd/testsmith/generate.go.
+// Satisfies the usageSummaryReporter interface in cmd/assay/generate.go.
 func (g *LLMBodyGenerator) UsageSummary(model string) string {
 	return g.usage.Summary(model)
 }

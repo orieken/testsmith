@@ -13,9 +13,9 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
-	"github.com/orieken/testsmith/internal/analysis"
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/generation"
+	"github.com/orieken/assay/internal/analysis"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/generation"
 )
 
 // Handler is called with the absolute path of a changed source file.

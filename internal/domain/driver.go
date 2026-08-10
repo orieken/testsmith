@@ -1,12 +1,12 @@
 // Package domain contains the pure types and interfaces that form
-// the core of TestSmith v2. Nothing in this package imports from
+// the core of Assay v2. Nothing in this package imports from
 // the adapter or infrastructure layers.
 package domain
 
 import "context"
 
 // LanguageDriver is the single extension point for adding language support.
-// Implement this interface to teach TestSmith how to analyse and generate
+// Implement this interface to teach Assay how to analyse and generate
 // tests for a new language or test framework.
 //
 // All methods operate on abstract domain types. No language-specific

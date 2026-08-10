@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/projectknowledge"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/projectknowledge"
 )
 
 // Pipeline builds GenerationPlans from SourceAnalyses.

@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/config"
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/config"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // ── Load ──────────────────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ func TestLoad_FindsFileInCurrentDir(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 	content := "language: python\ntest_root: mytests/\n"
-	cfgPath := filepath.Join(dir, ".testsmith.yaml")
+	cfgPath := filepath.Join(dir, ".assay.yaml")
 	if err := os.WriteFile(cfgPath, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestLoad_FindsFileInParentDir(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cfgPath := filepath.Join(parent, ".testsmith.yaml")
+	cfgPath := filepath.Join(parent, ".assay.yaml")
 	if err := os.WriteFile(cfgPath, []byte("language: go\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestLoad_FindsFileInParentDir(t *testing.T) {
 func TestLoad_InvalidYAML_ReturnsError(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, ".testsmith.yaml"), []byte(":\tinvalid:\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".assay.yaml"), []byte(":\tinvalid:\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := config.Load(dir); err == nil {

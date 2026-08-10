@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/generation"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/generation"
 )
 
 // ── ClampWorkers ──────────────────────────────────────────────────────────────

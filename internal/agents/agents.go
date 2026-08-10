@@ -1,6 +1,6 @@
-// Package agents embeds the bundled Claude Code agent files that testsmith
+// Package agents embeds the bundled Claude Code agent files that assay
 // can write into a consumer project's .claude/agents/ directory via
-// testsmith init --with-agents.
+// assay init --with-agents.
 package agents
 
 import (

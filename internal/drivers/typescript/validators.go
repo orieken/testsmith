@@ -1,8 +1,8 @@
 package typescript
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/validation"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/validation"
 )
 
 var tsValidators = []*validation.TextValidator{
@@ -13,7 +13,7 @@ var tsValidators = []*validation.TextValidator{
 func jestValidator() *validation.TextValidator {
 	return validation.New("jest", "jest").
 		Forbid("vitest-api-in-jest", `\bvi\.`,
-			"file uses vi.* (Vitest API) but adapter is Jest — run 'testsmith migrate --from vitest --to jest'",
+			"file uses vi.* (Vitest API) but adapter is Jest — run 'assay migrate --from vitest --to jest'",
 			domain.SeverityError).
 		Forbid("vitest-import-in-jest", `from\s+['"]vitest['"]`,
 			"file imports from 'vitest' but adapter is Jest",
@@ -23,7 +23,7 @@ func jestValidator() *validation.TextValidator {
 func vitestValidator() *validation.TextValidator {
 	return validation.New("vitest", "vitest").
 		Forbid("jest-api-in-vitest", `\bjest\.`,
-			"file uses jest.* (Jest API) but adapter is Vitest — run 'testsmith migrate --from jest --to vitest'",
+			"file uses jest.* (Jest API) but adapter is Vitest — run 'assay migrate --from jest --to vitest'",
 			domain.SeverityWarning).
 		Forbid("jest-import-in-vitest", `from\s+['"]@jest/globals['"]`,
 			"file imports from '@jest/globals' but adapter is Vitest",

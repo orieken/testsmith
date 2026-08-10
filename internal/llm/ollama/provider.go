@@ -6,8 +6,8 @@ package ollama
 import (
 	"context"
 
-	"github.com/orieken/testsmith/internal/llm"
-	"github.com/orieken/testsmith/internal/llm/openai"
+	"github.com/orieken/assay/internal/llm"
+	"github.com/orieken/assay/internal/llm/openai"
 )
 
 const defaultBaseURL = "http://localhost:11434/v1"

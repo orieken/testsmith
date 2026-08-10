@@ -16,7 +16,7 @@
 Plan(ctx, analysis, opts)
 ├─ fetchBodies()          ← only when llm != nil && !opts.DryRun
 │   ├─ LLMContext()             ← adapter vocabulary (framework, mock_style, ...)
-│   ├─ LoadForFile()            ← TESTSMITH.md (package-level merge)
+│   ├─ LoadForFile()            ← ASSAY.md (package-level merge)
 │   ├─ buildDepsSignatures()    ← internal dep public API from depIndex
 │   ├─ mineConventions()        ← up to 5 test files in source dir (80-line cap)
 │   ├─ TrimToBudget()           ← drops low-priority tiers at promptTokenBudget
@@ -56,7 +56,7 @@ Java and C# return `nil` — their build toolchains are not guaranteed to be pre
 | 2 | Dep signatures | Budget exceeded after source |
 | 3 | Style snippet | Budget exceeded after deps |
 
-`ProjectKnowledge` (TESTSMITH.md) goes into the **system prompt**, not the user prompt,
+`ProjectKnowledge` (ASSAY.md) goes into the **system prompt**, not the user prompt,
 so it is never subject to the `PromptTokenBudget` trim.
 
 ## Batch vs fan-out path

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/projectknowledge"
+	"github.com/orieken/assay/internal/projectknowledge"
 )
 
 func TestEstimateTokens(t *testing.T) {

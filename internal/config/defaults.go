@@ -1,6 +1,6 @@
 package config
 
-import "github.com/orieken/testsmith/internal/domain"
+import "github.com/orieken/assay/internal/domain"
 
 // Default returns a Config pre-populated with sensible defaults.
 func Default() *Config {

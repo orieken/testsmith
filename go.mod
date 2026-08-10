@@ -1,4 +1,4 @@
-module github.com/orieken/testsmith
+module github.com/orieken/assay
 
 go 1.22
 

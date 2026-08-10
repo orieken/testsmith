@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-const patternsDirName = ".testsmith/patterns"
+const patternsDirName = ".assay/patterns"
 
-// LoadPatterns reads all .md files from <root>/.testsmith/patterns/ and returns
+// LoadPatterns reads all .md files from <root>/.assay/patterns/ and returns
 // them as a merged string with a per-file section header derived from the
 // filename. Returns empty string when the directory does not exist or contains
 // no markdown files. Files are read in directory order (typically alphabetical).

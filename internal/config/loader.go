@@ -7,9 +7,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const configFilename = ".testsmith.yaml"
+const configFilename = ".assay.yaml"
 
-// Load walks upward from startDir looking for a .testsmith.yaml (or pyproject.toml
+// Load walks upward from startDir looking for a .assay.yaml (or pyproject.toml
 // fallback for Python projects) and returns the merged Config.
 func Load(startDir string) (*Config, error) {
 	cfg := Default()

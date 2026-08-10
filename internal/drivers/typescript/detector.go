@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 var rootMarkers = []string{"package.json", "tsconfig.json", "tsconfig.base.json"}

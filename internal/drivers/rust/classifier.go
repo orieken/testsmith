@@ -3,7 +3,7 @@ package rust
 import (
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // stdlibRoots is the set of Rust standard library crate roots.

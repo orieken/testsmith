@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 func analyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysis, error) {

@@ -8,7 +8,7 @@ import (
 	sitter "github.com/smacker/go-tree-sitter"
 	sitterjava "github.com/smacker/go-tree-sitter/java"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 func analyzeFile(path string, ctx *domain.ProjectContext) (*domain.SourceAnalysis, error) {

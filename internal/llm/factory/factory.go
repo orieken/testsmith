@@ -8,12 +8,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/orieken/testsmith/internal/config"
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/llm"
-	"github.com/orieken/testsmith/internal/llm/anthropic"
-	"github.com/orieken/testsmith/internal/llm/ollama"
-	"github.com/orieken/testsmith/internal/llm/openai"
+	"github.com/orieken/assay/internal/config"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/llm"
+	"github.com/orieken/assay/internal/llm/anthropic"
+	"github.com/orieken/assay/internal/llm/ollama"
+	"github.com/orieken/assay/internal/llm/openai"
 )
 
 // Build constructs a BodyGenerator for the given driver and config.
@@ -57,7 +57,7 @@ func Build(cfg config.LLMConfig, driver domain.LanguageDriver) (domain.BodyGener
 // Returns an error when LLM is disabled or the API key is missing.
 func BuildProvider(cfg config.LLMConfig) (llm.Provider, error) {
 	if !cfg.Enabled {
-		return nil, fmt.Errorf("LLM is disabled — set llm.enabled: true in .testsmith.yaml")
+		return nil, fmt.Errorf("LLM is disabled — set llm.enabled: true in .assay.yaml")
 	}
 	apiKey := os.Getenv(cfg.APIKeyEnvVar)
 	if apiKey == "" && cfg.Provider != "ollama" {

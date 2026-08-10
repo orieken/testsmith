@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/generation"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/generation"
 )
 
 // ---- ScanUsedDependencies ----------------------------------------------------
@@ -139,8 +139,8 @@ func TestUpdateTestImports_CommentsOutStaleImport(t *testing.T) {
 	}
 
 	data, _ := os.ReadFile(testFile)
-	if !strings.Contains(string(data), "# [testsmith-pruned]") {
-		t.Error("stale import line should be commented out with [testsmith-pruned] prefix")
+	if !strings.Contains(string(data), "# [assay-pruned]") {
+		t.Error("stale import line should be commented out with [assay-pruned] prefix")
 	}
 }
 

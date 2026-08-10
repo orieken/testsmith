@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // FixtureFile describes a discovered fixture file and the dependency it mocks.
@@ -151,7 +151,7 @@ func commentOutImports(path string, patterns []string) (bool, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if isImportLine(line) && matchesAny(line, patterns) {
-			lines = append(lines, "# [testsmith-pruned] "+line)
+			lines = append(lines, "# [assay-pruned] "+line)
 			changed = true
 		} else {
 			lines = append(lines, line)

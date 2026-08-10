@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/analysis"
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/analysis"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // ---- fakes ------------------------------------------------------------------

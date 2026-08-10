@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/drivers/typescript"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/drivers/typescript"
 )
 
 // ── helpers ───────────────────────────────────────────────────────────────────

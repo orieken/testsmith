@@ -14,7 +14,7 @@ type ProjectContext struct {
 	// Metadata holds driver-specific extras that don't fit the common fields,
 	// e.g. Python: conftest_path, existing_paths; Go: module_name from go.mod.
 	Metadata map[string]any
-	// ProjectKnowledge is the content of the project's TESTSMITH.md file (if present).
+	// ProjectKnowledge is the content of the project's ASSAY.md file (if present).
 	// Loaded once after DetectProject and injected into every LLM system prompt.
 	ProjectKnowledge string
 }
@@ -185,7 +185,7 @@ type BodyGenRequest struct {
 	ModulePath          string            // importable path of the source module
 	DepsSignatures      string            // compact public API block of internal deps
 	ExistingTestSnippet string            // style sample mined from existing test files in same package
-	ProjectKnowledge    string            // content of TESTSMITH.md, injected as system prompt prefix
+	ProjectKnowledge    string            // content of ASSAY.md, injected as system prompt prefix
 }
 
 // BodyGenResult is the LLM output for one member.

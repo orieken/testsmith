@@ -1,7 +1,7 @@
-// Package config handles loading and merging of TestSmith configuration.
+// Package config handles loading and merging of Assay configuration.
 package config
 
-// Config is the fully-resolved configuration for a TestSmith invocation.
+// Config is the fully-resolved configuration for a Assay invocation.
 type Config struct {
 	Language    string                    `yaml:"language,omitempty"`
 	Root        string                    `yaml:"root,omitempty"`

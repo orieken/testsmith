@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/drivers/java"
+	"github.com/orieken/assay/internal/drivers/java"
 )
 
 func TestJunit4ToJunit5_ImportsAndAnnotations(t *testing.T) {

@@ -1,8 +1,8 @@
 package java
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/validation"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/validation"
 )
 
 var javaValidators = []*validation.TextValidator{
@@ -17,7 +17,7 @@ func junit5Validator() *validation.TextValidator {
 			"JUnit 5 import not found — expected 'import org.junit.jupiter.*'",
 			domain.SeverityWarning).
 		Forbid("junit4-import-in-junit5", `import org\.junit\.Test;`,
-			"JUnit 4 import detected — run 'testsmith migrate --from junit4 --to junit5'",
+			"JUnit 4 import detected — run 'assay migrate --from junit4 --to junit5'",
 			domain.SeverityError).
 		Forbid("junit4-runwith-in-junit5", `@RunWith\(`,
 			"@RunWith is JUnit 4 — use @ExtendWith for JUnit 5",
@@ -36,7 +36,7 @@ func junit4Validator() *validation.TextValidator {
 			"JUnit 4 import not found — expected 'import org.junit.Test'",
 			domain.SeverityWarning).
 		Forbid("junit5-import-in-junit4", `import org\.junit\.jupiter`,
-			"JUnit 5 import detected — run 'testsmith migrate --from junit5 --to junit4'",
+			"JUnit 5 import detected — run 'assay migrate --from junit5 --to junit4'",
 			domain.SeverityError).
 		Forbid("junit5-extendwith-in-junit4", `@ExtendWith\(`,
 			"@ExtendWith is JUnit 5 — use @RunWith for JUnit 4",

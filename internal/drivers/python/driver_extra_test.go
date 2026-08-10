@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/drivers/python"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/drivers/python"
 )
 
 // ── Language / FileExtensions / BodyGenerationPrompt ──────────────────────────

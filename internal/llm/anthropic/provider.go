@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/orieken/testsmith/internal/llm"
+	"github.com/orieken/assay/internal/llm"
 )
 
 const defaultBaseURL = "https://api.anthropic.com/v1"

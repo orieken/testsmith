@@ -4,7 +4,7 @@
 package csharp
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // Driver implements domain.LanguageDriver for C# + xUnit/NUnit/MSTest.

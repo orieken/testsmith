@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/config"
+	"github.com/orieken/assay/internal/config"
 )
 
 func TestWorkspaceID_UsesNameWhenSet(t *testing.T) {

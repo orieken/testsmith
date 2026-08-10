@@ -3,7 +3,7 @@ package typescript
 import (
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 func classifyDependency(imp domain.ImportInfo, _ *domain.ProjectContext) domain.DependencyCategory {

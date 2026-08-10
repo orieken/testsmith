@@ -3,7 +3,7 @@
 package typescript
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // Driver implements domain.LanguageDriver for TypeScript/JavaScript + Jest/Vitest.

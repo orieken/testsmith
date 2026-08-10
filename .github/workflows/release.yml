@@ -20,23 +20,23 @@ jobs:
           - os: ubuntu-latest
             goos: linux
             goarch: amd64
-            artifact: testsmith-linux-amd64
-            binary: testsmith
+            artifact: assay-linux-amd64
+            binary: assay
           - os: macos-latest
             goos: darwin
             goarch: amd64
-            artifact: testsmith-darwin-amd64
-            binary: testsmith
+            artifact: assay-darwin-amd64
+            binary: assay
           - os: macos-latest
             goos: darwin
             goarch: arm64
-            artifact: testsmith-darwin-arm64
-            binary: testsmith
+            artifact: assay-darwin-arm64
+            binary: assay
           - os: windows-latest
             goos: windows
             goarch: amd64
-            artifact: testsmith-windows-amd64.exe
-            binary: testsmith.exe
+            artifact: assay-windows-amd64.exe
+            binary: assay.exe
 
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
           go build
           -ldflags="-s -w -X main.Version=${{ github.ref_name }}"
           -o dist/${{ matrix.binary }}
-          ./cmd/testsmith
+          ./cmd/assay
         env:
           CGO_ENABLED: "1"
           GOOS: ${{ matrix.goos }}
@@ -135,9 +135,9 @@ jobs:
       - name: Parse SHA-256 values
         id: sha
         run: |
-          ARM64=$(grep testsmith-darwin-arm64 checksums/SHA256SUMS.txt | awk '{print $1}')
-          AMD64=$(grep testsmith-darwin-amd64 checksums/SHA256SUMS.txt | awk '{print $1}')
-          LINUX=$(grep testsmith-linux-amd64  checksums/SHA256SUMS.txt | awk '{print $1}')
+          ARM64=$(grep assay-darwin-arm64 checksums/SHA256SUMS.txt | awk '{print $1}')
+          AMD64=$(grep assay-darwin-amd64 checksums/SHA256SUMS.txt | awk '{print $1}')
+          LINUX=$(grep assay-linux-amd64  checksums/SHA256SUMS.txt | awk '{print $1}')
           echo "arm64=${ARM64}" >> $GITHUB_OUTPUT
           echo "amd64=${AMD64}" >> $GITHUB_OUTPUT
           echo "linux=${LINUX}" >> $GITHUB_OUTPUT
@@ -165,49 +165,49 @@ jobs:
           formula = textwrap.dedent(f"""\
             class Testsmith < Formula
               desc "Language-agnostic test scaffold generator"
-              homepage "https://github.com/orieken/testsmith"
+              homepage "https://github.com/orieken/assay"
               version "{ver}"
               license "MIT"
 
               on_macos do
                 on_arm do
-                  url "https://github.com/orieken/testsmith/releases/download/{tag}/testsmith-darwin-arm64"
+                  url "https://github.com/orieken/assay/releases/download/{tag}/assay-darwin-arm64"
                   sha256 "{arm64}"
 
                   def install
-                    bin.install "testsmith-darwin-arm64" => "testsmith"
+                    bin.install "assay-darwin-arm64" => "assay"
                   end
                 end
 
                 on_intel do
-                  url "https://github.com/orieken/testsmith/releases/download/{tag}/testsmith-darwin-amd64"
+                  url "https://github.com/orieken/assay/releases/download/{tag}/assay-darwin-amd64"
                   sha256 "{amd64}"
 
                   def install
-                    bin.install "testsmith-darwin-amd64" => "testsmith"
+                    bin.install "assay-darwin-amd64" => "assay"
                   end
                 end
               end
 
               on_linux do
                 on_intel do
-                  url "https://github.com/orieken/testsmith/releases/download/{tag}/testsmith-linux-amd64"
+                  url "https://github.com/orieken/assay/releases/download/{tag}/assay-linux-amd64"
                   sha256 "{linux}"
 
                   def install
-                    bin.install "testsmith-linux-amd64" => "testsmith"
+                    bin.install "assay-linux-amd64" => "assay"
                   end
                 end
               end
 
               test do
-                assert_match version.to_s, shell_output("\#{bin}/testsmith version")
+                assert_match version.to_s, shell_output("\#{bin}/assay version")
               end
             end
           """)
-          with open("tap/Formula/testsmith.rb", "w") as f:
+          with open("tap/Formula/assay.rb", "w") as f:
               f.write(formula)
-          print("wrote Formula/testsmith.rb")
+          print("wrote Formula/assay.rb")
           PY
 
       - name: Commit and push
@@ -215,7 +215,7 @@ jobs:
           cd tap
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Formula/testsmith.rb
+          git add Formula/assay.rb
           git diff --cached --quiet && echo "no changes" && exit 0
-          git commit -m "feat: update testsmith to ${{ github.ref_name }}"
+          git commit -m "feat: update assay to ${{ github.ref_name }}"
           git push

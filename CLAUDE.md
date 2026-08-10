@@ -1,7 +1,7 @@
-# TestSmith — Agent Context
+# Assay — Agent Context
 
 ## What this project is
-TestSmith is a Go CLI that generates test scaffolds for source files in any language.
+Assay is a Go CLI that generates test scaffolds for source files in any language.
 It is language-agnostic: a driver plugin model decouples file analysis, code generation,
 and LLM prompting from any particular language or framework.
 
@@ -14,9 +14,9 @@ and LLM prompting from any particular language or framework.
 | `internal/analysis` | File discovery (`DiscoverUntested`, `DiscoverInPath`) and `SourceAnalysis` construction | When changing discovery |
 | `internal/drivers/{lang}` | Language-specific analysis + code generation; one package per language | When adding/changing a language |
 | `internal/llm` | `LLMBodyGenerator`, provider middleware (retry/semaphore/cache), batch generation | When changing LLM integration |
-| `internal/projectknowledge` | Reads `TESTSMITH.md`, token budget management, convention mining | When changing context loading |
+| `internal/projectknowledge` | Reads `ASSAY.md`, token budget management, convention mining | When changing context loading |
 | `internal/config` | Config schema + defaults — `LLMConfig` fields live here | When changing config |
-| `cmd/testsmith` | Cobra CLI — one file per subcommand (`generate.go`, `init.go`, etc.) | When changing CLI |
+| `cmd/assay` | Cobra CLI — one file per subcommand (`generate.go`, `init.go`, etc.) | When changing CLI |
 
 ## Dependency direction (hard constraint)
 ```
@@ -29,12 +29,12 @@ cmd → internal/generation → internal/domain ← internal/drivers
 
 ## Key data flow for `generate --llm`
 ```
-DetectProject()           → ProjectContext  (ProjectKnowledge loaded from TESTSMITH.md)
+DetectProject()           → ProjectContext  (ProjectKnowledge loaded from ASSAY.md)
 DiscoverUntested()        → []string        (opts.TestFileKnownNew=true set here)
 AnalyzeFile()             → SourceAnalysis
 genPipeline.Plan()
   └─ fetchBodies()
-       ├─ projectknowledge.LoadForFile()    (per-file TESTSMITH.md merge)
+       ├─ projectknowledge.LoadForFile()    (per-file ASSAY.md merge)
        ├─ buildDepsSignatures()             (internal dep public API)
        ├─ mineConventions()                (up to 5 test files in same dir)
        ├─ TrimToBudget()                   (drops low-priority tiers at token limit)

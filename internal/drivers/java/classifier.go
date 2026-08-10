@@ -3,7 +3,7 @@ package java
 import (
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // javaStdlibPrefixes are root packages that ship with the JDK.

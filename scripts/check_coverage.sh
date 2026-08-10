@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check_coverage.sh — coverage fitness function for TestSmith CI.
+# check_coverage.sh — coverage fitness function for Assay CI.
 #
 # Enforces two constraints:
 #   1. Overall project coverage must be >= TOTAL_THRESHOLD (default 70%).
@@ -16,15 +16,15 @@ CORE_THRESHOLD="${CORE_THRESHOLD:-85}"
 
 # Packages that have received significant test investment — held to the higher bar.
 CORE_PACKAGES=(
-  "github.com/orieken/testsmith/internal/config"
-  "github.com/orieken/testsmith/internal/analysis"
-  "github.com/orieken/testsmith/internal/llm$"
-  "github.com/orieken/testsmith/internal/llm/anthropic"
-  "github.com/orieken/testsmith/internal/llm/openai"
-  "github.com/orieken/testsmith/internal/llm/ollama"
-  "github.com/orieken/testsmith/internal/llm/factory"
-  "github.com/orieken/testsmith/internal/migration"
-  "github.com/orieken/testsmith/internal/projectknowledge"
+  "github.com/orieken/assay/internal/config"
+  "github.com/orieken/assay/internal/analysis"
+  "github.com/orieken/assay/internal/llm$"
+  "github.com/orieken/assay/internal/llm/anthropic"
+  "github.com/orieken/assay/internal/llm/openai"
+  "github.com/orieken/assay/internal/llm/ollama"
+  "github.com/orieken/assay/internal/llm/factory"
+  "github.com/orieken/assay/internal/migration"
+  "github.com/orieken/assay/internal/projectknowledge"
 )
 
 # ── Generate profile if not supplied ─────────────────────────────────────────
@@ -56,7 +56,7 @@ echo "Core-package coverage (threshold: ${CORE_THRESHOLD}%):"
 # go tool cover -func emits: <file>:<line>: <func> <pct>%
 # The last line per package is the package summary — we want only the
 # "total" line for each package, which looks like:
-#   github.com/orieken/testsmith/internal/config/loader.go:30:	loadYAML	100.0%
+#   github.com/orieken/assay/internal/config/loader.go:30:	loadYAML	100.0%
 # We'll compute per-package averages ourselves from the profile.
 
 # Use `go test -cover ./...` output for per-package numbers; but that

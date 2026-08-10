@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to TestSmith v2 are documented here.
+All notable changes to Assay v2 are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
@@ -10,12 +10,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 #### Pattern knowledge system
-- `.testsmith/patterns/` directory — consumer projects drop per-pattern markdown files (e.g. `mock-database-sqlmock.md`, `http-handler-test-setup.md`); merged into every LLM prompt as a `## Captured patterns` section alongside `TESTSMITH.md` (system-prompt, budget-exempt)
-- `learn <file>` subcommand — reads a corrected or hand-written test file, extracts the non-obvious testing pattern via LLM, and writes a new file into `.testsmith/patterns/` for human review and commit
-- `init` extended — scaffolds `.testsmith/patterns/` with a README alongside `.testsmith.yaml`; `init --with-agents` writes bundled Claude Code agent files into `.claude/agents/`
+- `.assay/patterns/` directory — consumer projects drop per-pattern markdown files (e.g. `mock-database-sqlmock.md`, `http-handler-test-setup.md`); merged into every LLM prompt as a `## Captured patterns` section alongside `ASSAY.md` (system-prompt, budget-exempt)
+- `learn <file>` subcommand — reads a corrected or hand-written test file, extracts the non-obvious testing pattern via LLM, and writes a new file into `.assay/patterns/` for human review and commit
+- `init` extended — scaffolds `.assay/patterns/` with a README alongside `.assay.yaml`; `init --with-agents` writes bundled Claude Code agent files into `.claude/agents/`
 
 #### Agent integration
-- Three bundled Claude Code agents shipped in `internal/agents/files/`: `testsmith-test-author`, `testsmith-pattern-curator`, `testsmith-migration-guide`
+- Three bundled Claude Code agents shipped in `internal/agents/files/`: `assay-test-author`, `assay-pattern-curator`, `assay-migration-guide`
 - `init --with-agents` writes them into `.claude/agents/` — no network call, embedded via `go:embed`
 
 ---
@@ -41,14 +41,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `graph` — Mermaid dependency graph + coupling-score table
 - `prune` — identify and optionally delete unused fixture files; comments out stale imports in test files
 - `watch` — debounced `fsnotify` watcher; regenerates on source file save; per-workspace goroutines in monorepo mode
-- `init` — scaffold `.testsmith.yaml` and test directories for the detected language
+- `init` — scaffold `.assay.yaml` and test directories for the detected language
 - `adapters list` — list all adapters for the current or specified language with selection reason
-- `config show` — print the fully-resolved configuration (defaults merged with `.testsmith.yaml`)
+- `config show` — print the fully-resolved configuration (defaults merged with `.assay.yaml`)
 - `completion [bash|zsh|fish|powershell]` — generate shell completion scripts via Cobra's built-in generator
 - `version` — print the binary version
 
 #### Monorepo workspace support
-- `workspaces:` in `.testsmith.yaml` — named workspace entries with per-workspace `language` and `llm` overrides
+- `workspaces:` in `.assay.yaml` — named workspace entries with per-workspace `language` and `llm` overrides
 - `--workspace <name>` flag on `generate`, `validate`, `gaps`, `graph`, `prune`, and `watch`
 - `WorkspaceID()` / `WorkspaceLLM()` helpers in `internal/config`
 
@@ -67,13 +67,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `LanguageDriver.ValidateFile()` — per-framework validators for all five languages
 
 #### Configuration
-- `.testsmith.yaml` with full `yaml:"snake_case"` struct tags — files written by `init` are immediately loadable by `Load()`
+- `.assay.yaml` with full `yaml:"snake_case"` struct tags — files written by `init` are immediately loadable by `Load()`
 - Per-language `framework` and `mock_library` overrides
 - `exclude_dirs`, `test_root`, `fixture_dir` at root and per-language level
-- `pyproject.toml [tool.testsmith]` fallback for Python v1 compatibility
+- `pyproject.toml [tool.assay]` fallback for Python v1 compatibility
 
 #### Testing
-- 31 black-box CLI integration tests in `cmd/testsmith/cli_test.go` (`package main_test`) — compile binary once in `TestMain`, exercise every command as a subprocess
+- 31 black-box CLI integration tests in `cmd/assay/cli_test.go` (`package main_test`) — compile binary once in `TestMain`, exercise every command as a subprocess
 - Race detector (`-race`) enforced in CI on all three platforms
 - Unit tests for all internal packages
 - End-to-end pipeline tests in `internal/integration/`
@@ -84,18 +84,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 - Rewritten from Python (v1) to Go — single static binary, no runtime dependencies
-- `testsmith <file>` (v1 default) → `testsmith generate <file>` (explicit subcommand)
-- `testsmith --all` → `testsmith generate --all`
-- `testsmith --graph` → `testsmith graph`
-- `testsmith --prune` → `testsmith prune`
-- `testsmith --coverage-gaps` → `testsmith gaps`
-- `testsmith --watch` → `testsmith watch`
+- `assay <file>` (v1 default) → `assay generate <file>` (explicit subcommand)
+- `assay --all` → `assay generate --all`
+- `assay --graph` → `assay graph`
+- `assay --prune` → `assay prune`
+- `assay --coverage-gaps` → `assay gaps`
+- `assay --watch` → `assay watch`
 
 ### Migration from v1
 
-See the [v1 → v2 migration table](docs/v2/00-implementation-plan.md#migration-from-v1-python) for the full flag mapping. The v1 Python package (`pip install testsmith`) continues to receive bug fixes during the transition period.
+See the [v1 → v2 migration table](docs/v2/00-implementation-plan.md#migration-from-v1-python) for the full flag mapping. The v1 Python package (`pip install assay`) continues to receive bug fixes during the transition period.
 
 ---
 
-[Unreleased]: https://github.com/orieken/testsmith/compare/v2.0.0...HEAD
-[2.0.0]: https://github.com/orieken/testsmith/releases/tag/v2.0.0
+[Unreleased]: https://github.com/orieken/assay/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/orieken/assay/releases/tag/v2.0.0

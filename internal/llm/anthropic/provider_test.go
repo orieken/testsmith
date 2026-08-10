@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/llm"
-	"github.com/orieken/testsmith/internal/llm/anthropic"
+	"github.com/orieken/assay/internal/llm"
+	"github.com/orieken/assay/internal/llm/anthropic"
 )
 
 func TestComplete_Success(t *testing.T) {

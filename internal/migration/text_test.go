@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/migration"
+	"github.com/orieken/assay/internal/migration"
 )
 
 func TestTextMigrator_AppliesStepsInOrder(t *testing.T) {

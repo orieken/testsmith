@@ -6,11 +6,11 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/orieken/testsmith/internal/config"
+	"github.com/orieken/assay/internal/config"
 )
 
 // TestLoadFromFile_SnakeCaseFields verifies that snake_case YAML keys produced
-// by `testsmith init` round-trip correctly into the Config struct.
+// by `assay init` round-trip correctly into the Config struct.
 func TestLoadFromFile_SnakeCaseFields(t *testing.T) {
 	content := `
 language: python

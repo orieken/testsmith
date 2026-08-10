@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/llm"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/llm"
 )
 
 // stubProvider returns a fixed completion string.

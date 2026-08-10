@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/orieken/testsmith/internal/analysis"
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/analysis"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // DetectCoverage inspects each source analysis to determine whether a
@@ -30,7 +30,7 @@ func DetectCoverage(
 			continue
 		}
 
-		cmd := fmt.Sprintf("testsmith generate %s", a.SourcePath)
+		cmd := fmt.Sprintf("assay generate %s", a.SourcePath)
 		if status == domain.CoveragePartial || status == domain.CoverageSkeletonOnly {
 			cmd += " --overwrite"
 		}
@@ -91,7 +91,7 @@ func GenerateReport(gaps []domain.CoverageGap, totalSources int) string {
 	}
 
 	var sb strings.Builder
-	sb.WriteString("# TestSmith Coverage Gap Report\n\n")
+	sb.WriteString("# Assay Coverage Gap Report\n\n")
 	fmt.Fprintf(&sb, "**%d / %d source files have test coverage (%d%%)**\n\n", covered, totalSources, pct)
 
 	if len(gaps) == 0 {

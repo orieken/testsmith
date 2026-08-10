@@ -4,13 +4,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/agents"
+	"github.com/orieken/assay/internal/agents"
 )
 
 var expectedAgents = []string{
-	"testsmith-test-author.md",
-	"testsmith-pattern-curator.md",
-	"testsmith-migration-guide.md",
+	"assay-test-author.md",
+	"assay-pattern-curator.md",
+	"assay-migration-guide.md",
 }
 
 func TestAll_returnsAllBundledAgents(t *testing.T) {

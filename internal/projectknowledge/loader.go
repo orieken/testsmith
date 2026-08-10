@@ -1,12 +1,12 @@
-// Package projectknowledge reads and merges TESTSMITH.md knowledge files from
+// Package projectknowledge reads and merges ASSAY.md knowledge files from
 // the target project. These files let project owners inject conventions, domain
 // vocabulary, and test-infrastructure facts into every LLM prompt without
 // reloading them per-file.
 //
 // Loading is hierarchical:
 //
-//	<project-root>/TESTSMITH.md       — project-wide conventions (always loaded)
-//	<source-dir>/TESTSMITH.md         — package-level overrides (merged below root)
+//	<project-root>/ASSAY.md       — project-wide conventions (always loaded)
+//	<source-dir>/ASSAY.md         — package-level overrides (merged below root)
 //
 // If neither file exists, Load/LoadForFile return an empty string and the LLM
 // falls back to file-level context only.
@@ -19,22 +19,22 @@ import (
 	"strings"
 )
 
-const filename = "TESTSMITH.md"
+const filename = "ASSAY.md"
 
-// Load reads the root-level TESTSMITH.md for the given project root.
+// Load reads the root-level ASSAY.md for the given project root.
 // Returns empty string when the file does not exist.
 func Load(root string) string {
 	return readFile(filepath.Join(root, filename))
 }
 
-// LoadForFile merges root-level and source-directory-level TESTSMITH.md files.
+// LoadForFile merges root-level and source-directory-level ASSAY.md files.
 // The directory content is appended under a separator so the LLM sees both.
 // Returns the root content alone when source directory has no override.
 func LoadForFile(sourcePath, root string) string {
 	return LoadForDir(filepath.Dir(sourcePath), root)
 }
 
-// LoadForDir merges root-level and directory-level TESTSMITH.md files.
+// LoadForDir merges root-level and directory-level ASSAY.md files.
 // Use this when you have a directory path rather than a file path.
 func LoadForDir(dir, root string) string {
 	rootContent := readFile(filepath.Join(root, filename))
@@ -59,7 +59,7 @@ func LoadForDir(dir, root string) string {
 	return sb.String()
 }
 
-// Template returns a language-specific starter TESTSMITH.md that testsmith init
+// Template returns a language-specific starter ASSAY.md that assay init
 // can write to a new project. The caller should trim or expand it to taste.
 func Template(language string) string {
 	base := templates["default"]

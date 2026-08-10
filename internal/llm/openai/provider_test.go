@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/llm"
-	"github.com/orieken/testsmith/internal/llm/openai"
+	"github.com/orieken/assay/internal/llm"
+	"github.com/orieken/assay/internal/llm/openai"
 )
 
 func TestComplete_Success(t *testing.T) {

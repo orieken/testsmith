@@ -4,9 +4,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/config"
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/llm/factory"
+	"github.com/orieken/assay/internal/config"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/llm/factory"
 )
 
 func TestBuild_DisabledReturnsNil(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/generation"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/generation"
 )
 
 // ---- classifyTestContent (via DetectCoverage) --------------------------------
@@ -74,7 +74,7 @@ func TestGenerateReport_AllCovered(t *testing.T) {
 
 func TestGenerateReport_WithGaps(t *testing.T) {
 	gaps := []domain.CoverageGap{
-		{SourcePath: "src/auth.py", Status: domain.CoverageNoTest, PriorityScore: 0.9, SuggestedCommand: "testsmith generate src/auth.py"},
+		{SourcePath: "src/auth.py", Status: domain.CoverageNoTest, PriorityScore: 0.9, SuggestedCommand: "assay generate src/auth.py"},
 	}
 	report := generation.GenerateReport(gaps, 3)
 	if !strings.Contains(report, "auth.py") {

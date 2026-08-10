@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // ── ResultCache.Stats ─────────────────────────────────────────────────────────

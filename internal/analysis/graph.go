@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // BuildDependencyGraph constructs a DependencyGraph from a set of SourceAnalyses.

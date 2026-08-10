@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // ResultCache is a thread-safe in-process cache for LLM body generation results.

@@ -7,9 +7,9 @@ before:
 # go-tree-sitter requires CGo. Each platform is built natively on its own runner.
 # Use `goreleaser build --single-target` in CI with the GOOS/GOARCH env vars set.
 builds:
-  - id: testsmith
-    main: ./cmd/testsmith
-    binary: testsmith
+  - id: assay
+    main: ./cmd/assay
+    binary: assay
     env:
       - CGO_ENABLED=1
     ldflags:
@@ -33,10 +33,10 @@ builds:
         goarch: arm64
 
 archives:
-  - id: testsmith-archive
+  - id: assay-archive
     builds:
-      - testsmith
-    name_template: "testsmith_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+      - assay
+    name_template: "assay_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format: tar.gz
     format_overrides:
       - goos: windows
@@ -46,13 +46,13 @@ archives:
       - LICENSE*
 
 checksum:
-  name_template: "testsmith_{{ .Version }}_checksums.txt"
+  name_template: "assay_{{ .Version }}_checksums.txt"
   algorithm: sha256
 
 release:
   github:
     owner: orieken
-    name: testsmith
+    name: assay
   name_template: "v{{ .Version }}"
   draft: false
   prerelease: auto

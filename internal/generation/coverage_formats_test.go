@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/generation"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/generation"
 )
 
 // ── GenerateReportJSON ────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ func TestGenerateReportJUnit_NoGaps(t *testing.T) {
 
 func TestGenerateReportJUnit_WithGaps(t *testing.T) {
 	gaps := []domain.CoverageGap{
-		{SourcePath: "src/bar.go", Status: domain.CoverageNoTest, SuggestedCommand: "testsmith generate src/bar.go"},
+		{SourcePath: "src/bar.go", Status: domain.CoverageNoTest, SuggestedCommand: "assay generate src/bar.go"},
 	}
 	out := generation.GenerateReportJUnit(gaps, 5)
 

@@ -1,6 +1,6 @@
 # Framework & Mock Library Matrix
 
-TestSmith ships 18 built-in adapters across 5 languages. Each adapter is independently selectable via config or auto-detected from project files.
+Assay ships 18 built-in adapters across 5 languages. Each adapter is independently selectable via config or auto-detected from project files.
 
 ## Built-in adapters
 
@@ -27,7 +27,7 @@ TestSmith ships 18 built-in adapters across 5 languages. Each adapter is indepen
 
 ## Auto-detection heuristics
 
-TestSmith reads project files to select the best adapter automatically:
+Assay reads project files to select the best adapter automatically:
 
 | Language   | Signal file(s)                   | Detected as               |
 |------------|----------------------------------|---------------------------|
@@ -45,12 +45,12 @@ TestSmith reads project files to select the best adapter automatically:
 | C#         | `MSTest.TestFramework`           | mstest + moq              |
 | C#         | `NSubstitute` in .csproj         | (same framework) + nsubstitute |
 
-Config overrides always win over auto-detection — see `.testsmith.yaml` configuration below.
+Config overrides always win over auto-detection — see `.assay.yaml` configuration below.
 
 ## Overriding via config
 
 ```yaml
-# .testsmith.yaml
+# .assay.yaml
 languages:
   python:
     framework: unittest

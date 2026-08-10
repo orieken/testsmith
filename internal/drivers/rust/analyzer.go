@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // Regex patterns for Rust source analysis.
@@ -161,7 +161,7 @@ func collectImplMethods(src string) map[string][]domain.MethodInfo {
 
 func deriveTestPath(sourcePath string, ctx *domain.ProjectContext) (string, error) {
 	// Integration tests go in tests/<module>.rs; unit tests are inline.
-	// For TestSmith, we generate an integration test file.
+	// For Assay, we generate an integration test file.
 	base := filepath.Base(sourcePath)
 	ext := filepath.Ext(base)
 	name := base[:len(base)-len(ext)]

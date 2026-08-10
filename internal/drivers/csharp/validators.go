@@ -1,8 +1,8 @@
 package csharp
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/validation"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/validation"
 )
 
 var csValidators = []*validation.TextValidator{
@@ -17,7 +17,7 @@ func xunitValidator() *validation.TextValidator {
 			"xUnit namespace not found — expected 'using Xunit;'",
 			domain.SeverityWarning).
 		Forbid("nunit-using-in-xunit", `using NUnit\.Framework;`,
-			"NUnit namespace found — run 'testsmith migrate --from nunit --to xunit'",
+			"NUnit namespace found — run 'assay migrate --from nunit --to xunit'",
 			domain.SeverityError).
 		Forbid("nunit-testfixture-in-xunit", `\[TestFixture\]`,
 			"[TestFixture] is NUnit — remove it; xUnit discovers plain public classes",
@@ -36,7 +36,7 @@ func nunitValidator() *validation.TextValidator {
 			"NUnit namespace not found — expected 'using NUnit.Framework;'",
 			domain.SeverityWarning).
 		Forbid("xunit-using-in-nunit", `using Xunit;`,
-			"xUnit namespace found — run 'testsmith migrate --from xunit --to nunit'",
+			"xUnit namespace found — run 'assay migrate --from xunit --to nunit'",
 			domain.SeverityError).
 		Forbid("xunit-fact-in-nunit", `\[Fact\]`,
 			"[Fact] is xUnit — use [Test] for NUnit",

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // generateTestFile produces a test scaffold for the given analysis using the

@@ -9,7 +9,7 @@
 package python
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // Driver implements domain.LanguageDriver for Python + pytest.

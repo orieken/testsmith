@@ -5,8 +5,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/orieken/testsmith/internal/domain"
-	"github.com/orieken/testsmith/internal/drivers/csharp"
+	"github.com/orieken/assay/internal/domain"
+	"github.com/orieken/assay/internal/drivers/csharp"
 )
 
 func testdataPath(rel string) string {

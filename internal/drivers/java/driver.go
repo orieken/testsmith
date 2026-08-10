@@ -4,7 +4,7 @@
 package java
 
 import (
-	"github.com/orieken/testsmith/internal/domain"
+	"github.com/orieken/assay/internal/domain"
 )
 
 // Driver implements domain.LanguageDriver for Java + JUnit 5.
