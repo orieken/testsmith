@@ -1,0 +1,17 @@
+version: "2"
+language: java
+source_dirs:
+  - src/main/java
+test_dir: src/test/java
+exclude_dirs:
+  - target
+  - .git
+llm:
+  provider: anthropic
+  model: claude-3-5-haiku-20241022
+  api_key_env_var: ANTHROPIC_API_KEY
+  max_tokens: 1536
+  temperature: 0.2
+  prompt_token_budget: 6000
+  max_concurrent_calls: 5
+  max_retry_attempts: 3

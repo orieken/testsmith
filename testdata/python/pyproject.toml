@@ -1,0 +1,11 @@
+[tool.poetry]
+name = "assay-testdata-python"
+version = "0.1.0"
+description = "Python testdata fixtures for Assay integration tests"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

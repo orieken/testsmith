@@ -1,0 +1,73 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+# go-tree-sitter requires CGo. Each platform is built natively on its own runner.
+# Use `goreleaser build --single-target` in CI with the GOOS/GOARCH env vars set.
+builds:
+  - id: assay
+    main: ./cmd/assay
+    binary: assay
+    env:
+      - CGO_ENABLED=1
+    ldflags:
+      - -s -w
+      - -X main.Version={{ .Version }}
+    # Goreleaser will build for the host platform only when invoked per-runner.
+    # The CI matrix collects all three artifacts and merges them in the publish job.
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      # arm64 Windows cross-compilation is not reliably supported with CGo.
+      - goos: windows
+        goarch: arm64
+      # linux/arm64 needs a cross-compiler; skip unless you have one configured.
+      - goos: linux
+        goarch: arm64
+
+archives:
+  - id: assay-archive
+    builds:
+      - assay
+    name_template: "assay_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE*
+
+checksum:
+  name_template: "assay_{{ .Version }}_checksums.txt"
+  algorithm: sha256
+
+release:
+  github:
+    owner: orieken
+    name: assay
+  name_template: "v{{ .Version }}"
+  draft: false
+  prerelease: auto
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - Merge pull request
+      - Merge branch
+
+announce:
+  skip: "true"

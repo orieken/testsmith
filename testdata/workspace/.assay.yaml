@@ -1,0 +1,7 @@
+workspaces:
+  - name: api
+    path: services/api
+    language: go
+  - name: frontend
+    path: services/frontend
+    language: typescript

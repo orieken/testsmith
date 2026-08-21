@@ -1,354 +1,470 @@
-# TestSmith
+# Assay
 
-> **A project-agnostic Python test scaffold generator**
+> *assay (v.)* — to test the quality or composition of something; from Old French *assai*, "trial, test." In metallurgy, an assay determines the purity of a metal sample. Here, it determines the test coverage of your code.
 
-TestSmith analyzes your Python source code via AST parsing and automatically generates pytest test scaffolds, mock fixtures, and test infrastructure—so you can focus on writing assertions, not boilerplate.
+**Language-agnostic test scaffold generator.** Point it at any source file and it writes the boilerplate so you can write the assertions.
 
-[![CI](https://github.com/orieken/testsmith/workflows/CI/badge.svg)](https://github.com/orieken/testsmith/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
----
-
-## How It Works
-
-TestSmith follows a simple pipeline: **Analyze → Classify → Generate**
-
-```mermaid
-graph LR
-    A[Source File] -->|AST Parse| B[Analyze Imports]
-    B --> C{Classify Import}
-    C -->|stdlib| D[Skip]
-    C -->|internal| E[Add to conftest paths]
-    C -->|external| F[Generate Mock Fixture]
-    
-    E --> G[Generate Test File]
-    F --> G
-    G --> H[Update conftest.py]
-    
-    style A fill:#4a90d9,color:#fff
-    style B fill:#7b68ee,color:#fff
-    style G fill:#50c878,color:#fff
-    style H fill:#ffa07a,color:#fff
-```
-
-**What happens:**
-1. **Analyze**: Parse source file with Python's AST to extract imports, classes, and functions
-2. **Classify**: Categorize each import as stdlib (skip), internal (add path), or external (mock)
-3. **Generate**: Create test file with proper structure, mock fixtures for external dependencies
-4. **Update**: Modify `conftest.py` to ensure internal imports resolve correctly
+| Language | Frameworks | Mocking |
+|----------|-----------|---------|
+| Python | pytest, unittest | pytest-mock, unittest.mock |
+| TypeScript / JavaScript | Jest, Vitest, Mocha | jest.fn(), vi.fn(), sinon |
+| Go | testing (stdlib) | interfaces, testify, gomock |
+| Java | JUnit 5, JUnit 4, TestNG, Spring Boot | Mockito |
+| C# | xUnit, NUnit, MSTest | Moq, NSubstitute |
 
 ---
 
-## Features
+## Install
 
-### Core Functionality
-- ✅ **Zero Configuration**: Works on any Python project structure
-- ✅ **Smart Import Classification**: Automatically detects stdlib, internal, and external dependencies
-- ✅ **Shared Mock Fixtures**: Generates reusable `*.fixture.py` files for external dependencies
-- ✅ **Idempotent**: Safe to run multiple times—won't duplicate or break existing tests
-- ✅ **Project-Aware**: Auto-detects project root and package structure
-
-### Advanced Features
-- 🤖 **LLM Test Body Generation**: Use `--generate-bodies` to fill in test assertions with AI
-- 📊 **Dependency Graph Visualization**: Generate Mermaid diagrams with `--graph`
-- 🧹 **Fixture Pruning**: Remove unused fixtures with `--prune`
-- 📈 **Coverage Gap Analysis**: Identify untested code with `--coverage-gaps`
-- 👀 **Watch Mode**: Auto-regenerate tests on file changes with `--watch`
-
-### Distribution
-- 📦 **Standalone Binaries**: No Python installation required
-- 🐍 **PyPI Package**: Install with `pipx` or `pip`
-- 🖥️ **Multi-Platform**: Linux, macOS (Intel + Apple Silicon), Windows
-
----
-
-## Installation
-
-### Option 1: Binary (No Python Required)
-
-Download the latest binary for your platform from [GitHub Releases](https://github.com/orieken/testsmith/releases):
-
-```bash
-# Linux
-curl -LO https://github.com/orieken/testsmith/releases/latest/download/testsmith-linux-amd64
-chmod +x testsmith-linux-amd64
-sudo mv testsmith-linux-amd64 /usr/local/bin/testsmith
-
-# macOS (Intel)
-curl -LO https://github.com/orieken/testsmith/releases/latest/download/testsmith-macos-amd64
-chmod +x testsmith-macos-amd64
-sudo mv testsmith-macos-amd64 /usr/local/bin/testsmith
-
-# macOS (Apple Silicon)
-curl -LO https://github.com/orieken/testsmith/releases/latest/download/testsmith-macos-arm64
-chmod +x testsmith-macos-arm64
-sudo mv testsmith-macos-arm64 /usr/local/bin/testsmith
-
-# Windows (PowerShell)
-Invoke-WebRequest -Uri https://github.com/orieken/testsmith/releases/latest/download/testsmith-windows-amd64.exe -OutFile testsmith.exe
+### Homebrew (macOS / Linux)
+```sh
+brew install orieken/tap/assay
 ```
 
-### Option 2: pipx (Recommended for Python Users)
+### Download binary
+Download the latest release from the [releases page](https://github.com/orieken/assay/releases), then make it executable:
 
-```bash
-pipx install testsmith
+```sh
+chmod +x assay-darwin-arm64
+sudo mv assay-darwin-arm64 /usr/local/bin/assay
 ```
 
-### Option 3: pip
+### Build from source
+Requires Go 1.22+.
 
-```bash
-pip install testsmith
+```sh
+git clone https://github.com/orieken/assay.git
+cd assay
+go build -o assay ./cmd/assay
 ```
 
 ---
 
-## Quick Start
+## Quick start
 
-### 1. Initialize TestSmith in Your Project
+```sh
+# Initialise a project (creates .assay.yaml and .assay/patterns/)
+assay init
 
-```bash
-cd your-project/
-testsmith --init
-```
+# Also write Claude Code agents into .claude/agents/
+assay init --with-agents
 
-This creates:
-- `tests/` directory
-- `tests/fixtures/` for shared mocks
-- `tests/fixtures/conftest.py` for fixture registration
+# Generate a test for one file
+assay generate src/services/payment.py
 
-### 2. Generate Tests for a File
+# Generate tests for every untested file in the project
+assay generate --all
 
-```bash
-testsmith src/services/payment.py
-```
+# Preview what would be generated without writing
+assay generate --all --dry-run
 
-This creates:
-- `tests/src/services/test_payment.py` with test scaffolds
-- Mock fixtures in `tests/fixtures/` for external dependencies
-- Updates `conftest.py` with necessary paths
+# Capture a testing pattern from an existing test file (requires llm.enabled: true)
+assay learn src/services/payment_test.py
 
-### 3. Run Your Tests
-
-```bash
-pytest tests/
+# Start watching for changes (auto-regenerates on save)
+assay watch
 ```
 
 ---
 
-## Usage Examples
+## Commands
 
-### Basic Test Generation
+### `generate`
+Generate test scaffolds for one file, a directory, or the whole project.
 
-```bash
-# Generate test for a single file
-testsmith src/api/users.py
+```
+assay generate [file] [flags]
 
-# Generate tests for all untested files
-testsmith --all
-
-# Generate tests for a directory
-testsmith --path src/services/
+Flags:
+  --all               Generate tests for every untested source file
+  --path <dir>        Generate tests for untested files under this directory
+  --overwrite         Regenerate even if a test file already exists
+  --llm               Use an LLM to write test bodies (see LLM setup)
+  --lang <name>       Override auto-detected language
+  --workers <n>       Parallel workers for --all / --path (default: NumCPU)
+  --workspace <name>  Process only this workspace (monorepo support)
+  --dry-run           Print what would be created without writing any files
+  -v, --verbose       Show detailed per-file analysis output
 ```
 
-### Advanced Features
-
-```bash
-# Generate test bodies with AI (requires ANTHROPIC_API_KEY)
-testsmith src/api/users.py --generate-bodies
-
-# Visualize dependency graph
-testsmith --graph --graph-output deps.md
-
-# Find and remove unused fixtures
-testsmith --prune --confirm
-
-# Analyze coverage gaps and prioritize testing
-testsmith --coverage-gaps
-
-# Watch mode: auto-regenerate on file changes
-testsmith --watch
-```
-
-### Dry Run Mode
-
-```bash
-# Preview what would be generated without writing files
-testsmith src/api/users.py --dry-run
+```sh
+assay generate src/payment.py
+assay generate --all
+assay generate --all --workers 8
+assay generate --path src/services/
+assay generate src/payment.py --llm --overwrite
 ```
 
 ---
 
-## Configuration
+### `validate`
+Scan existing test files and report mismatches against the configured adapter's conventions. Exits non-zero when errors are found (suitable for CI).
 
-TestSmith works with zero configuration, but you can customize behavior in `pyproject.toml`:
+```
+assay validate [flags]
 
-```toml
-[tool.testsmith]
-test_root = "tests/"
-fixture_root = "tests/fixtures/"
-exclude_dirs = ["venv", ".venv", "node_modules", "__pycache__"]
+Flags:
+  --lang <name>       Override auto-detected language
+  --path <dir>        Restrict to test files under this directory
+  --workspace <name>  Validate only this workspace
+  -v, --verbose       Print ✓ for each clean file
+```
+
+```sh
+assay validate
+assay validate --lang java
+assay validate --workspace api
 ```
 
 ---
 
-## Architecture
-
-TestSmith is organized into distinct layers:
+### `migrate`
+Rewrite existing test files from one framework to another using ordered regex transformations.
 
 ```
-src/testsmith/
-├── cli.py                  # CLI entry point
-├── core/                   # Core analysis engine
-│   ├── source_analyzer.py  # AST parsing & import extraction
-│   ├── import_classifier.py # stdlib/internal/external classification
-│   └── project_detector.py # Project structure detection
-├── generation/             # Code generation
-│   ├── test_generator.py   # Test file generation
-│   ├── fixture_generator.py # Mock fixture generation
-│   └── conftest_updater.py # conftest.py management
-├── llm/                    # LLM integration
-│   └── test_body_generator.py # AI-powered test bodies
-├── visualization/          # Dependency graphs
-│   ├── graph_builder.py    # Build dependency graphs
-│   └── mermaid_renderer.py # Render Mermaid diagrams
-├── maintenance/            # Maintenance tools
-│   ├── fixture_pruner.py   # Remove unused fixtures
-│   └── coverage_analyzer.py # Coverage gap analysis
-└── support/                # Shared utilities
-    ├── config.py           # Configuration management
-    ├── models.py           # Data models
-    └── templates.py        # Code templates
+assay migrate [flags]
+
+Required:
+  --from <framework>  Source framework (e.g. jest, junit4, pytest-mock, nunit)
+  --to   <framework>  Target framework (e.g. vitest, junit5, unittest-mock, xunit)
+
+Optional:
+  --path <dir>        Restrict to test files under this directory
+  --lang <name>       Override auto-detected language
+  --dry-run           Print what would change without writing files
 ```
 
-See [docs/architecture.md](docs/architecture.md) for detailed design documentation.
+```sh
+assay migrate --from jest --to vitest
+assay migrate --from junit4 --to junit5 --path src/test/
+assay migrate --from pytest-mock --to unittest-mock --dry-run
+```
+
+Available pairs: `jest↔vitest`, `junit4↔junit5`, `pytest-mock↔unittest-mock`, `nunit↔xunit`.
 
 ---
 
-## Platform Support
+### `gaps`
+Analyse all source files and produce a prioritised Markdown coverage report.
 
-- **Linux**: Ubuntu 20.04+, Debian 10+, RHEL 7+, Fedora 30+, CentOS 7+
-- **macOS**: macOS 11+ (Big Sur and later), Intel and Apple Silicon
-- **Windows**: Windows 10, Windows 11, Windows Server 2019+
+```
+assay gaps [flags]
+
+Flags:
+  --output <file>     Output file (default: assay_coverage_report.md)
+  --top <n>           Show only the top N gaps
+  --workspace <name>  Analyse only this workspace
+  --dry-run           Print the report to stdout
+```
+
+```sh
+assay gaps
+assay gaps --top 10 --dry-run
+assay gaps --output coverage.md
+```
+
+---
+
+### `graph`
+Build a Mermaid dependency graph and coupling-score table for all source modules.
+
+```
+assay graph [flags]
+
+Flags:
+  --output <file>     Output Markdown file (default: assay_graph.md)
+  --workspace <name>  Graph only this workspace
+  --dry-run           Print the report to stdout
+```
+
+```sh
+assay graph
+assay graph --dry-run
+assay graph --output deps.md
+```
+
+---
+
+### `prune`
+Find fixture files that no longer match any active external dependency.
+
+```
+assay prune [flags]
+
+Flags:
+  --confirm           Actually delete unused fixtures (default: dry-run)
+  --workspace <name>  Prune only this workspace
+```
+
+```sh
+assay prune             # preview what would be removed
+assay prune --confirm   # delete unused fixtures
+```
+
+---
+
+### `watch`
+Monitor source files and automatically regenerate test scaffolds on save.
+
+```
+assay watch [flags]
+
+Flags:
+  --debounce <ms>     Debounce interval in milliseconds (default: 500)
+  --llm               Enable LLM body generation on watched changes
+  --workspace <name>  Watch only this workspace
+  -v, --verbose       Log each file event
+```
+
+```sh
+assay watch
+assay watch --debounce 1000 --llm
+```
+
+---
+
+### `init`
+Scaffold a `.assay.yaml`, standard test directories, and a `.assay/patterns/` directory with a README.
+
+```
+assay init [flags]
+
+Flags:
+  --lang <name>      Force a specific language instead of auto-detecting
+  --with-agents      Write bundled Claude Code agent files into .claude/agents/
+  --dry-run          Print what would be created without writing files
+```
+
+```sh
+assay init
+assay init --lang python
+assay init --with-agents   # also writes Claude Code agents into .claude/agents/
+```
+
+---
+
+### `learn`
+Read a test file, extract its non-obvious testing patterns using the configured LLM, and write the result to `.assay/patterns/<slug>.md` for future `generate` runs.
+
+Requires `llm.enabled: true` in `.assay.yaml`. Skips writing if the target pattern file already exists.
+
+```
+assay learn <file> [flags]
+
+Flags:
+  --dry-run   Print the extracted pattern without writing a file
+```
+
+```sh
+assay learn src/payment_test.py
+assay learn internal/db/store_test.go --dry-run
+```
+
+---
+
+### `adapters list`
+List all available adapters for the detected (or specified) language.
+
+```
+assay adapters list [flags]
+
+Flags:
+  --lang <name>   Show adapters for this language
+```
+
+```sh
+assay adapters list
+assay adapters list --lang java
+```
+
+---
+
+### `config show`
+Print the resolved configuration (defaults merged with any `.assay.yaml`).
+
+```sh
+assay config show
+```
+
+---
+
+### `completion`
+Generate shell completion scripts.
+
+```sh
+# Bash (load for session)
+source <(assay completion bash)
+
+# Zsh
+assay completion zsh > "${fpath[1]}/_assay"
+
+# Fish
+assay completion fish | source
+
+# PowerShell
+assay completion powershell | Out-String | Invoke-Expression
+```
+
+---
+
+## Configuration (`.assay.yaml`)
+
+Run `assay init` to generate a starter config. Full schema:
+
+```yaml
+language: python          # override auto-detection
+
+test_root: tests/
+fixture_dir: tests/fixtures/
+
+exclude_dirs:
+  - node_modules
+  - .venv
+  - vendor
+  - build
+  - dist
+
+# LLM body generation (optional — works offline without this)
+llm:
+  enabled: false
+  provider: anthropic          # anthropic | openai | ollama
+  model: claude-sonnet-4-6
+  max_tokens_per_function: 1500
+  temperature: 0.0
+  api_key_env_var: ANTHROPIC_API_KEY
+  # base_url: http://localhost:11434/v1   # Ollama or OpenAI-compatible
+
+# Per-language overrides
+languages:
+  python:
+    test_root: tests/
+    fixture_dir: tests/fixtures/
+    framework: pytest
+    mock_library: pytest-mock
+  typescript:
+    test_root: src/
+    fixture_dir: __mocks__/
+  java:
+    test_root: src/test/java/
+
+# Monorepo workspace support
+# All commands that accept --workspace use these entries.
+workspaces:
+  - name: api
+    path: services/api
+    language: go
+  - name: frontend
+    path: services/frontend
+    language: typescript
+    llm:
+      provider: openai
+      model: gpt-4o
+```
+
+---
+
+## LLM setup
+
+Assay works offline with TODO stubs. Pass `--llm` to have an LLM write the test bodies.
+
+### Anthropic (default)
+```sh
+export ANTHROPIC_API_KEY=sk-ant-...
+assay generate src/payment.py --llm
+```
+
+### OpenAI
+```yaml
+# .assay.yaml
+llm:
+  provider: openai
+  model: gpt-4o
+  api_key_env_var: OPENAI_API_KEY
+```
+
+### Ollama (local, no API key)
+```yaml
+# .assay.yaml
+llm:
+  provider: ollama
+  model: llama3
+  base_url: http://localhost:11434/v1
+```
+
+---
+
+## How it works
+
+```
+Source file
+    │
+    ▼
+LanguageDriver.AnalyzeFile()      → SourceAnalysis (imports, public API)
+    │
+    ▼
+generation.Pipeline.Plan()        → GenerationPlan (pure data, no I/O)
+    │   optionally: BodyGenerator via LLM
+    ▼
+generation.Executor.Execute()     → writes files to disk
+```
+
+Each language driver is isolated behind the `LanguageDriver` interface. Adding a new language means implementing that interface — no changes to the pipeline or CLI are required.
 
 ---
 
 ## Development
 
-### Local Setup
+```sh
+# Run all tests (with race detector)
+go test -race ./...
 
-```bash
-# Clone repository
-git clone https://github.com/orieken/testsmith.git
-cd testsmith
+# Run a specific package
+go test ./internal/drivers/python/... -v
 
-# Install dependencies (including dev tools)
-poetry install --with dev,build
-```
+# Run black-box CLI integration tests
+go test ./cmd/assay/... -v -timeout 120s
 
-### Using Source Version Locally
+# Run end-to-end pipeline tests
+go test ./internal/integration/... -v
 
-To use the development version of TestSmith in other projects on your machine:
-
-1. **Activate the environment**:
-   ```bash
-   # Activate the virtual environment in your shell
-   source $(poetry env info --path)/bin/activate
-   ```
-
-2. **Navigate to your target project**:
-   ```bash
-   cd ../my-other-project
-   ```
-
-3. **Run TestSmith**:
-   ```bash
-   # The 'testsmith' command is now available in your PATH
-   testsmith --generate-bodies src/app.py
-   ```
-
-### Development Tasks
-
-TestSmith uses [poethepoet](https://github.com/nat-n/poethepoet) for task automation. Run `poe` to see all available tasks:
-
-```bash
-# Testing
-poe test              # Run all tests with coverage
-poe test-unit         # Run only unit tests
-poe test-integration  # Run only integration tests
-poe test-fast         # Stop on first failure, run failed tests first
-
-# Linting & Formatting
-poe lint              # Check code with ruff
-poe format            # Format code with black
-poe format-check      # Check formatting without modifying
-poe check             # Run all checks (lint + format + test)
-
-# Building
-poe build             # Build binary with PyInstaller
-poe build-test        # Build and test binary
-
-# Cleaning
-poe clean             # Remove build artifacts and caches
-
-# Development
-poe install           # Install all dependencies
-poe version           # Show current version
-```
-
-### Manual Commands (if not using poe)
-
-```bash
-# Run tests
-poetry run pytest tests/ --cov=src/testsmith --cov-report=term-missing
+# Build the binary
+go build -o assay ./cmd/assay
 
 # Lint
-poetry run ruff check src/ tests/
-poetry run black --check src/ tests/
+golangci-lint run
 ```
 
-### Build Binary Locally
-
-```bash
-# Using poe (recommended)
-poe build
-
-# Or using scripts directly
-# Linux/macOS
-./scripts/build-local.sh
-
-# Windows
-.\scripts\build-local.ps1
+### Project layout
 ```
-
----
-
-## Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+cmd/assay/       CLI commands (Cobra) + black-box integration tests
+internal/
+  analysis/          Source discovery and analysis pipeline
+  config/            Config loading, defaults, yaml tags
+  domain/            Pure types and interfaces (no dependencies)
+  drivers/           One package per language
+    python/
+    typescript/
+    golang/
+    java/
+    csharp/
+  generation/        GenerationPlan builder, Executor, gap analysis, prune
+  integration/       End-to-end pipeline tests against testdata/
+  llm/               LLM adapter (Anthropic, OpenAI, Ollama)
+  migration/         TextMigrator fluent builder (regex-based rewrites)
+  registry/          Language driver registry
+  validation/        TextValidator fluent builder (Require / Forbid rules)
+  watch/             Debounced file-system watcher
+testdata/            Fixture projects for driver tests
+  python/
+  typescript/
+  golang/
+  java/
+  csharp/
+  workspace/         Monorepo fixture (Go api + TypeScript frontend)
+```
 
 ---
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
-
-Copyright (c) 2026 Oscar Rieken <oriekenjr@gmail.com>
-
-Portfolio: https://rieken-portfolio.netlify.app/
-
----
-
-## About
-
-TestSmith was built as a learning project to explore static code analysis, test automation, and AI-assisted development. Read more about the story and philosophy behind the project in [ABOUT.md](ABOUT.md).
-
----
-
-## Acknowledgments
-
-Built with:
-- [Python AST](https://docs.python.org/3/library/ast.html) for source analysis
-- [pytest](https://pytest.org/) for testing framework
-- [Anthropic Claude](https://www.anthropic.com/) for LLM test generation
-- [PyInstaller](https://pyinstaller.org/) for binary builds
-- [GitHub Actions](https://github.com/features/actions) for CI/CD
+MIT

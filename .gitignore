@@ -63,5 +63,18 @@ env/
 Thumbs.db
 
 # Project specific
-testsmith_coverage_report.md
-testsmith_graph.md
+assay_coverage_report.md
+assay_graph.md
+
+# Go build artifacts
+/dist/
+/debug_tmp/
+/assay
+
+# Local notes (drafts, emails, scratch)
+/notes/
+
+# Local environment — never commit real secrets
+.env
+.env.local
+.env.*.local
