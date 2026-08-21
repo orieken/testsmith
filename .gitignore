@@ -78,3 +78,4 @@ assay_graph.md
 .env
 .env.local
 .env.*.local
+cmd/assay/spike_ctx/
