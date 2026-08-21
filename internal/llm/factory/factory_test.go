@@ -81,14 +81,14 @@ func TestBuildProvider_DisabledReturnsError(t *testing.T) {
 }
 
 // backfill / AC: BuildProvider returns error when non-ollama provider has no API key env var set.
-// Uses a unique env var name (TESTSMITH_NO_SUCH_KEY_XYZ) that is guaranteed absent in any
+// Uses a unique env var name (ASSAY_NO_SUCH_KEY_XYZ) that is guaranteed absent in any
 // normal environment, so no explicit unset is required and the test is safe to run in parallel.
 func TestBuildProvider_MissingAPIKey_ReturnsError(t *testing.T) {
 	t.Parallel()
 	cfg := config.LLMConfig{
 		Enabled:      true,
 		Provider:     "anthropic",
-		APIKeyEnvVar: "TESTSMITH_NO_SUCH_KEY_XYZ",
+		APIKeyEnvVar: "ASSAY_NO_SUCH_KEY_XYZ",
 	}
 	_, err := factory.BuildProvider(cfg)
 	if err == nil {
@@ -116,11 +116,11 @@ func TestBuildProvider_OllamaRequiresNoKey(t *testing.T) {
 // backfill / AC: BuildProvider returns a non-nil provider when the API key env var is set.
 // t.Setenv restores the env automatically after the test; no t.Parallel() per project rules.
 func TestBuildProvider_AnthropicWithKey_ReturnsProvider(t *testing.T) {
-	t.Setenv("TESTSMITH_ANTHROPIC_PROVIDER_KEY", "test-key")
+	t.Setenv("ASSAY_ANTHROPIC_PROVIDER_KEY", "test-key")
 	cfg := config.LLMConfig{
 		Enabled:          true,
 		Provider:         "anthropic",
-		APIKeyEnvVar:     "TESTSMITH_ANTHROPIC_PROVIDER_KEY",
+		APIKeyEnvVar:     "ASSAY_ANTHROPIC_PROVIDER_KEY",
 		MaxRetryAttempts: 1,
 	}
 	p, err := factory.BuildProvider(cfg)
@@ -136,11 +136,11 @@ func TestBuildProvider_AnthropicWithKey_ReturnsProvider(t *testing.T) {
 // even when an API key env var is present (key presence check passes; switch hits default).
 // t.Setenv restores the env automatically after the test; no t.Parallel() per project rules.
 func TestBuildProvider_UnknownProvider_ReturnsError(t *testing.T) {
-	t.Setenv("TESTSMITH_UNKNOWN_PROVIDER_KEY", "value")
+	t.Setenv("ASSAY_UNKNOWN_PROVIDER_KEY", "value")
 	cfg := config.LLMConfig{
 		Enabled:      true,
 		Provider:     "unknown-llm",
-		APIKeyEnvVar: "TESTSMITH_UNKNOWN_PROVIDER_KEY",
+		APIKeyEnvVar: "ASSAY_UNKNOWN_PROVIDER_KEY",
 	}
 	_, err := factory.BuildProvider(cfg)
 	if err == nil {

@@ -22,7 +22,7 @@ var testdataDir string
 
 func TestMain(m *testing.M) {
 	// Short-circuit: when we are the subprocess, just run the requested test.
-	if os.Getenv("GO_TESTSMITH_SUBPROCESS") == "1" {
+	if os.Getenv("GO_ASSAY_SUBPROCESS") == "1" {
 		os.Exit(m.Run())
 	}
 
@@ -49,8 +49,8 @@ func run(t *testing.T, dir string, args ...string) (string, int) {
 	)
 	cmd.Dir = dir
 	cmd.Env = append(os.Environ(),
-		"GO_TESTSMITH_SUBPROCESS=1",
-		"GO_TESTSMITH_ARGS="+strings.Join(args, "\x1e"),
+		"GO_ASSAY_SUBPROCESS=1",
+		"GO_ASSAY_ARGS="+strings.Join(args, "\x1e"),
 	)
 	var buf bytes.Buffer
 	cmd.Stdout = &buf

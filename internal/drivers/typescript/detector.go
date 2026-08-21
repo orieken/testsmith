@@ -109,5 +109,5 @@ func deriveModulePath(sourcePath string, ctx *domain.ProjectContext) (string, er
 		return "", err
 	}
 	ext := filepath.Ext(rel)
-	return rel[:len(rel)-len(ext)], nil
+	return filepath.ToSlash(rel[:len(rel)-len(ext)]), nil
 }

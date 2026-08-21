@@ -163,7 +163,7 @@ jobs:
           amd64   = os.environ["SHA_AMD64"]
           linux   = os.environ["SHA_LINUX"]
           formula = textwrap.dedent(f"""\
-            class Testsmith < Formula
+            class Assay < Formula
               desc "Language-agnostic test scaffold generator"
               homepage "https://github.com/orieken/assay"
               version "{ver}"

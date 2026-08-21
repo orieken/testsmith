@@ -63,13 +63,13 @@ env/
 Thumbs.db
 
 # Project specific
-testsmith_coverage_report.md
-testsmith_graph.md
+assay_coverage_report.md
+assay_graph.md
 
 # Go build artifacts
 /dist/
 /debug_tmp/
-/testsmith
+/assay
 
 # Local notes (drafts, emails, scratch)
 /notes/

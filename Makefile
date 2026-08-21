@@ -1,9 +1,9 @@
 # ──────────────────────────────────────────────────────────────────────────────
-# TestSmith — top-level Makefile
+# Assay — top-level Makefile
 #
 # ── Build ────────────────────────────────────────────────────────────────────
-#   make build            compile dist/testsmith (stamped with git version)
-#   make install          copy dist/testsmith → $GOPATH/bin/testsmith
+#   make build            compile dist/assay (stamped with git version)
+#   make install          copy dist/assay → $GOPATH/bin/assay
 #   make clean            remove dist/
 #
 # ── Quality ──────────────────────────────────────────────────────────────────
@@ -30,8 +30,8 @@
 #   make examples-ci          all five: generate, report, then clean
 # ──────────────────────────────────────────────────────────────────────────────
 
-BINARY := dist/testsmith
-CMD    := ./cmd/testsmith
+BINARY := dist/assay
+CMD    := ./cmd/assay
 # Absolute path so sub-shell cd's can still reach the binary.
 TS     := $(CURDIR)/$(BINARY)
 
@@ -49,8 +49,8 @@ $(BINARY):
 
 .PHONY: install
 install: build
-	cp $(BINARY) $$(go env GOPATH)/bin/testsmith
-	@echo "Installed to $$(go env GOPATH)/bin/testsmith"
+	cp $(BINARY) $$(go env GOPATH)/bin/assay
+	@echo "Installed to $$(go env GOPATH)/bin/assay"
 
 # ── Quality ───────────────────────────────────────────────────────────────────
 
@@ -83,7 +83,7 @@ clean:
 # ──────────────────────────────────────────────────────────────────────────────
 # Example targets
 #
-# generate-example-*   run testsmith inside the project; files stay on disk
+# generate-example-*   run assay inside the project; files stay on disk
 # clean-example-*      delete the generated test files; source stays untouched
 # example-*            alias for generate-example-* (for muscle-memory)
 # example-*-llm        same but with --llm (requires ANTHROPIC_API_KEY)

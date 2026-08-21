@@ -317,7 +317,7 @@ func TestWriteReport_DryRun_MarkdownFormat(t *testing.T) {
 // ── runInit ASSAY.md already-exists branch (init.go:152) ─────────────────
 
 // assay coverage backfill / AC: runInit prints skip message when ASSAY.md already exists
-func TestRunInit_TESTSMITHAlreadyExists_Coverage(t *testing.T) {
+func TestRunInit_ASSAYAlreadyExists_Coverage(t *testing.T) {
 	dir := t.TempDir()
 	testChdir(t, dir)
 	dryRun = false

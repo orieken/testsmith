@@ -271,7 +271,7 @@ func TestBuildBodyGen_LLMEnabled_MissingKey_Errors(t *testing.T) {
 	t.Parallel()
 	cfg := config.LLMConfig{
 		Provider:     "anthropic",
-		APIKeyEnvVar: "TESTSMITH_COVERAGE_TEST_NONEXISTENT_ENV_XYZ",
+		APIKeyEnvVar: "ASSAY_COVERAGE_TEST_NONEXISTENT_ENV_XYZ",
 	}
 	bg, err := buildBodyGen(true, cfg, goDriver())
 	if err == nil {
@@ -454,7 +454,7 @@ func TestRunInit_PatternsDirAlreadyExists(t *testing.T) {
 }
 
 // assay coverage backfill / AC: runInit prints "already exists — skipping" when ASSAY.md already exists
-func TestRunInit_TESTSMITHMDAlreadyExists(t *testing.T) {
+func TestRunInit_ASSAYMDAlreadyExists(t *testing.T) {
 	dir := t.TempDir()
 	testChdir(t, dir)
 	dryRun = false

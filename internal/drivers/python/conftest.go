@@ -75,6 +75,7 @@ func computeRequiredPaths(plan *domain.GenerationPlan, ctx *domain.ProjectContex
 		if err != nil {
 			continue
 		}
+		rel = filepath.ToSlash(rel)
 		// The source directory is the tests/ mirror reversed back to src/.
 		// e.g. tests/src/services/test_payment.py -> src/services
 		srcDir := mirrorTestPathToSrcDir(rel, ctx.Root)
