@@ -262,6 +262,48 @@ rationale and can be searched in future sessions.
 
 ---
 
+## Relationship to bundled agents
+
+Assay ships three Claude Code agents embedded in the binary
+(`internal/agents/files/`) and written into a consumer project's
+`.claude/agents/` via `assay init --with-agents`:
+
+| Agent | Role |
+|---|---|
+| `assay-test-author` | Runs `assay generate`, reviews scaffold, flags non-obvious patterns |
+| `assay-pattern-curator` | Extracts reusable patterns into `.assay/patterns/` |
+| `assay-migration-guide` | Coordinates `assay migrate` and fixes regex-rewrite edge cases |
+
+These agents are **isolated from the ai-assistant-dot-files shared agent
+library** — they ship with the binary so consumers need no extra setup, but
+improvements in either repo don't flow automatically to the other.
+
+ctx fits naturally as a pre-step for `assay-test-author`. If ctx is installed
+in the consumer project, the agent could run:
+
+```bash
+ctx search --file <source-file> --limit 5
+```
+
+before calling `assay generate`, surfacing prior rationale and failed
+approaches before the scaffold is even built. This is agent-side context
+enrichment rather than pipeline-side — useful even if the Go SDK integration
+(Session B) never ships.
+
+**If the pipeline integration goes ahead**, the bundled agent instructions
+should be updated to:
+
+1. Check whether ctx is installed (`ctx status`).
+2. If yes, run a file-scoped search and include the top result in the
+   review step — not to add tokens to the LLM call, but to cross-check the
+   scaffold against known prior decisions before editing.
+3. If not installed, proceed as today (no change in behaviour).
+
+Session D (optional) could evaluate this agent-side approach as an
+alternative or complement to the pipeline-side Tier 4 approach.
+
+---
+
 ## References
 
 - ctx repo: https://github.com/ctxrs/ctx
