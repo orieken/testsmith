@@ -65,11 +65,11 @@ jobs:
 
       - name: Smoke test (non-Windows)
         if: runner.os != 'Windows'
-        run: dist/${{ matrix.binary }} --version
+        run: dist/${{ matrix.binary }} version
 
       - name: Smoke test (Windows)
         if: runner.os == 'Windows'
-        run: dist\${{ matrix.binary }} --version
+        run: dist\${{ matrix.binary }} version
         shell: cmd
 
       - name: Rename artifact
