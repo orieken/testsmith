@@ -137,7 +137,7 @@ jobs:
 
       - name: Clone homebrew tap
         run: |
-          git clone https://x-access-token:${{ secrets.HOMEBREW_TAP_TOKEN }}@github.com/orieken/homebrew-tap.git tap
+          git clone https://x-access-token:${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}@github.com/orieken/homebrew-tap.git tap
           mkdir -p tap/Formula
 
       - name: Write formula
