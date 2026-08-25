@@ -12,7 +12,7 @@ import (
 )
 
 // Version is injected at build time via -ldflags.
-var Version = "v2.0.0-dev"
+var Version = "v2.0.1-dev"
 
 // reg is the global DriverRegistry populated at startup.
 var reg *registry.Registry

@@ -10,8 +10,8 @@
 class Assay < Formula
   desc "Language-agnostic test scaffold generator"
   homepage "https://github.com/orieken/assay"
-  url "https://github.com/orieken/assay/archive/refs/tags/v2.0.0.tar.gz"
-  sha256 "e7aee4a5e67cbec756c587c9203a85e04cf03eb7d5ce0160213955c4ba60f772"
+  url "https://github.com/orieken/assay/archive/refs/tags/v2.0.1.tar.gz"
+  sha256 "REPLACE_WITH_SHA256"
   license "MIT"
   head "https://github.com/orieken/assay.git", branch: "main"
 
