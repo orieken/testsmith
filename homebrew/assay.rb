@@ -12,7 +12,7 @@ class Assay < Formula
   homepage "https://github.com/orieken/assay"
   url "https://github.com/orieken/assay/archive/refs/tags/v#{version}.tar.gz"
   version "2.0.0"
-  sha256 "REPLACE_WITH_SHA256"
+  sha256 "e7aee4a5e67cbec756c587c9203a85e04cf03eb7d5ce0160213955c4ba60f772"
   license "MIT"
   head "https://github.com/orieken/assay.git", branch: "main"
 
